@@ -26,63 +26,63 @@ def check_ants(fname):
         target='3C237'
         
     if fname=='1551055211':
-        bad_ants=['m041']
+        bad_ants=['m025', 'm041']
         target='3C273'
         
     if fname=='1553966342':
-        bad_ants=[]
+        bad_ants=['m024', 'm041']
         target='PictorA'
     
     if fname=='1554156377':
-        bad_ants=[]
+        bad_ants=['m041', 'm054']
         target='3C273'
     
     if fname=='1556034219':
-        bad_ants=[]
+        bad_ants=['ALL']
         target='PictorA'
     
     if fname=='1556052116':
-        bad_ants=[]
+        bad_ants=['ALL']
         target='3C273'
     
     if fname=='1556120503':
-        bad_ants=[]
+        bad_ants=['m024', 'm035', 'm059']
         target='PictorA'
     
     if fname=='1556138397':
-        bad_ants=[]
+        bad_ants=['m015', 'm016', 'm024', 'm033', 'm059']
         target='3C273'
 
     if fname=='1555775533':
-        bad_ants=[]
+        bad_ants=['ALL']
         target='PictorA'
 
     if fname=='1555793534':
-        bad_ants=[]
+        bad_ants=['ALL']
         target='3C273'
 
     if fname=='1555861810':
-        bad_ants=[]
+        bad_ants=['ALL']
         target='PictorA'
     
     if fname=='1555879611':
-        bad_ants=[]
+        bad_ants=['ALL']
         target='3C273'
     
     if fname=='1561650779':
-        bad_ants=[]
+        bad_ants=['m054', 'm056']
         target='3C273'
 
     if fname=='1558464584':
-        bad_ants=[]
+        bad_ants=['m060']
         target='3C273'
 
     if fname=='1558472940':
-        bad_ants=[]
+        bad_ants=['m059']
         target='3C273'
     
     if fname=='1562857793':
-        bad_ants=[]
+        bad_ants=['m043', 'm045', 'm048', 'm056', 'm059']
         target='3C273'
 
     ################set calibrator coordinates####################################
