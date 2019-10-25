@@ -26,7 +26,7 @@ def check_ants(fname):
         target='3C237'
         
     if fname=='1551055211':
-        bad_ants=['m018', 'm025', 'm032', 'm036' 'm041']
+        bad_ants=['m018', 'm025', 'm032', 'm036', 'm041']
         target='3C273'
         
     if fname=='1553966342':
