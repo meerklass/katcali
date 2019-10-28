@@ -22,7 +22,7 @@ def check_ants(fname):
     ##############will be updated by Brandon's summary################
     
     if fname=='1551037708':
-        bad_ants=[]
+        bad_ants=['m001', 'm007', 'm008', 'm018', 'm023', 'm025', 'm032', 'm036', 'm038', 'm040', 'm041', 'm059']
         target='3C237'
         
     if fname=='1551055211':
