@@ -216,6 +216,7 @@ def calc_atmosphere_model_1ch(autodata,ch): #copy from KAT-7
    
     return atmo_table
 
+
 def cal_Gal_model_np(vis ,freqs, ra, dec, ch_min, ch_max, nside):
     sky_config = {
         'synchrotron': models("s1", nside),
@@ -261,6 +262,7 @@ def flux_PictorA(freq_GHz):
     return pow((freq_GHz/1.41),-alpha)*F1410
 
 def call_Tnd(data, ant,pol,freqs,ch,plot_key):
+    print ("#cal_Tnd is for single channel only! Tnd_spl has higher efficiency for multi channel calibration")
     noise_id=data.receivers[ant]
     
     noise={}
@@ -290,8 +292,27 @@ def call_Tnd(data, ant,pol,freqs,ch,plot_key):
         plt.show()
 
     return Tnd_std,Tnd_ref,noise,Tnd_spl
-
+#################
+def Tnd_spl(data, ant,pol):
+    noise_id=data.receivers[ant]
+    
+    noise={}
+    for pol_i in ['h','v'] :  
+        print noise_id,pol_i 
+    
+        filename = '/users/jywang/MeerKAT/model_test/mkat_model/noise-diode-models/mkat/rx.%s.%s.csv'%(noise_id,pol_i)
+        
+        noise[pol_i] = np.loadtxt(filename,delimiter=',')
+    x=noise[pol][:,0]/1e9
+    y=noise[pol][:,1]
+    Tnd_std=y.std()
+    #print Tnd_std
+    Tnd_spl = Rbf(x, y)
+    return Tnd_std,Tnd_spl
+ 
+################
 def cal_Tspill(el, pol,freqs,ch,version):
+    print ("#cal_Tspill is for single channel only! cal_Tspill_func has higher efficiency for multi channel calibration")
     if version==1:
         SpillOver = Spill_Temp(filename='/users/jywang/MeerKAT/model_test/mkat_model/spillover-models/mkat/MK_L_Tspill_AsBuilt_atm_mask.dat')
 
@@ -315,5 +336,13 @@ def cal_Tspill(el, pol,freqs,ch,version):
             Tspill=SpillOver2.spill['HH']((el,freqs[ch]/1e6))[:,0]
         if pol=='v':
             Tspill=SpillOver2.spill['VV']((el,freqs[ch]/1e6))[:,0]
+    return Tspill
+
+def cal_Tspill_func(el, pol,freqs):
+    SpillOver2 = Spill_Temp2(filename='/users/jywang/MeerKAT/model_test/mkat_model/spillover-models/mkat/MK_L_Tspill_AsBuilt_atm_mask.dat')
+    if pol=='h':
+        Tspill=SpillOver2.spill['HH']
+    if pol=='v':
+        Tspill=SpillOver2.spill['VV']
     return Tspill
             
