@@ -1,0 +1,182 @@
+{
+  "1551037708": {
+    "root": "/idia/projects/hi_im/SCI-20180330-MS-01/",
+    "target": "3C237",
+    "diode": {
+      "offset": 4,
+      "jump_limit": 10,
+      "time_range": [
+        5,
+        null
+      ]
+    }
+  },
+  "1551055211": {
+    "root": "/idia/projects/hi_im/SCI-20180330-MS-01/",
+    "target": "3C273",
+    "diode": {
+      "offset": 1,
+      "jump_limit": 10,
+      "time_range": [
+        6,
+        null
+      ]
+    }
+  },
+  "1553966342": {
+    "root": "/idia/projects/hi_im/SCI-20180330-MS-01/",
+    "target": "PictorA",
+    "diode": {
+      "offset": 4,
+      "jump_limit": 10.0,
+      "time_range": [
+        2,
+        null
+      ]
+    }
+  },
+  "1554156377": {
+    "root": "/idia/projects/hi_im/SCI-20180330-MS-01/",
+    "target": "3C273",
+    "diode": {
+      "offset": 5,
+      "jump_limit": 10.0,
+      "time_range": [
+        1,
+        null
+      ]
+    }
+  },
+  "1556034219": {
+    "root": "/idia/projects/hi_im/SCI-20190418-MS-01/",
+    "target": "PictorA",
+    "diode": {
+      "offset": -1,
+      "jump_limit": 10.0,
+      "time_range": [
+        2,
+        null
+      ]
+    }
+  },
+  "1556052116": {
+    "root": "/idia/projects/hi_im/SCI-20190418-MS-01/",
+    "target": "3C273",
+    "diode": {
+      "offset": 1,
+      "jump_limit": 15.0,
+      "time_range": [
+        2,
+        null
+      ]
+    }
+  },
+  "1556120503": {
+    "root": "/idia/projects/hi_im/SCI-20190418-MS-01/",
+    "target": "PictorA",
+    "diode": {
+      "offset": 0,
+      "jump_limit": 2,
+      "time_range": [
+        2,
+        null
+      ]
+    }
+  },
+  "1556138397": {
+    "root": "/idia/projects/hi_im/SCI-20190418-MS-01/",
+    "target": "3C273",
+    "diode": {
+      "offset": 2,
+      "jump_limit": 10.0,
+      "time_range": [
+        2,
+        -1
+      ]
+    }
+  },
+  "1555775533": {
+    "root": "/idia/projects/hi_im/SCI-20190418-MS-01/",
+    "target": "PictorA",
+    "diode": {
+      "offset": 0,
+      "jump_limit": 10,
+      "time_range": [
+        2,
+        null
+      ]
+    }
+  },
+  "1555793534": {
+    "root": "/idia/projects/hi_im/SCI-20190418-MS-01/",
+    "target": "3C273",
+    "diode": {
+      "offset": 8,
+      "jump_limit": 10,
+      "time_range": [
+        2,
+        null
+      ]
+    }
+  },
+  "1555861810": {
+    "root": "/idia/projects/hi_im/SCI-20190418-MS-01/",
+    "target": "PictorA",
+    "diode": {
+      "offset": -999,
+      "jump_limit": 10.0,
+      "time_range": null
+    }
+  },
+  "1555879611": {
+    "root": "/idia/projects/hi_im/SCI-20190418-MS-01/",
+    "target": "3C273",
+    "diode": {
+      "offset": -999,
+      "jump_limit": 10.0,
+      "time_range": null
+    }
+  },
+  "1561650779": {
+    "root": "/idia/projects/hi_im/SCI-20190418-MS-01/",
+    "target": "3C273",
+    "diode": {
+      "offset": 7,
+      "jump_limit": 10.0,
+      "time_range": [
+        3,
+        -1
+      ]
+    }
+  },
+  "1558464584": {
+    "root": "/idia/projects/hi_im/COM-20190418-MS-01/",
+    "target": "3C273",
+    "diode": {
+      "offset": -999,
+      "jump_limit": 10.0,
+      "time_range": null
+    }
+  },
+  "1558472940": {
+    "root": "/idia/projects/hi_im/COM-20190418-MS-01/",
+    "target": "3C273",
+    "diode": {
+      "offset": -999,
+      "jump_limit": 10.0,
+      "time_range": null
+    }
+  },
+  "1562857793": {
+    "root": "/idia/projects/hi_im//",
+    "target": "3C273",
+    "diode": {
+      "offset": 7,
+      "jump_limit": 10.0,
+      "time_range": [
+        3,
+        null
+      ]
+    }
+  }
+}

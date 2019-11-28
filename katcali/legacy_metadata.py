@@ -157,7 +157,7 @@ if __name__ == '__main__':
     
     # Prepare DataSet object
     from dataset import DataSet
-    ds = DataSet("meerkat2019.json")
+    ds = DataSet("../data/meerkat2019.json")
     
     # Filenames
     fnames = [
@@ -207,7 +207,7 @@ if __name__ == '__main__':
     ds.save()
     
     # Try loading it as a new dataset
-    ds2 = DataSet("meerkat2019.json")
+    ds2 = DataSet("../data/meerkat2019.json")
     print(list(ds2.files.keys()))
     
     

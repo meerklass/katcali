@@ -1,5 +1,7 @@
 import numpy as np
 import json
+import pickle
+import katdal
 from models import cal_sources
 
 def valid_filename(filename):
@@ -140,6 +142,28 @@ class DataSet(object):
             flags = data['flags']
             
         return vis, flags
+    
+    
+    def get_metadata(self, filename):
+        """
+        Return katdal metadata object for a given file.
+        
+        Parameters
+        ----------
+        filename : str
+            Name of file.
+        
+        Returns
+        -------
+        metadata : katdal object
+            katdal metadata object.
+        """
+        # Validate filename
+        filename = valid_filename(filename)
+        
+        # Make sure metadata is loaded
+        self.load_metadata(filename)
+        return self._metadata[filename]
     
     
     def get_bad_ants(self, filename):
