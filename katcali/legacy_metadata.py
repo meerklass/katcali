@@ -1,28 +1,28 @@
-import katdal
-from astropy.coordinates import SkyCoord
-from astropy import units as u
-import numpy as np
-import pickle
-from . import models as km 
-def load_data(fname):
-    if fname in ['1551037708','1551055211', '1553966342','1554156377']:
-        data = katdal.open('/idia/projects/hi_im/SCI-20180330-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
-    if fname in ['1555775533','1555793534', '1555861810', '1556034219', '1556052116', '1556120503', '1556138397','1555879611','1561650779']:
-        data = katdal.open('/idia/projects/hi_im/SCI-20190418-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
-    if fname in['1558464584','1558472940']:
-        data = katdal.open('/idia/projects/hi_im/COM-20190418-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
-
-    if fname=='1562857793':
-        data = katdal.open('/idia/projects/hi_im//1562857793/1562857793/1562857793_sdp_l0.full.rdb')
-
-    return data
 
 
-def check_ants(fname):
-    ##############will be updated by Brandon's summary################
+def legacy_metadata(fname):
+    """
+    Aggregate all file-specific metadata into a single function, so it can be 
+    converted into a more uniform external data format.
+    """
     
+    # File paths (from io.load_data)
+    data = None
+    if fname in ['1551037708','1551055211', '1553966342','1554156377']:
+        data = '/idia/projects/hi_im/SCI-20180330-MS-01/'
+    if fname in ['1555775533','1555793534', '1555861810', '1556034219', 
+                 '1556052116', '1556120503', '1556138397','1555879611', 
+                 '1561650779']:
+        data = '/idia/projects/hi_im/SCI-20190418-MS-01/'
+    if fname in['1558464584','1558472940']:
+        data = '/idia/projects/hi_im/COM-20190418-MS-01/'
+    if fname=='1562857793':
+        data = '/idia/projects/hi_im//'
+    
+    # Antennas (from io.check_ants)
     if fname=='1551037708':
-        bad_ants=['m001', 'm007', 'm008', 'm018', 'm023', 'm025', 'm032', 'm036', 'm038', 'm040', 'm041', 'm059']
+        bad_ants=['m001', 'm007', 'm008', 'm018', 'm023', 'm025', 'm032', 
+                  'm036', 'm038', 'm040', 'm041', 'm059']
         target='3C237'
         
     if fname=='1551055211':
@@ -84,80 +84,131 @@ def check_ants(fname):
     if fname=='1562857793':
         bad_ants=['m000', 'm001', 'm002', 'm003', 'm035', 'm039', 'm043', 'm045', 'm048', 'm056', 'm058', 'm059', 'm060']
         target='3C273'
-                  
+    
+    # Jump limit (from label_nd_injection) 
+    f=10.
+    if fname in ['1555793534','1551055211','1551037708','1555775533']:
+        f=10
+    if fname=='1556120503':
+        f=2
+    if fname=='1556052116':
+        f=15.
+    
+    # Noise diode initial step (diode.call_nd_1a_param)
+    nd_1a_gap=10
+    nd_1a0=-999
+    if fname=='1551055211':
+        nd_1a0=1
+    if fname=='1555793534':
+        nd_1a0 =8
+    if fname=='1551037708':
+        nd_1a0 =4
+    if fname=='1553966342':
+        nd_1a0 =4
+    if fname=='1554156377':
+        nd_1a0 =5
+    if fname=='1555775533':
+        nd_1a0 =0
+    if fname=='1556034219':
+        nd_1a0 =-1 #to keep nd_1b in the list
+    if fname=='1556120503':
+        nd_1a0 =0
+    if fname=='1556138397':
+        nd_1a0 =2
+    if fname=='1556052116':
+        nd_1a0 =1
+    if fname=='1561650779':
+        nd_1a0 =7
+    if fname=='1562857793':
+        nd_1a0 =7
+    
+    # Diode lead time (from diode.cal_t_line)
+    trange = None
+    if fname=='1551037708':
+        trange = (5, None)
+    if fname=='1551055211':
+        trange = (6, None)
+    if fname=='1553966342':
+        trange = (2, None)
+    if fname=='1556034219':
+        trange = (2, None)
+    if fname=='1554156377':
+        trange = (1, None)
+    if fname=='1556138397':
+        trange = (2,-1)
+    if fname=='1556052116':
+        trange = (2, None)
+    if fname=='1555775533':
+        trange = (2, None)
+    if fname=='1556120503':
+        trange = (2, None)
+    if fname=='1555793534':
+        trange = (2, None)
+    if fname=='1561650779':
+        trange = (3,-1)
+    if fname=='1562857793':
+        trange = (3, None)
+    
+    return target, bad_ants, f, data, nd_1a0, trange
 
-    ################set calibrator coordinates####################################
-    if target=='3C273':
-        flux_model=km.flux_3C273
-        cc = SkyCoord(187.2779154*u.deg,  2.0523883*u.deg, frame='icrs') #3C273
-    if target=='3C237':
-        flux_model=km.flux_3C237
-        cc = SkyCoord(152.000125*u.deg,  7.504541*u.deg, frame='icrs') #3C237
-    if target=='PictorA':
-        flux_model=km.flux_PictorA
-        cc = SkyCoord(79.9571708*u.deg,  -45.7788278*u.deg, frame='icrs') #Pictor A
 
-    print 'calibrator: '+str(target)+', ra,dec= '+str(cc.ra)+', '+str(cc.dec)
-    print 'bad_ants: '+ str(bad_ants)
-    return target,cc,bad_ants,flux_model
-
-def ant_list(data):
-    ant_list=[]
-    for corr_i in range(len(data.ants)):
-        assert(data.corr_products[corr_i][0]==data.corr_products[corr_i][1]) #check auto-corr
-        ant_list.append(data.corr_products[corr_i][0][0:4])
-    return np.array(ant_list)
-
-"""
-def call_vis(fname,recv):
-    if fname in ['1551037708','1551055211', '1553966342','1554156377']:
-        data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/SCI-20180330-MS-01/'+str(fname)+'/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
-    if fname in ['1555775533','1555793534', '1555861810', '1556034219', '1556052116', '1556120503', '1556138397','1555879611','1561650779']:
-        data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/SCI-20190418-MS-01/'+str(fname)+'/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
-    if fname in['1558464584','1558472940']:
-        data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/COM-20190418-MS-01/'+str(fname)+'/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
-    if fname in ['1562857793']:
-        data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/SCI-20190418-MS-01/'+str(fname)+'_new/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
-
-    print data1['recv_pair']
-    recv1=data1['recv_pair'][0]
-    assert(recv1==recv)
-
-    vis=data1['vis']
-    flags=data1['flags']
-    return vis,flags
-"""
-
-def cal_corr_id(data,recv):
-    for i in range(len(data.ants)*2):
-        a=data.corr_products[i]
-        if (a[0]==recv and a[1]==recv):
-            corr_id=i
-            break
-    return corr_id
-
-def load_coordinates(data):
-    ra=data.ra[:,0]
-    dec=data.dec[:,0]    
-    az=data.az[:,0]
-    el=data.el[:,0]
-
-    return ra,dec,az,el
-
-def load_ndparam(fname, data):
-    nd_set=float(fname)
-    nd_time=1.799235 
-    nd_cycle=19.9915424299 #only for stable diode noise pattern
-    nd_ratio=1.8/data.dump_period #1.8???test
-    return nd_set,nd_time,nd_cycle,nd_ratio
-
-def load_tf(data):
-    freqs = data.freqs
-    timestamps=data.timestamps
-    return timestamps,freqs
-
-def load_ang_deg(ra,dec,cc):
-    c_obs = SkyCoord(ra*u.deg,  dec*u.deg, frame='icrs')
-    ang_deg=cc.separation(c_obs)/u.deg
-    return ang_deg
-
+if __name__ == '__main__':
+    # Process filenames
+    
+    # Prepare DataSet object
+    from dataset import DataSet
+    ds = DataSet("meerkat2019.json")
+    
+    # Filenames
+    fnames = [
+        '1551037708',
+        '1551055211',
+        '1553966342',
+        '1554156377',
+        '1556034219',
+        '1556052116',
+        '1556120503',
+        '1556138397',
+        '1555775533',
+        '1555793534',
+        '1555861810',
+        '1555879611',
+        '1561650779',
+        '1558464584',
+        '1558472940',
+        '1562857793'
+    ]
+    
+    # Loop over filenames
+    for f in fnames:
+        target, bad_ants, fjump, data, nd_1a0, trange = legacy_metadata(f)
+        
+        root = data
+        
+        diode = {
+            'offset':       nd_1a0,
+            'jump_limit':   fjump,
+            'time_range':   trange,
+        }
+        
+        print("%s" % f)
+        print("  %s" % target)
+        print("  %s" % fjump)
+        print("  %s" % data)
+        print("  %s" % nd_1a0)
+        print("  %s" % str(trange))
+        print("  %s" % len(bad_ants))
+        print("")
+    
+        # Load this file into DataSet
+        ds.add_file(f, target=target, root=root, diode=diode, bad_ants=bad_ants)
+    
+    # Save dataset
+    ds.save()
+    
+    # Try loading it as a new dataset
+    ds2 = DataSet("meerkat2019.json")
+    print(list(ds2.files.keys()))
+    
+    
+    
