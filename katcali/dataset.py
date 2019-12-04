@@ -72,7 +72,7 @@ class DataSet(object):
                     root=info['root'], fname=filename)
         
         # Check file size
-        fsize, units = file_size(filename)
+        fsize, units = file_size(fname)
         print("Metadata file: %3.1f %s" % (fsize, units))
         
         # Load the metadata
