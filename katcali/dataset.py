@@ -3,30 +3,7 @@ import json
 import pickle
 import katdal
 from models import cal_sources
-
-def valid_filename(filename):
-    """
-    Return a standardised, valid form of the filename, or raise an error if it 
-    is invalid. This function is needed because filenames are often integers, 
-    but need to be passed in as strings. 
-    
-    Parameters
-    ----------
-    filename : str or int
-        Filename to be validated and standardised.
-    
-    Returns
-    -------
-    filename : str
-        Standardised filename as string.
-    """
-    # Check for valid filename types
-    if isinstance(filename, str): return filename
-    if isinstance(filename, (int, float, np.integer, np.float)):
-        return "%s" % filename
-    
-    # Raise error if invalid type found
-    raise TypeError("filename '%s' must be a string or integer" % filename)
+from utils import valid_filename
 
 
 class DataSet(object):
@@ -214,6 +191,37 @@ class DataSet(object):
             raise KeyError("File '%s' has calibrator source '%s', but a model "
                            "for this source was not found." % (filename, target))
     
+    
+    def get_diode_info(self, filename, field=None):
+        """
+        Get information about the noise diode settings for a particular file.
+        
+        Parameters
+        ----------
+        filename : str
+            Name of file to find noise diode model for.
+        
+        field : str, optional
+            If specified, return the data for a given setting only. Otherwise, 
+            a dictionary of all settings for the file will be returned. 
+            Default: None (return full dict).
+        
+        Returns
+        -------
+        diode_info : dict or dict item
+            Dict of all noise diode settings for this file (if 'field' is not 
+            specified). Otherwise, returns the dict item corresponding to 
+            'field'.
+        """
+        # Validate filename
+        filename = valid_filename(filename)
+        
+        # Return whole dict if field is None
+        if field is None:
+            return self.files[filename]['diode']
+        else:
+            return self.files[filename]['diode'][field]
+        
     
     def add_file(self, filename, target=None, root=None, diode=None, 
                  bad_ants=[]):

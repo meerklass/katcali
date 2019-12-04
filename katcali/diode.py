@@ -1,8 +1,13 @@
 import numpy as np
 from scipy import stats
+from io import ds
+from utils import valid_filename
 
 def label_nd_injection(fname,vis, timestamps, dp_ss, dump_period):
-
+    
+    # Validate filename
+    fname = valid_filename(fname)
+    
     ######set a jump limit###############
     f=10.
     if fname in ['1555793534','1551055211','1551037708','1555775533']:
@@ -64,102 +69,59 @@ def cal_nd_wro_0(nd_1a):
     nd_wro_0=np.where(nd_gap_list != nd_gap_mode)[0]
     return nd_gap_mode, nd_wro_0
 
-def cal_t_line(fname, timestamps,nd_set, nd_cycle, dump_period):
+def cal_t_line(fname, timestamps, nd_set, nd_cycle, dump_period):
     t_line=[]
     nd_tb=nd_set-timestamps[0]
     nd_te=dump_period*len(timestamps)
 
     for t in np.arange(nd_tb, nd_te+dump_period, nd_cycle ) :
         t_line.append(t)
-    #######below are caused by the diode lead time###############
-    if fname=='1551037708':
-        t_line=t_line[5:]
     
-    if fname=='1551055211':
-        t_line=t_line[6:]
-    
-    if fname=='1553966342':
-        t_line=t_line[2:]
-    
-    if fname=='1556034219':
-        t_line=t_line[2:]
-    
-    if fname=='1554156377':
-        t_line=t_line[1:]
-    
-    if fname=='1556138397':
-        t_line=t_line[2:-1]
-        
-    if fname=='1556052116':
-        t_line=t_line[2:]
-    
-    if fname=='1555775533':
-        t_line=t_line[2:]
-    
-    if fname=='1556120503':
-        t_line=t_line[2:]
-    
-    if fname=='1555793534':
-        t_line=t_line[2:]
-    
-    if fname=='1561650779':
-        t_line=t_line[3:-1]
-
-    if fname=='1562857793':
-        t_line=t_line[3:]
-    ########################################################################
+    # Adjustment caused by the diode lead time
+    time_idxs = ds.get_diode_info(fname, 'time_range')
+    t_line = t_line[time_idxs[0]:time_idxs[1]]
     return t_line
     
-def call_nd_1a_param(fname):
-    nd_1a_gap=10
-    nd_1a0=-999
-    if fname=='1551055211':
-        nd_1a0=1
-    if fname=='1555793534':
-        nd_1a0 =8
-    if fname=='1551037708':
-        nd_1a0 =4
-    if fname=='1553966342':
-        nd_1a0 =4
-    if fname=='1554156377':
-        nd_1a0 =5
-    if fname=='1555775533':
-        nd_1a0 =0
-    if fname=='1556034219':
-        nd_1a0 =-1 #to keep nd_1b in the list
-    if fname=='1556120503':
-        nd_1a0 =0
-    if fname=='1556138397':
-        nd_1a0 =2
-    if fname=='1556052116':
-        nd_1a0 =1
-    if fname=='1561650779':
-        nd_1a0 =7
-    if fname=='1562857793':
-        nd_1a0 =7    
-    if nd_1a0==-999:
-        print 'no record, can ask astro.jywang@gmail.com'
-    return nd_1a_gap,nd_1a0
+def call_nd_1a_param(fname, ds=None):
+    """
+    
+    Parameters
+    ----------
+    fname : str
+        Name of file to get diode info for.
+    
+    Returns
+    -------
+    nd_1a_gap : int
+        ??
+    
+    nd_1a0 : int
+        ??
+    """
+    nd_1a_gap = 10
+    nd_1a0 = ds.get_diode_info(fname, 'offset')
+    
+    return nd_1a_gap, nd_1a0
 
-def call_nd_1_list(fname,timestamps):
-    nd_1a_gap,nd_1a0=call_nd_1a_param(fname)
-    nd_1aa=[]
+def call_nd_1_list(fname, timestamps):
+    nd_1a_gap, nd_1a0 = call_nd_1a_param(fname)
+    nd_1aa = []
     for i in range(1000):
-        a=nd_1a0+i*nd_1a_gap
+        a = nd_1a0 + i*nd_1a_gap
         if a >= 0:
             if a >= len(timestamps):
                 break
             nd_1aa.append(a)
           
-    nd_1bb=[]
+    nd_1bb = []
     for i in range(1000):
-        a=nd_1a0+1+i*nd_1a_gap
+        a = nd_1a0 + 1 + i*nd_1a_gap
         if a>=0:
             if a >= len(timestamps):
                 break
             max=i
             nd_1bb.append(a)
-    nd_11=list(nd_1aa)+list(nd_1bb)
+    nd_11 = list(nd_1aa) + list(nd_1bb)
     nd_11.sort()
     
     nd_00=[]
@@ -167,7 +129,7 @@ def call_nd_1_list(fname,timestamps):
         if i not in nd_11:
             nd_00.append(i)
 
-    assert(len(nd_00)+len(nd_11)==len(timestamps))
+    assert(len(nd_00) + len(nd_11) == len(timestamps))
     return nd_1aa,nd_1bb,nd_11,nd_00
        
 def cal_nds_list(dp_ss,nd_1a,nd_1b,nd_1,nd_0): #dp_ss/dp_s

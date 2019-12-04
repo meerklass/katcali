@@ -8,28 +8,35 @@ from astropy.coordinates.angles import Angle
 import astropy.time as at
 import glob
 import astropy.io.fits as pyfits
+from utils import KBOLTZ, CLIGHT
 #from . import label_dump as kl
+
+
 def beam_pattern_ptr(freq, flux, Aeffmax, Pn):
+    """
+    
+    """
     flux_freq = flux(freq/1e9) * 1e-26
-    k_B = 1.38E-23
-      
-    Aeff=Aeffmax*Pn
-    TA = flux_freq / 2 * Aeff/ k_B #half
-    return TA 
+    Aeff = Aeffmax * Pn
+    TA = 0.5 * flux_freq * Aeff/ KBOLTZ
+    return TA
+    
 def gaussian_beam_ptr(freq, flux, Aeff, sep):
+    """
+    
+    """
     flux_freq = flux(freq/1e9) * 1e-26
-    k_B = 1.38E-23
-    TA = flux_freq / 2 * Aeff(freq, sep) / k_B #half
+    TA = 0.5 * flux_freq * Aeff(freq, sep) / KBOLTZ # half
     return TA 
 
-#############BM###########################
+# BM
 def calc_Omega_A_from_sigma(sigma_deg):
     return 2 * np.pi * np.radians(sigma_deg) ** 2
 
 def calc_Aeff_max_from_sigma(sigma_deg, freq_Hz):
-    light_speed = 2.99792485e8
-    lbd = light_speed / freq_Hz
+    lbd = CLIGHT / freq_Hz
     return lbd ** 2 / calc_Omega_A_from_sigma(sigma_deg)
+    
 def cal_Pn(pattern,timestamps,dp_ca,dp_cb,x_pix,y_pix):
     Pn=np.zeros_like(timestamps)
     for i in range(len(timestamps)):
@@ -40,68 +47,107 @@ def cal_Pn(pattern,timestamps,dp_ca,dp_cb,x_pix,y_pix):
     return Pn
 
 ############ BM-I: beam from equation ####################
-def cal_BMI(freqs,ch,flux_model,ang_deg):
-    light_speed = 2.99792485e8
-    lbd=light_speed/freqs[ch]
-    D_MeerKAT=14.0
-    Bsigma0=np.degrees(0.45*lbd/D_MeerKAT)
-    #print Bsigma0
-    eta=0.83 #mean value from katconfig
+def cal_BMI(freqs, ch, flux_model, ang_deg, Ddish=14., eta=0.83):
+    """
+    
+    Parameters
+    ----------
+    freqs : array_like
+        xxx
+    
+    ch : int
+        xxx
+    
+    flux_model : ???
+        xxx
+    
+    ang_deg : ???
+        xxx
+    
+    Ddish : float, optional
+        Dish diameter, in m. Default: 14 (MeerKAT-like)
+    
+    eta : float, optional
+        Aperture efficiency. Default: 0.83 (mean value from katconfig)
+    
+    Returns
+    -------
+    xxx
+    """
+    lbd = CLIGHT / freqs[ch] # wavelength
+    Bsigma0 = np.degrees(0.45 * lbd / Ddish)
     Aeffmax0 = eta* calc_Aeff_max_from_sigma(Bsigma0, freqs[ch])
-    print Aeffmax0
-    Aeff0=lambda freq,r: Aeffmax0*np.exp(-r**2/(2*Bsigma0**2)) #freq useless here
-    T_ptr0=gaussian_beam_ptr(freqs[ch], flux_model, Aeff0, ang_deg)
+    
+    Aeff0 = lambda freq, r: Aeffmax0*np.exp(-r**2./(2.*Bsigma0**2.)) #freq useless here
+    T_ptr0 = gaussian_beam_ptr(freqs[ch], flux_model, Aeff0, ang_deg)
     return T_ptr0
-###########################################################
-def load_Bdata(ch,beam_select):
+    
+
+"""
+def load_Bdata(ch, beam_select):
     print ("#load_Bdata is for single channel only! load_Bdata_fband has higher efficiency for multi channel calibration")
-    if ch<1024:
+    if ch < 1024:
         beam_file='p513_d5_ch4096/p1'
         ch_local=ch
-    if ch>=1024 and ch<2048:
+    if ch >= 1024 and ch < 2048:
         beam_file='p513_d5_ch4096/p2'
         ch_local=ch-1024
-    if ch>=2048 and ch<3072:
+    if ch >= 2048 and ch < 3072:
         beam_file='p513_d5_ch4096/p3'
         ch_local=ch-2048
-    if ch>=3072:
+    if ch >= 3072:
         beam_file='p513_d5_ch4096/p4'
         ch_local=ch-3072
     print beam_file
     Bdata=pickle.load(open('/users/jywang/MeerKAT/model_test/beam_model/eidos_sim/'+beam_file+'/beam_fit_'+beam_select+'_data','rb'))
     return Bdata,ch_local,beam_file
+"""
 
-def load_Bdata_fband(beam_select):
-    Bdata=pickle.load(open('/users/jywang/MeerKAT/model_test/beam_model/eidos_sim/p513_d5_ch4096/beam_fit_'+beam_select+'_p513_ch4096_d5_data','rb'))
+def load_Bdata_fband(beam_select, template='/users/jywang/MeerKAT/model_test/beam_model/eidos_sim/p513_d5_ch4096/beam_fit_%s_p513_ch4096_d5_data'):
+    """
+    
+    Parameters
+    ----------
+    
+    Returns
+    -------
+    """
+    Bdata = pickle.load(open(template % beam_select,'rb'))
     return Bdata
 
-############BM-II: beam from gaussian fitting on Pattern ##############
-def cal_BMII(freqs,ch,pol,flux_model,ang_deg,beam_select):
+
+# BM-II: beam from gaussian fitting on Pattern
+def cal_BMII(freqs, ch, pol, flux_model, ang_deg, beam_select):
+    """
     
-    Bdata,ch_local,beam_file= load_Bdata(ch,beam_select)
-    grid_freq=Bdata['grid_freq']
-    sigma_HH=Bdata['sigma_HH']
-    sigma_VV=Bdata['sigma_VV']
-    sigma_HH=np.array(sigma_HH)
-    sigma_VV=np.array(sigma_VV)
-    #print np.shape(sigma_HH),np.shape(sigma_VV)
-    #print grid_freq[ch_local],freqs[ch]/1e6
+    Parameters
+    ----------
+    
+    Returns
+    -------
+    """
+    # FIXME: Single channel?
+    #Bdata, ch_local, beam_file = load_Bdata(ch, beam_select)
+    Bdata, ch_local, beam_file = load_Bdata_fband(beam_select)  
+    grid_freq = Bdata['grid_freq']
+    sigma_HH = np.array(Bdata['sigma_HH'])
+    sigma_VV = np.array(Bdata['sigma_VV'])
     assert(grid_freq[ch_local]==freqs[ch]/1e6)
     
     if pol=='h':
         Bsigma1=sigma_HH[ch_local]
-    if pol=='v':
+    elif pol=='v':
         Bsigma1=sigma_VV[ch_local]
-       
-    #print Bsigma1
+    else:
+        raise ValueError("Unknown polarisation '%s'" % pol)
+        
     Aeffmax1 = calc_Aeff_max_from_sigma(Bsigma1, freqs[ch])
-    #print Aeffmax1
-    Aeff1=lambda freq,r: Aeffmax1*np.exp(-r**2/(2*Bsigma1**2)) #freq useless here
-    T_ptr1=gaussian_beam_ptr(freqs[ch], flux_model, Aeff1, ang_deg)
+    Aeff1 = lambda freq, r: Aeffmax1 * np.exp(-r**2./(2.*Bsigma1**2.))
+    T_ptr1 = gaussian_beam_ptr(freqs[ch], flux_model, Aeff1, ang_deg)
     return T_ptr1
 
 
-
+"""
 ############BM-III: beam from pattern#######################################
 def cal_BMIII(fname,data,ch,ant,pol,flux_model,c0, dp_ca,dp_cb,ang_deg,beam_select):
     print ("#cal_BMIII is for single channel only! cal_BMIII_1ch has higher efficiency for multi channel calibration")
@@ -217,7 +263,7 @@ def cal_BMIII(fname,data,ch,ant,pol,flux_model,c0, dp_ca,dp_cb,ang_deg,beam_sele
     T_ptr2=beam_pattern_ptr(freqs[ch], flux_model, Aeffmax2, Pn)
     pix_label=x_pix,y_pix,x_pix_max,y_pix_max
     return T_ptr2,pattern,pix_label
-
+"""
 
 
 ####split cal_BMIII to avoid repeat calucluation ################################################
@@ -271,7 +317,7 @@ def cal_pix_params(data,c0,Npix,Ddeg):
 
     return x_pix,y_pix
 
-def load_Aeff_max_fband(beam_select,pol):
+def load_Aeff_max_fband(beam_select, pol):
     Bdata= load_Bdata_fband(beam_select)
     if pol=='h':
         Aeff_max_HH=Bdata['Aeff_max_HH']
@@ -281,38 +327,37 @@ def load_Aeff_max_fband(beam_select,pol):
         Aeff_max=np.array(Aeff_max_VV)
     return  Aeff_max
 
-def load_pattern_fband(beam_select,pol):
+def load_pattern_fband(beam_select, pol):
     if pol=='h':
-        file=glob.glob('/users/jywang/MeerKAT/model_test/beam_model/eidos_sim/p513_d5_ch4096/primary_beam_'+beam_select+'_p513_ch4096_d5_HH.fits')
+        fname = glob.glob('/users/jywang/MeerKAT/model_test/beam_model/eidos_sim/p513_d5_ch4096/primary_beam_%s_p513_ch4096_d5_HH.fits' % beam_select)
     if pol=='v':
-        file=glob.glob('/users/jywang/MeerKAT/model_test/beam_model/eidos_sim/p513_d5_ch4096/primary_beam_'+beam_select+'_p513_ch4096_d5_VV.fits')
+        fname = glob.glob('/users/jywang/MeerKAT/model_test/beam_model/eidos_sim/p513_d5_ch4096/primary_beam_%s_p513_ch4096_d5_VV.fits' % beam_select)
     
-    assert(len(file)==1)
-    file=file[0]
-    print file    
-    imgs=pyfits.open(file)[0].data
+    assert len(fname)==1, "More than one file was found that matches the pattern."
+    fname = fname[0]
+    imgs = pyfits.open(fname)[0].data
     return imgs
 
-def cal_BMIII_1ch(data,ch,flux_model, dp_ca,dp_cb,pattern_fband,x_pix,y_pix,Aeff_max_fband):
-    timestamps=data.timestamps
-    freqs=data.freqs
+def cal_BMIII_1ch(data, ch, flux_model, dp_ca, dp_cb, pattern_fband, 
+                  x_pix, y_pix, Aeff_max_fband):
+    timestamps = data.timestamps
+    freqs = data.freqs
        
-    Aeffmax2=Aeff_max_fband[ch] #add in notebook
-    print Aeffmax2
+    Aeffmax2 = Aeff_max_fband[ch] #add in notebook
             
-    pattern=pattern_fband[ch,:,:]
-    pattern=pattern/pattern.max()
+    pattern = pattern_fband[ch,:,:]
+    pattern = pattern/pattern.max()
     
     #in Khan's paper, smaller pix number (top in plots) is higher elevation
-    pattern=np.flip(pattern,axis=0) #updown flip to make sure smaller pix number is lower elevation
+    pattern = np.flip(pattern, axis=0) #updown flip to make sure smaller pix number is lower elevation
       
     print np.where(pattern==pattern.max())
-    x_pix_max=np.where(pattern==pattern.max())[0][0]
-    y_pix_max=np.where(pattern==pattern.max())[1][0]
+    x_pix_max = np.where(pattern==pattern.max())[0][0]
+    y_pix_max = np.where(pattern==pattern.max())[1][0]
     print x_pix_max,y_pix_max
       
-    Pn=cal_Pn(pattern,timestamps,dp_ca,dp_cb,x_pix,y_pix)
-    T_ptr2=beam_pattern_ptr(freqs[ch], flux_model, Aeffmax2, Pn)
-    return T_ptr2,pattern,x_pix_max,y_pix_max
-############END of split###################################################
+    Pn = cal_Pn(pattern, timestamps, dp_ca, dp_cb, x_pix, y_pix)
+    T_ptr2 = beam_pattern_ptr(freqs[ch], flux_model, Aeffmax2, Pn)
+    return T_ptr2, pattern, x_pix_max, y_pix_max
+
 
