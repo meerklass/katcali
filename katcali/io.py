@@ -22,9 +22,9 @@ def check_ants(fname):
     cc = calsrc.coords
     flux_model = calsrc.flux_model
     
-    print 'calibrator: {target}, ra,dec= {ra}, {dec}'.format(
-                target=target, ra=cc.ra, dec=cc.dec )
-    print 'bad_ants: %s' % str(bad_ants)
+    print('calibrator: {target}, ra,dec= {ra}, {dec}'.format(
+                target=target, ra=cc.ra, dec=cc.dec ))
+    print('bad_ants: %s' % str(bad_ants))
     return target, cc, bad_ants, flux_model
 
 
@@ -47,7 +47,7 @@ def call_vis(fname,recv):
     if fname in ['1562857793']:
         data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/SCI-20190418-MS-01/'+str(fname)+'_new/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
 
-    print data1['recv_pair']
+    print(data1['recv_pair'])
     recv1=data1['recv_pair'][0]
     assert(recv1==recv)
 
