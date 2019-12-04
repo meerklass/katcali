@@ -64,6 +64,10 @@ class DataSet(object):
             print("Metadata already loaded for '%s'." % filename)
             return
         
+        # Check file size
+        fsize, units = file_size(filename)
+        print("Metadata file: %3.1f %s" % (fsize, units))
+        
         # Get info about this file
         info = self.files[filename]
         
@@ -103,6 +107,10 @@ class DataSet(object):
         # Construct filename
         fname = "{root}/{fname}/{fname}_{recv}_vis_data".format(
                 root=info['root'], fname=filename, recv=recv)
+        
+        # Check file size
+        fsize, units = file_size(filename)
+        print("Data file: %3.1f %s" % (fsize, units))
         
         # Load data using pickle
         with open(fname, 'rb') as f:

@@ -1,8 +1,36 @@
 import numpy as np
 from numpy.polynomial.legendre import legval
+import os
 
 KBOLTZ = 1.38e-23 # Boltzmann constant
 CLIGHT = 2.99792485e8 # Speed of light, m/s
+
+def file_size(filename):
+    """
+    Calculate the size of a file and return in human-readable units.
+    
+    Parameters
+    ----------
+    filename : str
+        Path to file.
+    
+    Returns
+    -------
+    fsize : float
+        Size of file in some units.
+    
+    units : str
+        Units (e.g. MB, GB).
+    """
+    # Get size of file
+    fsize = os.path.getsize(filename)
+    
+    # Convert to human-readable units
+    for u in ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB']:
+        if fsize < 1024.:
+            return fsize, u
+        fsize /= 1024.
+        
 
 def log_normal(x, mu, sigma):
     return -((x - mu)**2. /(2* sigma**2.)) \
