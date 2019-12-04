@@ -7,9 +7,9 @@ from astropy.coordinates import *
 from astropy import units as u
 from scipy.interpolate import Rbf
 import matplotlib.pylab as plt
-from calsource import CalSource
-from spillover import Spillover
-import atmosphere
+from .calsource import CalSource
+from .spillover import Spillover
+from . import atmosphere
 
 #-------------------------------------------------------------------------------
 # Calibration point sources

@@ -2,8 +2,8 @@ import numpy as np
 import json
 import pickle
 import katdal
-from models import cal_sources
-from utils import valid_filename
+from .models import cal_sources
+from .utils import valid_filename
 
 
 class DataSet(object):

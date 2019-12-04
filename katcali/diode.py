@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import stats
-from io import ds
-from utils import valid_filename
+from .io import ds
+from .utils import valid_filename
 
 def label_nd_injection(fname,vis, timestamps, dp_ss, dump_period):
     

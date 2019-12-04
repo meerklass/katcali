@@ -8,7 +8,7 @@ from astropy.coordinates.angles import Angle
 import astropy.time as at
 import glob
 import astropy.io.fits as pyfits
-from utils import KBOLTZ, CLIGHT
+from .utils import KBOLTZ, CLIGHT
 #from . import label_dump as kl
 
 

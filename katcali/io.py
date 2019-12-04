@@ -4,7 +4,7 @@ from astropy import units as u
 import numpy as np
 import pickle
 from . import models as km
-from dataset import DataSet
+from .dataset import DataSet
 
 # Load default dataset
 ds = DataSet("meerkat2019.json")

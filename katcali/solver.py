@@ -2,7 +2,7 @@ import numpy as np
 import scipy.optimize as opt
 import numpy.ma as ma
 from . import label_dump as kl
-from utils import legendre_timeseries, log_normal
+from .utils import legendre_timeseries, log_normal
 
 Tcmb = 2.725
 #for MeerKAT
