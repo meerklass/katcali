@@ -11,20 +11,20 @@ dump_period = 1.999154243
 
 
 params = {
-    'nd_ratio':         ,
-    'ratio':            ,
-    'Tptr':             ,
-    'eta_p':            ,
-    'Tnd':              ,
-    'Tnd_ref':          ,
-    'Tnd_std':          ,
-    'Tel':              ,
-    'Tgal':             ,
-    'gain_coeffs':      ,
-    'sm_coeffs':        ,
-    'nd_0':             ,
-    'nd_1a':            ,
-    'nd_1b':            
+    'nd_ratio':         None,
+    'ratio':            None,
+    'Tptr':             None,
+    'eta_p':            None,
+    'Tnd':              None,
+    'Tnd_ref':          None,
+    'Tnd_std':          None,
+    'Tel':              None,
+    'Tgal':             None,
+    'gain_coeffs':      None,
+    'sm_coeffs':        None,
+    'nd_0':             None,
+    'nd_1a':            None,
+    'nd_1b':            None
 }
 
 
