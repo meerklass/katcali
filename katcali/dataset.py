@@ -3,7 +3,7 @@ import json
 import pickle
 import katdal
 from .models import cal_sources
-from .utils import valid_filename
+from .utils import valid_filename, file_size
 
 
 class DataSet(object):
