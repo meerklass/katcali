@@ -156,7 +156,7 @@ if __name__ == '__main__':
     # Process filenames
     
     # Prepare DataSet object
-    from dataset import DataSet
+    from katcali.dataset import DataSet
     ds = DataSet("../data/meerkat2019.json")
     
     # Filenames

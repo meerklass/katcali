@@ -266,6 +266,7 @@ class DataSet(object):
             'root':         root,
             'target':       target,
             'diode':        diode,
+            'bad_ants':     bad_ants
         }
     
     
