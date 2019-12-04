@@ -271,7 +271,7 @@ def cal_pix_params(data,c0,Npix,Ddeg):
     timestamps=data.timestamps
     az=data.az[:,0]
     el=data.el[:,0]
-    print np.shape(az),np.shape(el)
+    print(np.shape(az),np.shape(el))
     lon=Angle(data.ants[0].observer.lon,unit='rad')
     lat=Angle(data.ants[0].observer.lat, unit='rad')
     height=data.ants[0].observer.elevation
@@ -302,7 +302,7 @@ def cal_pix_params(data,c0,Npix,Ddeg):
         
     x_pc=(Npix-1)/2.
     y_pc=(Npix-1)/2.
-    print x_pc, y_pc
+    print(x_pc, y_pc)
     x_pix=x_pc+x_sep/Ddeg*Npix #relative on beam pattern
     
     y_pix=y_pc+y_sep/Ddeg*Npix
@@ -351,10 +351,10 @@ def cal_BMIII_1ch(data, ch, flux_model, dp_ca, dp_cb, pattern_fband,
     #in Khan's paper, smaller pix number (top in plots) is higher elevation
     pattern = np.flip(pattern, axis=0) #updown flip to make sure smaller pix number is lower elevation
       
-    print np.where(pattern==pattern.max())
+    print(np.where(pattern==pattern.max()))
     x_pix_max = np.where(pattern==pattern.max())[0][0]
     y_pix_max = np.where(pattern==pattern.max())[1][0]
-    print x_pix_max,y_pix_max
+    print(x_pix_max,y_pix_max)
       
     Pn = cal_Pn(pattern, timestamps, dp_ca, dp_cb, x_pix, y_pix)
     T_ptr2 = beam_pattern_ptr(freqs[ch], flux_model, Aeffmax2, Pn)
