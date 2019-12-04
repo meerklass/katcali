@@ -64,16 +64,18 @@ class DataSet(object):
             print("Metadata already loaded for '%s'." % filename)
             return
         
+        # Get info about this file
+        info = self.files[filename]
+        
+        # Construct metadata filename
+        fname = "{root}/{fname}/{fname}/{fname}_sdp_l0.full.rdb".format(
+                    root=info['root'], fname=filename)
+        
         # Check file size
         fsize, units = file_size(filename)
         print("Metadata file: %3.1f %s" % (fsize, units))
         
-        # Get info about this file
-        info = self.files[filename]
-        
         # Load the metadata
-        fname = "{root}/{fname}/{fname}/{fname}_sdp_l0.full.rdb".format(
-                    root=info['root'], fname=filename)
         meta = katdal.open(fname)
         self._metadata[filename] = meta
     
@@ -109,7 +111,7 @@ class DataSet(object):
                 root=info['root'], fname=filename, recv=recv)
         
         # Check file size
-        fsize, units = file_size(filename)
+        fsize, units = file_size(fname)
         print("Data file: %3.1f %s" % (fsize, units))
         
         # Load data using pickle
