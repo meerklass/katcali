@@ -39,7 +39,12 @@ def calc_logprob(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tnd_ref
     total_model=calc_total_model(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b)
     calc_error=total_model/func_gt(timestamps,func_gt_param)/np.sqrt(d_freq*dump_period)
    
-    result=ma.sum(log_normal(vis[:,ch],total_model,calc_error))+log_normal(Tnd, Tnd_ref, 0.1*Tnd_std)+log_normal(eta_p, 1.0, 0.02)
+    #result=ma.sum(log_normal(vis[:,ch],total_model,calc_error))+log_normal(Tnd, Tnd_ref, 0.1*Tnd_std)+log_normal(eta_p, 1.0, 1e-30)
+    result=(ma.sum(log_normal(vis[:,ch],total_model,calc_error))
+            +3*ma.sum(log_normal(vis[nd_1a,ch],total_model[nd_1a],calc_error[nd_1a]))
+            +3*ma.sum(log_normal(vis[nd_1b,ch],total_model[nd_1b],calc_error[nd_1b]))
+            +log_normal(Tnd, Tnd_ref, 0.1*Tnd_std)+log_normal(eta_p, 1.0, 1e-30))
+
     return result
 
 
@@ -99,7 +104,12 @@ def calc_logprob_sm(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel,
     total_model=calc_total_model_sm(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b)
     calc_error=total_model/func_gt(timestamps,func_gt_param)/np.sqrt(d_freq*dump_period)
     #result = ma.sum(-(vis[:,ch]-total_model)**2/(2*error**2)-np.log(2*np.pi*error**2)/2.0) #supposing Gaussian
-    result=ma.sum(log_normal(vis[:,ch],total_model,calc_error))+log_normal(eta_p, 1.0, 1e-30) #no point source at the moment
+    #result=ma.sum(log_normal(vis[:,ch],total_model,calc_error))+log_normal(eta_p, 1.0, 1e-30) #no point source at the moment
+    result=(ma.sum(log_normal(vis[:,ch],total_model,calc_error))
+            +3*ma.sum(log_normal(vis[nd_1a,ch],total_model[nd_1a],calc_error[nd_1a]))
+            +3*ma.sum(log_normal(vis[nd_1b,ch],total_model[nd_1b],calc_error[nd_1b]))
+            +log_normal(eta_p, 1.0, 1e-30))
+
     return result
 
 def calc_total_model_sm(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b):
@@ -138,9 +148,14 @@ def cal_gain0(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg,T_ptr,vis_clean):
 
 
 
+#END
+
+####### below only for test##########################
+####### below only for test##########################
+####### below only for test##########################
 
 '''
-#######only for test
+######TEST 0 ############
 ########################for scan, break bkg for each line##############
 
 def solve_params_smbr(timestamps, vis, ch, ratio0, Tptr, Tnd, func_gt_param0, func_sm_param0,
@@ -190,4 +205,172 @@ def func_sm_break(ts, p_sm, nt_az_edge): #ts is full list of timestamps
         sm_part+=list(legval(x, p_sm[n*i:n*(i+1)]))
     
     return np.array(sm_part)
+####END of TEST 0########
 '''
+
+#####TEST 1#######
+#use track gain value as start and end gain for scan part 2019.11.25 #######
+#######################for track test ############################################
+def calc_total_model_test(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b):
+    return func_gt(timestamps,func_gt_param)*(func_sm(timestamps, func_sm_param)
+                                              +Tptr*eta_p
+                                              +Tel 
+                                              +Tgal +np.ones(len(timestamps))*Tcmb
+                                              +vis_ndstamp_model(timestamps, nd_0, nd_1a, nd_1b, Tnd, nd_ratio, ratio))
+
+
+def calc_logprob_test(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b):
+    total_model=calc_total_model_test(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b)
+    calc_error=total_model/func_gt(timestamps,func_gt_param)/np.sqrt(d_freq*dump_period)*np.sqrt(2)
+   
+    #result=ma.sum(log_normal(vis[:,ch],total_model,calc_error))+log_normal(Tnd, Tnd_ref, 0.1*Tnd_std)+log_normal(eta_p, 1.0, 0.02)
+    #result=ma.sum(log_normal(vis[:,ch],total_model,calc_error))+log_normal(Tnd, Tnd_ref, 0.1*Tnd_std)+log_normal(eta_p, 1.0, 1e-3)
+    result=(ma.sum(log_normal(vis[:,ch],total_model,calc_error))
+            +3*ma.sum(log_normal(vis[nd_1a,ch],total_model[nd_1a],calc_error[nd_1a]))
+            +3*ma.sum(log_normal(vis[nd_1b,ch],total_model[nd_1b],calc_error[nd_1b]))
+            +log_normal(Tnd, Tnd_ref, 0.1*Tnd_std)+log_normal(eta_p, 1.0, 1e-30))
+
+
+    return result
+
+
+def func_obj0_test(p, *args):
+    timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, nd_0, nd_1a, nd_1b=args
+    Tnd=p[0]
+    eta_p=p[1]
+    func_sm_param=p[2]
+    func_gt_param=p[3:-1]
+    ratio=p[-1]      
+    return -calc_logprob_test(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b)
+
+
+def solve_params0_test(timestamps, vis, ch, nd_ratio, ratio0, Tptr, eta_p0, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param0, func_sm_param0, nd_0, nd_1a, nd_1b):
+    return opt.fmin_powell(func_obj0_test, 
+                           x0=[Tnd_ref]+[eta_p0]+list(func_sm_param0)+list(func_gt_param0)+[ratio0],
+                           args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, nd_0, nd_1a, nd_1b))
+######
+######
+#################for scan#############################
+def solve_params_sm_test(timestamps, vis, ch, nd_ratio, ratio0, Tptr, eta_p0, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param0,gb, ge, dp_sb,dp_se, func_sm_param0,nd_0, nd_1a, nd_1b):
+    return opt.fmin_powell(func_obj_sm_test, 
+                           x0=[Tnd_ref]+[eta_p0]+list(func_sm_param0)+list(func_gt_param0)+[ratio0], 
+                           args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, gb, ge, dp_sb,dp_se, 
+                                 nd_0, nd_1a, nd_1b))
+
+def func_obj_sm_test(p, *args):
+    timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, gb, ge, dp_sb,dp_se, nd_0, nd_1a, nd_1b=args
+    Tnd=p[0]
+    eta_p=p[1]
+    func_sm_param=p[2:-6]
+    func_gt_param=p[-6:-1]
+    ratio=p[-1]
+    
+    return -calc_logprob_sm_test(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, gb, ge, dp_sb,dp_se,func_sm_param,nd_0, nd_1a, nd_1b)
+
+
+def calc_logprob_sm_test(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std,  Tel,Tgal, func_gt_param, gb, ge, dp_sb, dp_se, func_sm_param, nd_0, nd_1a, nd_1b):
+    total_model=calc_total_model_sm_test(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b)
+    calc_error=total_model/func_gt(timestamps,func_gt_param)/np.sqrt(d_freq*dump_period)*np.sqrt(2)
+    #result = ma.sum(-(vis[:,ch]-total_model)**2/(2*error**2)-np.log(2*np.pi*error**2)/2.0) #supposing Gaussian
+    gt_local=func_gt(timestamps, func_gt_param)
+    #result=ma.sum(log_normal(vis[:,ch],total_model,calc_error))+log_normal(eta_p, 1.0, 1e-30) +log_normal(Tnd, Tnd_ref, 0.1*Tnd_std) + log_normal(gt_local[dp_sb],gb,1e-3*gb)+log_normal(gt_local[dp_se],ge,1e-3*ge)
+    result=(ma.sum(log_normal(vis[:,ch],total_model,calc_error))
+            +3*ma.sum(log_normal(vis[nd_1a,ch],total_model[nd_1a],calc_error[nd_1a]))
+            +3*ma.sum(log_normal(vis[nd_1b,ch],total_model[nd_1b],calc_error[nd_1b]))
+            +log_normal(eta_p, 1.0, 1e-30)
+            +log_normal(Tnd, Tnd_ref, 0.1*Tnd_std)
+            + log_normal(gt_local[dp_sb],gb,1e-3*gb)+log_normal(gt_local[dp_se],ge,1e-3*ge))# if want to fix gb and ge, set error 1e-3 to 1e-30 
+
+    return result
+
+def calc_total_model_sm_test(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b):
+    
+    return func_gt(timestamps,func_gt_param)*(func_sm(timestamps, func_sm_param)+Tel
+                                              +Tgal+np.ones(len(timestamps))*Tcmb ###Galactic and CMB added!
+                                              +Tptr*eta_p
+                                              +vis_ndstamp_model(timestamps, nd_0, nd_1a, nd_1b, Tnd, nd_ratio, ratio))
+
+###END of TEST 1######
+
+
+
+#####TEST 2#######
+#use track gain value as the middle time gain for scan part #######
+#######################for track test ############################################
+def calc_total_model_test2(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b):
+    return func_gt(timestamps,func_gt_param)*(func_sm(timestamps, func_sm_param)
+                                              +Tptr*eta_p
+                                              +Tel 
+                                              +Tgal +np.ones(len(timestamps))*Tcmb
+                                              +vis_ndstamp_model(timestamps, nd_0, nd_1a, nd_1b, Tnd, nd_ratio, ratio))
+
+
+def calc_logprob_test2(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b):
+    total_model=calc_total_model_test2(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b)
+    calc_error=total_model/func_gt(timestamps,func_gt_param)/np.sqrt(d_freq*dump_period)*np.sqrt(2)
+   
+    result=(ma.sum(log_normal(vis[:,ch],total_model,calc_error))
+            +3*ma.sum(log_normal(vis[nd_1a,ch],total_model[nd_1a],calc_error[nd_1a]))
+            +3*ma.sum(log_normal(vis[nd_1b,ch],total_model[nd_1b],calc_error[nd_1b]))
+            +log_normal(Tnd, Tnd_ref, 0.1*Tnd_std)+log_normal(eta_p, 1.0, 1e-30))
+
+
+    return result
+
+
+def func_obj0_test2(p, *args):
+    timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, nd_0, nd_1a, nd_1b=args
+    Tnd=p[0]
+    eta_p=p[1]
+    func_sm_param=p[2]
+    func_gt_param=p[3:-1]
+    ratio=p[-1]      
+    return -calc_logprob_test2(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b)
+
+
+def solve_params0_test2(timestamps, vis, ch, nd_ratio, ratio0, Tptr, eta_p0, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param0, func_sm_param0, nd_0, nd_1a, nd_1b):
+    return opt.fmin_powell(func_obj0_test2, 
+                           x0=[Tnd_ref]+[eta_p0]+list(func_sm_param0)+list(func_gt_param0)+[ratio0],
+                           args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, nd_0, nd_1a, nd_1b))
+
+#################for scan#############################
+def solve_params_sm_test2(timestamps, vis, ch, nd_ratio, ratio0, Tptr, eta_p0, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param0,gb, ge, dp_m, dp_sb,dp_se, func_sm_param0,nd_0, nd_1a, nd_1b):
+    return opt.fmin_powell(func_obj_sm_test2, 
+                           x0=[Tnd_ref]+[eta_p0]+list(func_sm_param0)+list(func_gt_param0)+[ratio0], 
+                           args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, gb, ge, dp_sb,dp_se, dp_m, 
+                                 nd_0, nd_1a, nd_1b))
+
+def func_obj_sm_test2(p, *args):
+    timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, gb, ge, dp_sb,dp_se, dp_m,  nd_0, nd_1a, nd_1b=args
+    Tnd=p[0]
+    eta_p=p[1]
+    func_sm_param=p[2:-6]
+    func_gt_param=p[-6:-1]
+    ratio=p[-1]
+    
+    return -calc_logprob_sm_test2(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, gb, ge, dp_m, dp_sb,dp_se,func_sm_param,nd_0, nd_1a, nd_1b)
+
+
+def calc_logprob_sm_test2(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std,  Tel,Tgal, func_gt_param, gb, ge, dp_sb, dp_se, dp_m,  func_sm_param, nd_0, nd_1a, nd_1b):
+    total_model=calc_total_model_sm_test2(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b)
+    calc_error=total_model/func_gt(timestamps,func_gt_param)/np.sqrt(d_freq*dump_period)*np.sqrt(2)
+    gt_local=func_gt(timestamps, func_gt_param)
+    
+    result=(ma.sum(log_normal(vis[:,ch],total_model,calc_error))
+            +3*ma.sum(log_normal(vis[nd_1a,ch],total_model[nd_1a],calc_error[nd_1a]))
+            +3*ma.sum(log_normal(vis[nd_1b,ch],total_model[nd_1b],calc_error[nd_1b]))
+            +log_normal(eta_p, 1.0, 1e-30)
+            +log_normal(Tnd, Tnd_ref, 0.1*Tnd_std)
+            #+ log_normal(gt_local[dp_sb],gb,1e-3*gb)+log_normal(gt_local[dp_se],ge,1e-3*ge)
+            + log_normal(gt_local[dp_m],(gb+ge)/2,1e-30*(gb+ge)/2.))
+
+    return result
+
+def calc_total_model_sm_test2(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b):
+    
+    return func_gt(timestamps,func_gt_param)*(func_sm(timestamps, func_sm_param)+Tel
+                                              +Tgal+np.ones(len(timestamps))*Tcmb ###Galactic and CMB added!
+                                              +Tptr*eta_p
+                                              +vis_ndstamp_model(timestamps, nd_0, nd_1a, nd_1b, Tnd, nd_ratio, ratio))
+
+###END of TEST 2######

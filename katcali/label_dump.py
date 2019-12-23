@@ -105,8 +105,9 @@ def cal_dp_c(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg):
     dp_c1b=dp_c1[dp_c1>dp_se]
 
     dp_ca=list(dp_c0a)+list(dp_c1a)#+list(dp_c2a)+list(dp_c3a)+list(dp_c4a)
+    dp_ca.sort()
     dp_cb=list(dp_c0b)+list(dp_c1b)#+list(dp_c2b)+list(dp_c3b)+list(dp_c4b)
-    
+    dp_cb.sort()
     result= dp_ca,dp_cb,dp_c0a, dp_c1a,dp_c0b,dp_c1b
     
     #######################all have above#######################
@@ -149,7 +150,9 @@ def cal_dp_c(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg):
         dp_c4b=dp_c4[dp_c4>dp_se]
         #overwrite
         dp_ca=list(dp_c0a)+list(dp_c1a)+list(dp_c2a)+list(dp_c3a)+list(dp_c4a)
+        dp_ca.sort()
         dp_cb=list(dp_c0b)+list(dp_c1b)+list(dp_c2b)+list(dp_c3b)+list(dp_c4b)
+        dp_cb.sort()
         result= dp_ca,dp_cb,dp_c0a, dp_c1a,dp_c2a,dp_c3a,dp_c4a,dp_c0b,dp_c1b,dp_c2b,dp_c3b,dp_c4b
     data.select() #recover after select!!!
     data.select(ants=ant,pol=pol)
