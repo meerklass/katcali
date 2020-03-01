@@ -235,7 +235,7 @@ def cal_Gal_model_np(vis ,freqs, ra, dec, ch_min, ch_max, nside):
         syn = sky.synchrotron(nu=freqs[i]/1e9) / 1e6  # K
         I = hp.pixelfunc.get_interp_val(syn[0, :], theta / 180 * np.pi, phi / 180 * np.pi)
         
-        result[:, i] = I/2.
+        result[:, i] = I #I/2.
         
     return result
 

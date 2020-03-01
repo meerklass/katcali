@@ -13,8 +13,9 @@ def load_data(fname):
         data = katdal.open('/idia/projects/hi_im/COM-20190418-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
 
     if fname=='1562857793':
-        data = katdal.open('/idia/projects/hi_im//1562857793/1562857793/1562857793_sdp_l0.full.rdb')
-
+        #data = katdal.open('/idia/projects/hi_im//1562857793/1562857793/1562857793_sdp_l0.full.rdb')
+        print 'data link for MeerKLASS workshop only!'
+        data = katdal.open('https://archive-gw-1.kat.ac.za/1562857793/1562857793_sdp_l0.full.rdb?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJrYXQtYXJjaGl2ZS5rYXQuYWMuemEiLCJhdWQiOiJhcmNoaXZlLWd3LTEua2F0LmFjLnphIiwiaWF0IjoxNTgzMDc0NDQ2LCJwcmVmaXgiOlsiMTU2Mjg1Nzc5MyJdLCJleHAiOjE1ODM2NzkyNDYsInN1YiI6ImFzdHJvLmp5d2FuZ0BnbWFpbC5jb20iLCJzY29wZXMiOlsicmVhZCJdfQ.gpKrp-xHTm5Og2Jt1xSBvTpKEO6D6v2-wdJYXGmyyby3ufYU9gpSAAVPv7JMP26b2ufy4OcEtpgAZHHT7Qechw')
     return data
 
 
@@ -116,8 +117,9 @@ def call_vis(fname,recv):
     if fname in['1558464584','1558472940']:
         data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/COM-20190418-MS-01/'+str(fname)+'/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
     if fname in ['1562857793']:
-        data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/SCI-20190418-MS-01/'+str(fname)+'_new/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
-
+        #data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/SCI-20190418-MS-01/'+str(fname)+'_new/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
+        print 'raw_vis data for MeerKLASS workshop only!'
+        data1 = pickle.load(open('./'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
     print data1['recv_pair']
     recv1=data1['recv_pair'][0]
     assert(recv1==recv)

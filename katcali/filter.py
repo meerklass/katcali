@@ -21,7 +21,7 @@ def deg_filter(dump, ang_deg_list, sigma_level, n_iter):
     print 'deg filter end: '+str(ang_mean)+'+/-'+str(ang_std)+'\n'
     return dump_iter
 
-def curve_filter(x,y,sigma=4,k=5):
+def curve_filter(x,y,sigma=5,k=5):
     a=[]
     b=[]
     for i in range(len(x)):
