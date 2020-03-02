@@ -5,7 +5,7 @@ setup(
     name="katcali",
     author="Jingying Wang",
     author_email="astro.jywang@gmail.com",
-    version="0.1.3",
+    version="0.1.3.1",
     packages=["katcali"],
     zip_safe=True,
 )

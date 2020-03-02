@@ -60,7 +60,7 @@ def func_obj0(p, *args):
 
 def solve_params0(timestamps, vis, ch, nd_ratio, ratio0, Tptr, eta_p0, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param0, func_sm_param0, nd_0, nd_1a, nd_1b):
     return opt.fmin_powell(func_obj0,
-                           xtol=1e-12, ftol=1e-12, maxiter=1e9,
+                           xtol=1e-9, ftol=1e-9, maxiter=1e5,
                            x0=[Tnd_ref]+[eta_p0]+list(func_sm_param0)+list(func_gt_param0)+[ratio0],
                            args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, nd_0, nd_1a, nd_1b))
 
@@ -78,7 +78,7 @@ def func_obj2(p, *args):
 
 def solve_params2(timestamps, vis_part1, vis_part2, ch, nd_ratio, ratio0, Tptr, eta_p0, Tnd_ref,Tnd_std, Tel, Tgal, func_gt_param0, func_sm_param_a0,  func_sm_param_b0, nd_0, nd_1a, nd_1b):
     return opt.fmin_powell(func_obj2,
-                           xtol=1e-12, ftol=1e-12, maxiter=1e9, 
+                           xtol=1e-9, ftol=1e-9, maxiter=1e5,
                            x0=[Tnd_ref]+[eta_p0]+list(func_sm_param_a0)+list(func_sm_param_b0)+list(func_gt_param0)+[ratio0],
                            args=(timestamps, vis_part1, vis_part2, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, nd_0, nd_1a, nd_1b))
 
@@ -88,7 +88,7 @@ def solve_params2(timestamps, vis_part1, vis_part2, ch, nd_ratio, ratio0, Tptr, 
 def solve_params_sm(timestamps, vis, ch, nd_ratio, ratio0, Tptr, eta_p0, Tnd, Tel, Tgal, func_gt_param0, func_sm_param0,
                       nd_0, nd_1a, nd_1b):
     return opt.fmin_powell(func_obj_sm,
-                           xtol=1e-12, ftol=1e-12, maxiter=1e9, 
+                           xtol=1e-9, ftol=1e-9, maxiter=1e5,
                            x0=[eta_p0]+list(func_sm_param0)+list(func_gt_param0)+[ratio0], 
                            args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd, Tel, Tgal,  nd_0, nd_1a, nd_1b))
 
@@ -250,7 +250,7 @@ def func_obj0_test(p, *args):
 
 def solve_params0_test(timestamps, vis, ch, nd_ratio, ratio0, Tptr, eta_p0, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param0, func_sm_param0, nd_0, nd_1a, nd_1b):
     return opt.fmin_powell(func_obj0_test,
-                           xtol=1e-12, ftol=1e-12, maxiter=1e9,
+                           xtol=1e-9, ftol=1e-9, maxiter=1e5,
                            x0=[Tnd_ref]+[eta_p0]+list(func_sm_param0)+list(func_gt_param0)+[ratio0],
                            args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, nd_0, nd_1a, nd_1b))
 ######
@@ -258,7 +258,7 @@ def solve_params0_test(timestamps, vis, ch, nd_ratio, ratio0, Tptr, eta_p0, Tnd_
 #################for scan#############################
 def solve_params_sm_test(timestamps, vis, ch, nd_ratio, ratio0, Tptr, eta_p0, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param0,gb, ge, dp_sb,dp_se, func_sm_param0,nd_0, nd_1a, nd_1b):
     return opt.fmin_powell(func_obj_sm_test,
-                           xtol=1e-12, ftol=1e-12, maxiter=1e9,
+                           xtol=1e-9, ftol=1e-9, maxiter=1e5,
                            x0=[Tnd_ref]+[eta_p0]+list(func_sm_param0)+list(func_gt_param0)+[ratio0], 
                            args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, gb, ge, dp_sb,dp_se, 
                                  nd_0, nd_1a, nd_1b))
@@ -337,14 +337,14 @@ def func_obj0_test2(p, *args):
 
 def solve_params0_test2(timestamps, vis, ch, nd_ratio, ratio0, Tptr, eta_p0, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param0, func_sm_param0, nd_0, nd_1a, nd_1b):
     return opt.fmin_powell(func_obj0_test2,
-                           xtol=1e-12, ftol=1e-12, maxiter=1e9,
+                           xtol=1e-9, ftol=1e-9, maxiter=1e5,
                            x0=[Tnd_ref]+[eta_p0]+list(func_sm_param0)+list(func_gt_param0)+[ratio0],
                            args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, nd_0, nd_1a, nd_1b))
 
 #################for scan#############################
 def solve_params_sm_test2(timestamps, vis, ch, nd_ratio, ratio0, Tptr, eta_p0, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param0,gb, ge, dp_m, dp_sb,dp_se, func_sm_param0,nd_0, nd_1a, nd_1b):
     return opt.fmin_powell(func_obj_sm_test2,
-                           xtol=1e-12, ftol=1e-12, maxiter=1e9,
+                           xtol=1e-9, ftol=1e-9, maxiter=1e5,
                            x0=[Tnd_ref]+[eta_p0]+list(func_sm_param0)+list(func_gt_param0)+[ratio0], 
                            args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, gb, ge, dp_sb,dp_se, dp_m, 
                                  nd_0, nd_1a, nd_1b))
