@@ -48,13 +48,13 @@ def cal_BMI(freqs,ch,flux_model,ang_deg):
     #print Bsigma0
     eta=0.83 #mean value from katconfig
     Aeffmax0 = eta* calc_Aeff_max_from_sigma(Bsigma0, freqs[ch])
-    print Aeffmax0
+    print(Aeffmax0)
     Aeff0=lambda freq,r: Aeffmax0*np.exp(-r**2/(2*Bsigma0**2)) #freq useless here
     T_ptr0=gaussian_beam_ptr(freqs[ch], flux_model, Aeff0, ang_deg)
     return T_ptr0
 ###########################################################
 def load_Bdata(ch,beam_select):
-    print ("#load_Bdata is for single channel only! load_Bdata_fband has higher efficiency for multi channel calibration")
+    print("#load_Bdata is for single channel only! load_Bdata_fband has higher efficiency for multi channel calibration")
     if ch<1024:
         beam_file='p513_d5_ch4096/p1'
         ch_local=ch
@@ -67,7 +67,7 @@ def load_Bdata(ch,beam_select):
     if ch>=3072:
         beam_file='p513_d5_ch4096/p4'
         ch_local=ch-3072
-    print beam_file
+    print(beam_file)
     Bdata=pickle.load(open('/users/jywang/MeerKAT/model_test/beam_model/eidos_sim/'+beam_file+'/beam_fit_'+beam_select+'_data','rb'))
     return Bdata,ch_local,beam_file
 
@@ -104,12 +104,12 @@ def cal_BMII(freqs,ch,pol,flux_model,ang_deg,beam_select):
 
 ############BM-III: beam from pattern#######################################
 def cal_BMIII(fname,data,ch,ant,pol,flux_model,c0, dp_ca,dp_cb,ang_deg,beam_select):
-    print ("#cal_BMIII is for single channel only! cal_BMIII_1ch has higher efficiency for multi channel calibration")
+    print("#cal_BMIII is for single channel only! cal_BMIII_1ch has higher efficiency for multi channel calibration")
     timestamps=data.timestamps
     freqs=data.freqs
     az=data.az[:,0]
     el=data.el[:,0]
-    print np.shape(az),np.shape(el)
+    print(np.shape(az),np.shape(el))
     Bdata,ch_local,beam_file= load_Bdata(ch,beam_select)
 
     grid_freq=Bdata['grid_freq']
@@ -122,7 +122,7 @@ def cal_BMIII(fname,data,ch,ant,pol,flux_model,c0, dp_ca,dp_cb,ang_deg,beam_sele
         Aeffmax2=Aeff_max_HH[ch_local]
     if pol=='v':
         Aeffmax2=Aeff_max_VV[ch_local]
-    print Aeffmax2
+    print(Aeffmax2)
 
     lon=Angle(data.ants[0].observer.lon,unit='rad')
     lat=Angle(data.ants[0].observer.lat, unit='rad')
@@ -152,31 +152,31 @@ def cal_BMIII(fname,data,ch,ant,pol,flux_model,c0, dp_ca,dp_cb,ang_deg,beam_sele
         if ptr_az[i]-az[i]< 0: #only +/-, value is meanless!
             x_sep[i]=-1*x_sep[i]
         
-    print beam_file
+    print(beam_file)
     Ddeg=5.0
-    print Ddeg
+    print(Ddeg)
 
     file1=glob.glob('/users/jywang/MeerKAT/model_test/beam_model/eidos_sim/'+beam_file+'/*'+beam_select+'*re*.fits')
     assert(len(file1)==1)
     file1=file1[0]
-    print file1
+    print(file1)
     file2=glob.glob('/users/jywang/MeerKAT/model_test/beam_model/eidos_sim/'+beam_file+'/*'+beam_select+'*im*.fits')
     assert(len(file2)==1)
     file2=file2[0]
-    print file2
+    print(file2)
 
     imgs1=pyfits.open(file1)[0].data
     imgs2=pyfits.open(file2)[0].data
 
-    print np.shape(imgs1)
+    print(np.shape(imgs1))
     Npix=np.shape(imgs1)[-1]
-    print Npix
+    print(Npix)
 
     grid_i=ch_local
-    print grid_i
+    print(grid_i)
     img_HH=imgs1[grid_i,0,0,:,:]**2+imgs2[grid_i,0,0,:,:]**2 #squared!!!
     img_VV=imgs1[grid_i,1,1,:,:]**2+imgs2[grid_i,1,1,:,:]**2
-    print img_HH.max(),img_VV.max()
+    print(img_HH.max(),img_VV.max())
     img_HH=img_HH/img_HH.max()
     img_VV=img_VV/img_VV.max()
     
@@ -186,7 +186,7 @@ def cal_BMIII(fname,data,ch,ant,pol,flux_model,c0, dp_ca,dp_cb,ang_deg,beam_sele
     #img_HH=np.flip(img_HH,axis=1)#leftright
     #img_VV=np.flip(img_VV,axis=1)
     
-    print img_HH.max(),img_VV.max()
+    print(img_HH.max(),img_VV.max())
     if pol=='h':
         pattern=img_HH 
     if pol=='v':
@@ -194,12 +194,12 @@ def cal_BMIII(fname,data,ch,ant,pol,flux_model,c0, dp_ca,dp_cb,ang_deg,beam_sele
 
     x_pc=(Npix-1)/2.
     y_pc=(Npix-1)/2.
-    print x_pc, y_pc
+    print(x_pc, y_pc)
 
-    print np.where(pattern==pattern.max())
+    print(np.where(pattern==pattern.max()))
     x_pix_max=np.where(pattern==pattern.max())[0][0]
     y_pix_max=np.where(pattern==pattern.max())[1][0]
-    print x_pix_max,y_pix_max
+    print(x_pix_max,y_pix_max)
 
     x_pix=x_pc+x_sep/Ddeg*Npix #relative on beam pattern
     
@@ -225,7 +225,7 @@ def cal_pix_params(data,c0,Npix,Ddeg):
     timestamps=data.timestamps
     az=data.az[:,0]
     el=data.el[:,0]
-    print np.shape(az),np.shape(el)
+    print(np.shape(az),np.shape(el))
     lon=Angle(data.ants[0].observer.lon,unit='rad')
     lat=Angle(data.ants[0].observer.lat, unit='rad')
     height=data.ants[0].observer.elevation
@@ -256,7 +256,7 @@ def cal_pix_params(data,c0,Npix,Ddeg):
         
     x_pc=(Npix-1)/2.
     y_pc=(Npix-1)/2.
-    print x_pc, y_pc
+    print(x_pc, y_pc)
     x_pix=x_pc+x_sep/Ddeg*Npix #relative on beam pattern
     
     y_pix=y_pc+y_sep/Ddeg*Npix
@@ -289,7 +289,7 @@ def load_pattern_fband(beam_select,pol):
     
     assert(len(file)==1)
     file=file[0]
-    print file    
+    print(file    )
     imgs=pyfits.open(file)[0].data
     return imgs
 
@@ -298,7 +298,7 @@ def cal_BMIII_1ch(data,ch,flux_model, dp_ca,dp_cb,pattern_fband,x_pix,y_pix,Aeff
     freqs=data.freqs
        
     Aeffmax2=Aeff_max_fband[ch] #add in notebook
-    print Aeffmax2
+    print(Aeffmax2)
             
     pattern=pattern_fband[ch,:,:]
     pattern=pattern/pattern.max()
@@ -306,10 +306,10 @@ def cal_BMIII_1ch(data,ch,flux_model, dp_ca,dp_cb,pattern_fband,x_pix,y_pix,Aeff
     #in Khan's paper, smaller pix number (top in plots) is higher elevation
     pattern=np.flip(pattern,axis=0) #updown flip to make sure smaller pix number is lower elevation
       
-    print np.where(pattern==pattern.max())
+    print(np.where(pattern==pattern.max()))
     x_pix_max=np.where(pattern==pattern.max())[0][0]
     y_pix_max=np.where(pattern==pattern.max())[1][0]
-    print x_pix_max,y_pix_max
+    print(x_pix_max,y_pix_max)
       
     Pn=cal_Pn(pattern,timestamps,dp_ca,dp_cb,x_pix,y_pix)
     T_ptr2=beam_pattern_ptr(freqs[ch], flux_model, Aeffmax2, Pn)

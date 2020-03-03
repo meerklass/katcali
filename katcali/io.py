@@ -14,7 +14,7 @@ def load_data(fname):
 
     if fname=='1562857793':
         #data = katdal.open('/idia/projects/hi_im//1562857793/1562857793/1562857793_sdp_l0.full.rdb')
-        print 'data link for MeerKLASS workshop only!'
+        print('data link for MeerKLASS workshop only!')
         data = katdal.open('https://archive-gw-1.kat.ac.za/1562857793/1562857793_sdp_l0.full.rdb?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJrYXQtYXJjaGl2ZS5rYXQuYWMuemEiLCJhdWQiOiJhcmNoaXZlLWd3LTEua2F0LmFjLnphIiwiaWF0IjoxNTgzMDc0NDQ2LCJwcmVmaXgiOlsiMTU2Mjg1Nzc5MyJdLCJleHAiOjE1ODM2NzkyNDYsInN1YiI6ImFzdHJvLmp5d2FuZ0BnbWFpbC5jb20iLCJzY29wZXMiOlsicmVhZCJdfQ.gpKrp-xHTm5Og2Jt1xSBvTpKEO6D6v2-wdJYXGmyyby3ufYU9gpSAAVPv7JMP26b2ufy4OcEtpgAZHHT7Qechw')
     return data
 
@@ -98,8 +98,8 @@ def check_ants(fname):
         flux_model=km.flux_PictorA
         cc = SkyCoord(79.9571708*u.deg,  -45.7788278*u.deg, frame='icrs') #Pictor A
 
-    print 'calibrator: '+str(target)+', ra,dec= '+str(cc.ra)+', '+str(cc.dec)
-    print 'bad_ants: '+ str(bad_ants)
+    print('calibrator: '+str(target)+', ra,dec= '+str(cc.ra)+', '+str(cc.dec))
+    print('bad_ants: '+ str(bad_ants))
     return target,cc,bad_ants,flux_model
 
 def ant_list(data):
@@ -118,9 +118,9 @@ def call_vis(fname,recv):
         data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/COM-20190418-MS-01/'+str(fname)+'/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
     if fname in ['1562857793']:
         #data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/SCI-20190418-MS-01/'+str(fname)+'_new/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
-        print 'raw_vis data for MeerKLASS workshop only!'
+        print('raw_vis data for MeerKLASS workshop only!')
         data1 = pickle.load(open('./'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
-    print data1['recv_pair']
+    print(data1['recv_pair'])
     recv1=data1['recv_pair'][0]
     assert(recv1==recv)
 
