@@ -122,12 +122,15 @@ class DataSet(object):
         # Get info about this file
         info = self.files[filename]
         
+        # Construct receiver-polarisation string
+        recvp = "%s%s" % (recv, pol)
+        
         # Construct filename
-        tmpl = "{proj_root}/raw_vis/{data_root}/{fname}/{fname}_{recv}_vis_data"
+        tmpl = "{proj_root}/raw_vis/{data_root}/{fname}/{fname}_{recvp}_vis_data"
         fname = tmpl.format(proj_root=info['project_root'], 
                             data_root=info['data_root'],
                             fname=filename,
-                            recv="%s%s" % (recv, pol))
+                            recvp=recvp)
         
         # Check file size
         fsize, units = file_size(fname)
@@ -140,8 +143,8 @@ class DataSet(object):
             
             # Test that correct receiver has been found
             recv_pair = data['recv_pair']
-            assert(recv_pair[0] == recv), \
-                "Unexpected receiver '%s' found in file '%s'" \
+            assert(recv_pair[0] == recvp), \
+                "Unexpected receiver/pol. '%s' found in file '%s'" \
                 % (recv_pair[0], fname)
             
             # Get visibility and flag data
