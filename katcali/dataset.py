@@ -2,7 +2,7 @@ import numpy as np
 import json
 import pickle
 import katdal
-from .models import cal_sources
+#from .models import cal_sources # FIXME: Disabled in backport
 from .utils import valid_filename, file_size
 
 
@@ -219,6 +219,9 @@ class DataSet(object):
         """
         # Validate filename
         filename = valid_filename(filename)
+        
+        # FIXME: Disabled in backport only
+        raise NotImplementedError("get_calibrator() not implemented in backport")
         
         # Get calibrator for this field
         target = self.files[filename]['target']
