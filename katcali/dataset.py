@@ -18,7 +18,6 @@ class DataSet(object):
         ----------
         dbname : str
             File containing list of datasets.
-        
         """
         self.dbname = dbname
         self.files = {} # info about file
@@ -52,9 +51,18 @@ class DataSet(object):
             json.dump(self.files, outfile, indent=2)
     
     
-    def load_metadata(self, filename):
+    def load_metadata(self, filename, verbose=True):
         """
         Load metadata into memory for a given filename.
+        
+        Parameters
+        ----------
+        filename : str
+            Name of metadata file to load (in JSON format).
+        
+        verbose : bool, optional
+            Whether to print simple progress messages during load. 
+            Default: True.
         """
         # Validate filename
         filename = valid_filename(filename)
@@ -68,19 +76,21 @@ class DataSet(object):
         info = self.files[filename]
         
         # Construct metadata filename
-        fname = "{root}/{fname}/{fname}/{fname}_sdp_l0.full.rdb".format(
-                    root=info['root'], fname=filename)
+        tmpl = "{project_root}/{data_root}/{fname}/{fname}/{fname}_sdp_l0.full.rdb"
+        fname = tmpl.format(project_root=info['project_root'], 
+                            data_root=info['data_root'],
+                            fname=filename)
         
         # Check file size
         fsize, units = file_size(fname)
-        print("Metadata file: %3.1f %s" % (fsize, units))
+        if verbose: print("Metadata file: %3.1f %s" % (fsize, units))
         
         # Load the metadata
         meta = katdal.open(fname)
         self._metadata[filename] = meta
     
     
-    def load_data(self, filename, recv):
+    def load_data(self, filename, recv, verbose=True):
         """
         Load visibility data from a given file for a given receiver.
         
@@ -89,15 +99,18 @@ class DataSet(object):
         filename : str
             Name of file to load data for.
         
-        recv : int
-            Name of receiver to load data for.
+        recv : str
+            Name of receiver to load data for, e.g. 'm006'.
+        
+        verbose : bool, optional
+            Print simple status messages while loading data. Default: True.
         
         Returns
         -------
-        vis : ?
+        vis : ndarray
             Visibility data.
         
-        flags : ?
+        flags : ndarray
             Flags for visibility data.
         """
         # Validate filename
@@ -107,8 +120,11 @@ class DataSet(object):
         info = self.files[filename]
         
         # Construct filename
-        fname = "{root}/{fname}/{fname}_{recv}_vis_data".format(
-                root=info['root'], fname=filename, recv=recv)
+        tmpl = "{project_root}/raw_vis/{data_root}/{fname}/{fname}_{recv}_vis_data"
+        fname = tmpl.format(project_root=info['project_root'], 
+                            data_root=info['data_root'],
+                            fname=filename,
+                            recv=recv)
         
         # Check file size
         fsize, units = file_size(fname)

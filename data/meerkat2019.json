@@ -1,6 +1,7 @@
 {
   "1551037708": {
-    "root": "/idia/projects/hi_im/SCI-20180330-MS-01/",
+    "project_root": "/idia/projects/hi_im/",
+    "data_root":    "SCI-20180330-MS-01/",
     "target": "3C237",
     "diode": {
       "offset": 4,
@@ -12,7 +13,8 @@
     }
   },
   "1551055211": {
-    "root": "/idia/projects/hi_im/SCI-20180330-MS-01/",
+    "project_root": "/idia/projects/hi_im/",
+    "data_root":    "SCI-20180330-MS-01/",
     "target": "3C273",
     "diode": {
       "offset": 1,
@@ -24,7 +26,8 @@
     }
   },
   "1553966342": {
-    "root": "/idia/projects/hi_im/SCI-20180330-MS-01/",
+    "project_root": "/idia/projects/hi_im/",
+    "data_root":    "SCI-20180330-MS-01/",
     "target": "PictorA",
     "diode": {
       "offset": 4,
@@ -36,7 +39,8 @@
     }
   },
   "1554156377": {
-    "root": "/idia/projects/hi_im/SCI-20180330-MS-01/",
+    "project_root": "/idia/projects/hi_im/",
+    "data_root":    "SCI-20180330-MS-01/",
     "target": "3C273",
     "diode": {
       "offset": 5,
@@ -48,7 +52,8 @@
     }
   },
   "1556034219": {
-    "root": "/idia/projects/hi_im/SCI-20190418-MS-01/",
+    "project_root": "/idia/projects/hi_im/",
+    "data_root":    "SCI-20190418-MS-01/",
     "target": "PictorA",
     "diode": {
       "offset": -1,
@@ -60,7 +65,8 @@
     }
   },
   "1556052116": {
-    "root": "/idia/projects/hi_im/SCI-20190418-MS-01/",
+    "project_root": "/idia/projects/hi_im/",
+    "data_root":    "SCI-20190418-MS-01/",
     "target": "3C273",
     "diode": {
       "offset": 1,
@@ -72,7 +78,8 @@
     }
   },
   "1556120503": {
-    "root": "/idia/projects/hi_im/SCI-20190418-MS-01/",
+    "project_root": "/idia/projects/hi_im/",
+    "data_root":    "SCI-20190418-MS-01/",
     "target": "PictorA",
     "diode": {
       "offset": 0,
@@ -84,7 +91,8 @@
     }
   },
   "1556138397": {
-    "root": "/idia/projects/hi_im/SCI-20190418-MS-01/",
+    "project_root": "/idia/projects/hi_im/",
+    "data_root":    "SCI-20190418-MS-01/",
     "target": "3C273",
     "diode": {
       "offset": 2,
@@ -96,7 +104,8 @@
     }
   },
   "1555775533": {
-    "root": "/idia/projects/hi_im/SCI-20190418-MS-01/",
+    "project_root": "/idia/projects/hi_im/",
+    "data_root":    "SCI-20190418-MS-01/",
     "target": "PictorA",
     "diode": {
       "offset": 0,
@@ -108,7 +117,8 @@
     }
   },
   "1555793534": {
-    "root": "/idia/projects/hi_im/SCI-20190418-MS-01/",
+    "project_root": "/idia/projects/hi_im/",
+    "data_root":    "SCI-20190418-MS-01/",
     "target": "3C273",
     "diode": {
       "offset": 8,
@@ -120,7 +130,8 @@
     }
   },
   "1555861810": {
-    "root": "/idia/projects/hi_im/SCI-20190418-MS-01/",
+    "project_root": "/idia/projects/hi_im/",
+    "data_root":    "SCI-20190418-MS-01/",
     "target": "PictorA",
     "diode": {
       "offset": -999,
@@ -129,7 +140,8 @@
     }
   },
   "1555879611": {
-    "root": "/idia/projects/hi_im/SCI-20190418-MS-01/",
+    "project_root": "/idia/projects/hi_im/",
+    "data_root":    "SCI-20190418-MS-01/",
     "target": "3C273",
     "diode": {
       "offset": -999,
@@ -138,7 +150,8 @@
     }
   },
   "1561650779": {
-    "root": "/idia/projects/hi_im/SCI-20190418-MS-01/",
+    "project_root": "/idia/projects/hi_im/",
+    "data_root":    "SCI-20190418-MS-01/",
     "target": "3C273",
     "diode": {
       "offset": 7,
@@ -150,7 +163,8 @@
     }
   },
   "1558464584": {
-    "root": "/idia/projects/hi_im/COM-20190418-MS-01/",
+    "project_root": "/idia/projects/hi_im/",
+    "data_root":    "COM-20190418-MS-01/",
     "target": "3C273",
     "diode": {
       "offset": -999,
@@ -159,7 +173,8 @@
     }
   },
   "1558472940": {
-    "root": "/idia/projects/hi_im/COM-20190418-MS-01/",
+    "project_root": "/idia/projects/hi_im/",
+    "data_root":    "COM-20190418-MS-01/",
     "target": "3C273",
     "diode": {
       "offset": -999,
@@ -168,7 +183,8 @@
     }
   },
   "1562857793": {
-    "root": "/idia/projects/hi_im//",
+    "project_root": "/idia/projects/hi_im/",
+    "data_root":    "/",
     "target": "3C273",
     "diode": {
       "offset": 7,
