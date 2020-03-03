@@ -3,6 +3,7 @@
     "project_root": "/idia/projects/hi_im/",
     "data_root":    "SCI-20180330-MS-01/",
     "target": "3C237",
+    "comment": "3c237",
     "diode": {
       "offset": 4,
       "jump_limit": 10,
@@ -30,6 +31,7 @@
     "project_root": "/idia/projects/hi_im/",
     "data_root":    "SCI-20180330-MS-01/",
     "target": "3C273",
+    "comment": "rfi",
     "diode": {
       "offset": 1,
       "jump_limit": 10,
@@ -50,6 +52,7 @@
     "project_root": "/idia/projects/hi_im/",
     "data_root":    "SCI-20180330-MS-01/",
     "target": "PictorA",
+    "comment": "rfi",
     "diode": {
       "offset": 4,
       "jump_limit": 10.0,
@@ -71,6 +74,7 @@
     "project_root": "/idia/projects/hi_im/",
     "data_root":    "SCI-20180330-MS-01/",
     "target": "3C273",
+    "comment": "diode noise in one dump ##rfi clean",
     "diode": {
       "offset": 5,
       "jump_limit": 10.0,
@@ -92,6 +96,7 @@
     "project_root": "/idia/projects/hi_im/",
     "data_root":    "SCI-20190418-MS-01/",
     "target": "PictorA",
+    "comment": "strong rfi spots",
     "diode": {
       "offset": -1,
       "jump_limit": 10.0,
@@ -171,6 +176,7 @@
     "project_root": "/idia/projects/hi_im/",
     "data_root":    "SCI-20190418-MS-01/",
     "target": "3C273",
+    "comment": "good one, vis < 10",
     "diode": {
       "offset": 1,
       "jump_limit": 15.0,
@@ -250,6 +256,7 @@
     "project_root": "/idia/projects/hi_im/",
     "data_root":    "SCI-20190418-MS-01/",
     "target": "PictorA",
+    "comment": "strong rfi spots in line",
     "diode": {
       "offset": 0,
       "jump_limit": 2,
@@ -274,6 +281,7 @@
     "project_root": "/idia/projects/hi_im/",
     "data_root":    "SCI-20190418-MS-01/",
     "target": "3C273",
+    "comment": "rfi spots structure, only one so ok",
     "diode": {
       "offset": 2,
       "jump_limit": 10.0,
@@ -300,6 +308,7 @@
     "project_root": "/idia/projects/hi_im/",
     "data_root":    "SCI-20190418-MS-01/",
     "target": "PictorA",
+    "comment": "vis<1 and structure",
     "diode": {
       "offset": 0,
       "jump_limit": 10,
@@ -379,6 +388,7 @@
     "project_root": "/idia/projects/hi_im/",
     "data_root":    "SCI-20190418-MS-01/",
     "target": "3C273",
+    "comment": "vis<1 and rfi pollution",
     "diode": {
       "offset": 8,
       "jump_limit": 10,
@@ -458,6 +468,7 @@
     "project_root": "/idia/projects/hi_im/",
     "data_root":    "SCI-20190418-MS-01/",
     "target": "PictorA",
+    "comment": "vis=0 problem",
     "diode": {
       "offset": -999,
       "jump_limit": 10.0,
@@ -534,6 +545,7 @@
     "project_root": "/idia/projects/hi_im/",
     "data_root":    "SCI-20190418-MS-01/",
     "target": "3C273",
+    "comment": "vis=0 problem",
     "diode": {
       "offset": -999,
       "jump_limit": 10.0,
@@ -610,6 +622,7 @@
     "project_root": "/idia/projects/hi_im/",
     "data_root":    "SCI-20190418-MS-01/",
     "target": "3C273",
+    "comment": "diode shift",
     "diode": {
       "offset": 7,
       "jump_limit": 10.0,
@@ -630,6 +643,7 @@
     "project_root": "/idia/projects/hi_im/",
     "data_root":    "COM-20190418-MS-01/",
     "target": "3C273",
+    "comment": "3C273 track #diode shift",
     "diode": {
       "offset": -999,
       "jump_limit": 10.0,
@@ -651,6 +665,7 @@
     "project_root": "/idia/projects/hi_im/",
     "data_root":    "COM-20190418-MS-01/",
     "target": "3C273",
+    "comment": "3C273 track #diode shift",
     "diode": {
       "offset": -999,
       "jump_limit": 10.0,
@@ -673,6 +688,7 @@
     "project_root": "/idia/projects/hi_im/",
     "data_root":    "/",
     "target": "3C273",
+    "comment": "small sky coverage",
     "diode": {
       "offset": 7,
       "jump_limit": 10.0,
