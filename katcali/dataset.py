@@ -132,7 +132,8 @@ class DataSet(object):
         
         # Load data using pickle
         with open(fname, 'rb') as f:
-            data = pickle.load(f)
+            # FIXME: Encoding needed for Py2 pickles
+            data = pickle.load(f, encoding='latin1')
             
             # Test that correct receiver has been found
             recv_pair = data['recv_pair']
