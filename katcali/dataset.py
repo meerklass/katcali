@@ -143,9 +143,13 @@ class DataSet(object):
             
             # Test that correct receiver has been found
             recv_pair = data['recv_pair']
-            assert(recv_pair[0] == recvp), \
+            rp0 = recv_pair[0]
+            if isinstance(rp0, bytes):
+                # Handle bytes vs string issues between Py2 and Py3
+                rp0 = rp0.decode()
+            assert(rp0 == recvp), \
                 "Unexpected receiver/pol. '%s' found in file '%s'" \
-                % (recv_pair[0], fname)
+                % (rp0, fname)
             
             # Get visibility and flag data
             vis = data['vis']
