@@ -76,8 +76,8 @@ class DataSet(object):
         info = self.files[filename]
         
         # Construct metadata filename
-        tmpl = "{project_root}/{data_root}/{fname}/{fname}/{fname}_sdp_l0.full.rdb"
-        fname = tmpl.format(project_root=info['project_root'], 
+        tmpl = "{proj_root}/{data_root}/{fname}/{fname}/{fname}_sdp_l0.full.rdb"
+        fname = tmpl.format(proj_root=info['project_root'], 
                             data_root=info['data_root'],
                             fname=filename)
         
@@ -90,7 +90,7 @@ class DataSet(object):
         self._metadata[filename] = meta
     
     
-    def load_data(self, filename, recv, verbose=True):
+    def load_data(self, filename, recv, pol, verbose=True):
         """
         Load visibility data from a given file for a given receiver.
         
@@ -101,6 +101,9 @@ class DataSet(object):
         
         recv : str
             Name of receiver to load data for, e.g. 'm006'.
+        
+        pol : str
+            Name of polarisation to load data for, e.g. 'h' or 'v'.
         
         verbose : bool, optional
             Print simple status messages while loading data. Default: True.
@@ -120,11 +123,11 @@ class DataSet(object):
         info = self.files[filename]
         
         # Construct filename
-        tmpl = "{project_root}/raw_vis/{data_root}/{fname}/{fname}_{recv}_vis_data"
-        fname = tmpl.format(project_root=info['project_root'], 
+        tmpl = "{proj_root}/raw_vis/{data_root}/{fname}/{fname}_{recv}_vis_data"
+        fname = tmpl.format(proj_root=info['project_root'], 
                             data_root=info['data_root'],
                             fname=filename,
-                            recv=recv)
+                            recv="%s%s" % (recv, pol))
         
         # Check file size
         fsize, units = file_size(fname)
