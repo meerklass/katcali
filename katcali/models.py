@@ -75,7 +75,7 @@ class Spill_Temp:
             self.spill['HH'] = T_H # The HH and VV is a scape thing
             self.spill['VV'] = T_V
             warnings.warn('Warning: Failed to load Spillover models, setting models to zeros')
-            print "error"
+            print("error")
         # the models are in a format of theta=0  == el=90
 
 ######updated spill model######################################################################
@@ -135,7 +135,7 @@ class Spill_Temp2:
             self.spill['HH'] = T_H # The HH and VV is a scape thing
             self.spill['VV'] = T_V
             warnings.warn('Warning: Failed to load Spillover models, setting models to zeros')
-            print "error"
+            print("error")
         # the models are in a format of theta=0  == el=90
 
 def calc_atmospheric_opacity(T, RH, P, h, f): #same to KAT-7
@@ -245,29 +245,29 @@ def flux_3C273(freq_GHz):
     F1410=42 #Jy
     F408=55.10 #Jy
     alpha=-np.log10(F1410/F408)/np.log10(1410/408.)
-    print 'alpha='+str(alpha)
+    print('alpha='+str(alpha))
     return pow((freq_GHz/1.41),-alpha)*F1410
 
 def flux_3C237(freq_GHz):
     F1410=6.6 #Jy
     F408=15.4 #Jy
     alpha=-np.log10(F1410/F408)/np.log10(1410/408.)
-    print 'alpha='+str(alpha)
+    print('alpha='+str(alpha))
     return pow((freq_GHz/1.41),-alpha)*F1410
 
 def flux_PictorA(freq_GHz):
     F1410=66. #Jy
     alpha=0.85
-    print 'alpha='+str(alpha)
+    print('alpha='+str(alpha))
     return pow((freq_GHz/1.41),-alpha)*F1410
 
 def call_Tnd(data, ant,pol,freqs,ch,plot_key):
-    print ("#cal_Tnd is for single channel only! Tnd_spl has higher efficiency for multi channel calibration")
+    print("#cal_Tnd is for single channel only! Tnd_spl has higher efficiency for multi channel calibration")
     noise_id=data.receivers[ant]
     
     noise={}
     for pol_i in ['h','v'] :  
-        print noise_id,pol_i 
+        print(noise_id,pol_i )
     
         filename = '/users/jywang/MeerKAT/model_test/mkat_model/noise-diode-models/mkat/rx.%s.%s.csv'%(noise_id,pol_i)
         
@@ -275,7 +275,7 @@ def call_Tnd(data, ant,pol,freqs,ch,plot_key):
     x=noise[pol][:,0]/1e9
     y=noise[pol][:,1]
     Tnd_std=y.std()
-    print Tnd_std
+    print(Tnd_std)
     Tnd_spl = Rbf(x, y)
     Tnd_ref=Tnd_spl(freqs[ch]/1e9)
     if plot_key==1:
@@ -298,7 +298,7 @@ def Tnd_spl(data, ant,pol):
     
     noise={}
     for pol_i in ['h','v'] :  
-        print noise_id,pol_i 
+        print(noise_id,pol_i )
     
         filename = '/users/jywang/MeerKAT/model_test/mkat_model/noise-diode-models/mkat/rx.%s.%s.csv'%(noise_id,pol_i)
         
@@ -312,7 +312,7 @@ def Tnd_spl(data, ant,pol):
  
 ################
 def cal_Tspill(el, pol,freqs,ch,version):
-    print ("#cal_Tspill is for single channel only! cal_Tspill_func has higher efficiency for multi channel calibration")
+    print("#cal_Tspill is for single channel only! cal_Tspill_func has higher efficiency for multi channel calibration")
     if version==1:
         SpillOver = Spill_Temp(filename='/users/jywang/MeerKAT/model_test/mkat_model/spillover-models/mkat/MK_L_Tspill_AsBuilt_atm_mask.dat')
 

@@ -138,7 +138,7 @@ def call_nd_1a_param(fname):
     if fname=='1562857793':
         nd_1a0 =7    
     if nd_1a0==-999:
-        print 'no record, can ask astro.jywang@gmail.com'
+        print('no record, can ask astro.jywang@gmail.com')
     return nd_1a_gap,nd_1a0
 
 def call_nd_1_list(fname,timestamps):
