@@ -84,7 +84,7 @@ class DataSet(object):
         
         # Check file size
         fsize, units = file_size(fname)
-        if verbose: print("Metadata file: %3.1f %s" % (fsize, units))
+        if verbose: print("Loading metadata file (%3.1f %s)" % (fsize, units))
         
         # Load the metadata
         meta = katdal.open(fname)
@@ -185,6 +185,9 @@ class DataSet(object):
         """
         Return a list of available antennas (which have data) for a given file.
         
+        N.B. This method will load the metadata for a file if it is not already 
+        in memory. This can take a few seconds.
+        
         Parameters
         ----------
         filename : str
@@ -257,6 +260,38 @@ class DataSet(object):
         else:
             raise KeyError("File '%s' has calibrator source '%s', but a model "
                            "for this source was not found." % (filename, target))
+    
+    
+    def get_coords(self, filename):
+        """
+        Return arrays of RA, Dec, azimuth, and elevation for each time sample.
+        
+        N.B. This method will load the metadata for a file if it is not already 
+        in memory. This can take a few seconds.
+        
+        Parameters
+        ----------
+        filename : str
+            Name of file.
+        
+        Returns
+        -------
+        ra, dec, az, el : array_like
+            Arrays of RA, Dec, Az, and El values for each time sample.
+        """
+        # Validate filename
+        filename = valid_filename(filename)
+        
+        # Make sure metadata is loaded
+        meta = self.get_metadata(filename)
+        
+        # Get arrays
+        ra = meta.ra[:,0]
+        dec = meta.dec[:,0]    
+        az = meta.az[:,0]
+        el = meta.el[:,0]
+        
+        return ra, dec, az, el
     
     
     def get_diode_info(self, filename, field=None):
