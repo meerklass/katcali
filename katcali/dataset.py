@@ -348,7 +348,7 @@ class DataSet(object):
             return idxs_waste
             
         elif label == 'flagged':
-            return np.where(f)[0]
+            return np.where(flags)[0]
             
         else:
             return # should never get here
