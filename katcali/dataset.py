@@ -92,8 +92,12 @@ class DataSet(object):
     
     
     def load_data(self, filename, recv, pol, verbose=True):
+        return self.get_data(filename, recv, pol, verbose=verbose)
+    
+    
+    def get_data(self, filename, recv, pol, verbose=True):
         """
-        Load visibility data from a given file for a given receiver.
+        Get visibility data from a given file for a given receiver.
         
         Parameters
         ----------
