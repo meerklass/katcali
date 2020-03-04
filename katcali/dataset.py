@@ -294,9 +294,63 @@ class DataSet(object):
         return ra, dec, az, el
     
     
+    def get_freqs(self, filename):
+        """
+        Return an array of frequency values for a given file.
+        
+        N.B. This method will load the metadata for a file if it is not already 
+        in memory. This can take a few seconds.
+        
+        Parameters
+        ----------
+        filename : str
+            Name of file to return frequency array for.
+        
+        Returns
+        -------
+        freqs : array_like
+            Array of frequencies.
+        """
+        # Validate filename
+        filename = valid_filename(filename)
+        
+        # Make sure metadata is loaded
+        meta = self.get_metadata(filename)
+        return meta.freqs
+    
+    
+    def get_times(self, filename):
+        """
+        Return an array of timestamps for a given file.
+        
+        N.B. This method will load the metadata for a file if it is not already 
+        in memory. This can take a few seconds.
+        
+        Parameters
+        ----------
+        filename : str
+            Name of file to return timestamp array for.
+        
+        Returns
+        -------
+        times : array_like
+            Array of timestamps.
+        """
+        # Validate filename
+        filename = valid_filename(filename)
+        
+        # Make sure metadata is loaded
+        meta = self.get_metadata(filename)
+        return meta.timestamps
+    
+    
     def get_diode_info(self, filename, field=None):
         """
         Get information about the noise diode settings for a particular file.
+        
+        Several special fields are available that do not appear in the returned 
+        `diode_info` dict, but which can be obtained by specifying the 
+        following field names: nd_set, nd_time, nd_cycle, nd_ratio.
         
         Parameters
         ----------
@@ -305,7 +359,8 @@ class DataSet(object):
         
         field : str, optional
             If specified, return the data for a given setting only. Otherwise, 
-            a dictionary of all settings for the file will be returned. 
+            a dictionary of all settings for the file will be returned 
+            (currently excluding special fields; see above).
             Default: None (return full dict).
         
         Returns
@@ -317,6 +372,19 @@ class DataSet(object):
         """
         # Validate filename
         filename = valid_filename(filename)
+        
+        # Special fields
+        if field == 'nd_set':
+            return float(filename)
+        elif field == 'nd_time':
+            return 1.799235
+        elif field == 'nd_cycle':
+            return 19.9915424299 # only for stable diode noise pattern
+        elif field == 'nd_ratio'
+            meta = self.get_metadata(filename)
+            return 1.8 / meta.dump_period
+        else:
+            pass
         
         # Return whole dict if field is None
         if field is None:
