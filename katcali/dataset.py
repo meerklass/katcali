@@ -52,7 +52,7 @@ class DataSet(object):
             json.dump(self.files, outfile, indent=2)
     
     
-    def load_metadata(self, filename, verbose=True):
+    def load_metadata(self, filename, verbose=False):
         """
         Load metadata into memory for a given filename.
         
