@@ -4,7 +4,7 @@ import pickle
 import katdal
 from .models import cal_sources
 from .utils import valid_filename, file_size
-import .timestream as timestream
+from . import timestream
 
 
 class DataSet(object):
