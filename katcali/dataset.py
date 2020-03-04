@@ -69,7 +69,8 @@ class DataSet(object):
         
         # Check if data are already loaded for this file
         if filename in self._metadata.keys():
-            print("Metadata already loaded for '%s'." % filename)
+            if verbose:
+                print("Metadata already loaded for '%s'." % filename)
             return
         
         # Get info about this file
@@ -178,6 +179,35 @@ class DataSet(object):
         # Make sure metadata is loaded
         self.load_metadata(filename)
         return self._metadata[filename]
+    
+    
+    def get_ants(self, filename):
+        """
+        Return a list of available antennas (which have data) for a given file.
+        
+        Parameters
+        ----------
+        filename : str
+            Name of file.
+        
+        Returns
+        -------
+        ants : list of str
+            List of antennas.
+        """
+        # Validate filename
+        filename = valid_filename(filename)
+        
+        # Make sure metadata is loaded
+        meta = self.get_metadata(filename)
+        
+        # Loop over available antennas
+        ant_list = []
+        for corr_i in range(len(meta.ants)):
+            prods = meta.corr_products[corr_i]
+            assert prods[0] == prods[1] # check that this is auto-corr only
+            ant_list.append(prods[0][0:4])
+        return ant_list
     
     
     def get_bad_ants(self, filename):
