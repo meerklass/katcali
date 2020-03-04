@@ -4,6 +4,7 @@ import pickle
 import katdal
 from .models import cal_sources
 from .utils import valid_filename, file_size
+import .timestream as timestream
 
 
 class DataSet(object):
@@ -265,6 +266,93 @@ class DataSet(object):
             raise KeyError("File '%s' has calibrator source '%s', but a model "
                            "for this source was not found." % (filename, target))
     
+    
+    def get_time_indices(self, filename, recv, pol, label, ch=None):
+        """
+        Return an array of indices of time samples with a given label, e.g. 
+        only time samples that were taken while the telescope was scanning.
+        
+        Parameters
+        ----------
+        filename : str
+            Name of file.
+        
+        recv : str
+            Name of receiver, e.g. 'm006'.
+        
+        pol : str
+            Name of polarisation, e.g. 'h' or 'v'.
+        
+        label : str
+            Which label to find indices for. Options are:
+             - track:       Telescope is tracking a source (flags applied)
+             - scan:        Telescope is scanning (flags applied)
+             - flagged:     Time sample was flagged
+             - waste:       Wasted due to poor conditions
+             - track-raw:   Telescope is tracking a source (flags ignored)
+             - scan-raw:    Telescope is scanning (flags ignored)
+        
+        ch : int, optional
+            Which channel to retrieve flags for, if flagging is to be applied. 
+            Default: None.
+        
+        Returns
+        -------
+        cal : CalSource
+            Returns instance of CalSource class corresponding to the primary 
+            calibration source for this file.
+        """
+        # Validate filename
+        filename = valid_filename(filename)
+        
+        # Check that label is valid
+        valid_labels = ['track', 'scan', 'flagged', 'waste', 'track-raw', 
+                        'scan-raw']
+        if label not in valid_labels:
+            raise ValueError("'%s' is not a valid label type." % label)
+        
+        # Make sure metadata is loaded
+        meta = self.get_metadata(filename)
+        
+        # Load flags if needed
+        if 'raw' not in label:
+            assert ch is not None, "Channel 'ch' must be specified."
+            _vis, flags = self.get_data(filename=filename, recv=recv, pol=pol)
+            flags = flags[:,ch]
+        
+        # Return time indices with a given label
+        if 'track' in label:
+            idxs_track, scans_tw = timestream.select_track(meta, recv, pol)
+            
+            if 'raw' in label:
+                # Leave flagged samples in data
+                return idxs_track
+            else:
+                # Remove flagged samples
+                f = flags[idxs_track]
+                return idxs_track[~f] # negation of flags
+                
+        elif 'scan' in label:
+            idxs_scan, scans_sw = timestream.select_scan(meta, recv, pol)
+            
+            if 'raw' in label:
+                # Leave flagged samples in data
+                return idxs_scan
+            else:
+                # Remove flagged samples
+                f = flags[idxs_scan]
+                return idxs_scan[~f] # negation of flags
+                
+        elif label == 'waste':
+            idxs_waste = timestream.select_waste(meta, recv, pol)
+            return idxs_waste
+            
+        elif label == 'flagged':
+            return np.where(f)[0]
+            
+        else:
+            return # should never get here
+        
     
     def get_coords(self, filename):
         """
