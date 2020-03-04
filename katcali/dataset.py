@@ -384,7 +384,7 @@ class DataSet(object):
             return 1.799235
         elif field == 'nd_cycle':
             return 19.9915424299 # only for stable diode noise pattern
-        elif field == 'nd_ratio'
+        elif field == 'nd_ratio':
             meta = self.get_metadata(filename)
             return 1.8 / meta.dump_period
         else:
