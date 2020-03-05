@@ -26,7 +26,7 @@ class DataSet(object):
         try:
             self.load()
         except:
-            pass
+            raise
     
     
     def load(self):
