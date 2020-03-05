@@ -5,17 +5,20 @@ import numpy as np
 import pickle
 from . import models as km
 from .dataset import DataSet
+import warnings
 
 # Load default dataset
 ds = DataSet("meerkat2019.json")
 
 
 def load_data(fname):
+    warnings.warn("Deprecated; use DataSet object instead.", DeprecationWarning)
     metadata = ds.get_metadata(fname)
     return metadata
 
 
 def check_ants(fname):
+    warnings.warn("Deprecated; use DataSet object instead.", DeprecationWarning)
     bad_ants = ds.get_bad_ants(fname)
     calsrc = get_calibrator(fname)
     target = calsrc.calname
@@ -29,6 +32,7 @@ def check_ants(fname):
 
 
 def ant_list(data):
+    warnings.warn("Deprecated; use DataSet object instead.", DeprecationWarning)
     ant_list = []
     for corr_i in range(len(data.ants)):
         # check auto-corr
@@ -38,6 +42,7 @@ def ant_list(data):
 
 
 def call_vis(fname, recv):
+    warnings.warn("Deprecated; use DataSet object instead.", DeprecationWarning)
     if fname in ['1551037708', '1551055211', '1553966342', '1554156377']:
         data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/SCI-20180330-MS-01/' +
                                  str(fname)+'/'+str(fname)+'_'+str(recv)+'_vis_data', 'rb'))
@@ -79,6 +84,7 @@ def load_coordinates(data):
 
 
 def load_ndparam(fname, data):
+    warnings.warn("Deprecated; use DataSet object instead.", DeprecationWarning)
     nd_set = float(fname)
     nd_time = 1.799235
     nd_cycle = 19.9915424299  # only for stable diode noise pattern
@@ -87,6 +93,7 @@ def load_ndparam(fname, data):
 
 
 def load_tf(data):
+    warnings.warn("Deprecated; use DataSet object instead.", DeprecationWarning)
     freqs = data.freqs
     timestamps = data.timestamps
     return timestamps, freqs
