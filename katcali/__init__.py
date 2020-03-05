@@ -1,3 +1,3 @@
 
-from . import beam, dataset, diode, filter, io, models, rfi, solver, \
-              timestream, utils, visualizer
+from . import beam, dataset, filter, io, models, rfi, solver, timestream, \
+              utils, visualizer
