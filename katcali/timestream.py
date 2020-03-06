@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import stats
-from . import filter as kf
+from . import filter as kfilter
 from .utils import valid_filename
 
 
@@ -27,7 +27,7 @@ def select_track(data, ant, pol):
     scans_t = []
     scans_tw = []
     for s in data.scans():
-        if data.shape[0] > 50:
+        if data.shape[0] > 50: # only need 2 mins
             scans_t.append(data.scan_indices[0])
         else:
             scans_tw.append(data.scan_indices[0])
@@ -109,342 +109,226 @@ def select_waste(data, ant, pol):
     return dp_w
 
 
-def label_dump_1ch(data, ant, pol, flags, ch):
+def time_indices(self, meta, ant, pol, label, flags=None):
     """
-
+    Return an array of indices of time samples with a given label, e.g. 
+    only time samples that were taken while the telescope was scanning.
+    
     Parameters
     ----------
-
+    meta : obj
+        Metadata object returned by DataSet.get_metadata().
+    
+    ant : str
+        Name of antenna, e.g. 'm006'.
+    
+    pol : str
+        Name of polarisation, e.g. 'h' or 'v'.
+    
+    label : str
+        Which label to find indices for. Options are:
+         - track:       Telescope is tracking a source (flags applied)
+         - scan:        Telescope is scanning (flags applied)
+         - flagged:     Time sample was flagged
+         - waste:       Wasted due to poor conditions
+         - track-raw:   Telescope is tracking a source (flags ignored)
+         - scan-raw:    Telescope is scanning (flags ignored)
+    
+    flags : array_like, optional
+        2D array (waterfall) of flags. Only needed if label is not a 'raw' mode.
+    
     Returns
     -------
-
+    indices : array_like
+        Indices of time samples that match `label` in the time array.
     """
-    dp_t, scans_tw = select_track(data, ant, pol)
-    dp_s, scans_sw = select_scan(data, ant, pol)
-    dp_w = select_waste(data, ant, pol)
-
-    flags_1ch = flags[:, ch]
-
-    dp_tt = []
-    dp_ss = []
-    dp_f = []
-
-    for i in dp_t:
-        if flags_1ch[i] == False:
-            dp_tt.append(i)
+    # Check that label is valid
+    valid_labels = ['track', 'scan', 'flagged', 'waste', 'track-raw', 
+                    'scan-raw']
+    if label not in valid_labels:
+        raise ValueError("'%s' is not a valid label type." % label)
+    
+    # Load flags if needed
+    if 'raw' not in label:
+        assert flags is not None, "'flags' must be specified."
+    
+    # Return time indices with a given label
+    if 'track' in label:
+        idxs_track, scans_tw = select_track(meta, ant, pol)
+        
+        if 'raw' in label:
+            # Leave flagged samples in data
+            return idxs_track
         else:
-            dp_f.append(i)
-
-    for i in dp_s:
-        if flags_1ch[i] == False:
-            dp_ss.append(i)
+            # Remove flagged samples
+            f = flags[idxs_track]
+            return idxs_track[~f] # negation of flags
+            
+    elif 'scan' in label:
+        idxs_scan, scans_sw = select_scan(meta, ant, pol)
+        
+        if 'raw' in label:
+            # Leave flagged samples in data
+            return idxs_scan
         else:
-            dp_f.append(i)
-    return dp_tt, dp_ss, dp_f, dp_t, dp_s
+            # Remove flagged samples
+            f = flags[idxs_scan]
+            return idxs_scan[~f] # negation of flags
+            
+    elif label == 'waste':
+        idxs_waste = select_waste(meta, ant, pol)
+        return idxs_waste
+        
+    elif label == 'flagged':
+        return np.where(flags)[0]
+        
+    else:
+        return # should never get here
 
 
-def cal_dp_c(fname, data, ant, pol, flags, ch, dp_tt, dp_ss, ang_deg):
+def noise_diode_indices(times, offset, period, intersect=None):
     """
-
+    Return the indices of time samples when the noise diode is ON and OFF.
+    
     Parameters
     ----------
-
+    times : array_like
+        Array of time samples. Assumed to be regularly spaced.
+    
+    offset : int
+        Index of first noise diode fire in the time series.
+    
+    period : int
+        Number of time samples in between noise diode fires.
+    
+    intersect : array_like, optional
+        If specified, return the intersections of this array with the output 
+        arrays. Should be an integer array of time indices. Default: None.
+    
     Returns
     -------
-
+    idxs_on : array_like
+        Time indices when noise diode is on.
+    
+    idxs_off : array_like
+        Time indices when noise diode is off.
+    
+    idxs_on_start : array_like
+        Time indices when noise diode first switches on. (Noise 
+        diode fires span two time samples; this is the first in 
+        each firing.)
+    
+    idxs_on_stop : array_like
+        Time indices when noise diode stops being on. (Noise 
+        diode fires span two time samples; this is the last in 
+        each firing.)
     """
-    sigma_level = 10
-    n_iter = 3
-    flags_1ch = flags[:, ch]
-    dp_sb = dp_ss[0]
-    dp_se = dp_ss[-1]
-    data.select(ants=ant, pol=pol, scans='track', targets=0)
-    dp_c0 = data.dumps
-    for i in dp_c0:
-        if i not in dp_tt or flags_1ch[i] == True:
-            dp_c0 = list(dp_c0)
-            dp_c0.remove(i)
-            #print 'rm '+str(i)+' from dp_c0'
-    dp_c0 = kf.deg_filter(dp_c0, ang_deg, sigma_level, n_iter)
-    dp_c0 = np.array(dp_c0)
-    dp_c0a = dp_c0[dp_c0 < dp_sb]
-    dp_c0b = dp_c0[dp_c0 > dp_se]
-
-    data.select(ants=ant, pol=pol, scans='track', targets=1)
-    dp_c1 = data.dumps
-    for i in dp_c1:
-        if i not in dp_tt or flags_1ch[i] == True:
-            dp_c1 = list(dp_c1)
-            dp_c1.remove(i)
-            #print 'rm '+str(i)+' from dp_c1'
-    dp_c1 = kf.deg_filter(dp_c1, ang_deg, sigma_level, n_iter)
-    dp_c1 = np.array(dp_c1)
-    dp_c1a = dp_c1[dp_c1 < dp_sb]
-    dp_c1b = dp_c1[dp_c1 > dp_se]
-
-    # +list(dp_c2a)+list(dp_c3a)+list(dp_c4a)
-    dp_ca = list(dp_c0a)+list(dp_c1a)
-    # +list(dp_c2b)+list(dp_c3b)+list(dp_c4b)
-    dp_cb = list(dp_c0b)+list(dp_c1b)
-
-    result = dp_ca, dp_cb, dp_c0a, dp_c1a, dp_c0b, dp_c1b
-
-    #######################all have above#######################
-
-    if fname in ['1551055211', '1551037708']:
-        data.select(ants=ant, pol=pol, scans='track', targets=2)
-        dp_c2 = data.dumps
-        for i in dp_c2:
-            if i not in dp_tt or flags_1ch[i] == True:
-                dp_c2 = list(dp_c2)
-                dp_c2.remove(i)
-                #print 'rm '+str(i)+' from dp_c2'
-        dp_c2 = kf.deg_filter(dp_c2, ang_deg, sigma_level, n_iter)
-        dp_c2 = np.array(dp_c2)
-        dp_c2a = dp_c2[dp_c2 < dp_sb]
-        dp_c2b = dp_c2[dp_c2 > dp_se]
-
-        data.select(ants=ant, pol=pol, scans='track', targets=3)
-        dp_c3 = data.dumps
-        for i in dp_c3:
-            if i not in dp_tt or flags_1ch[i] == True:
-                dp_c3 = list(dp_c3)
-                dp_c3.remove(i)
-                #print 'rm '+str(i)+' from dp_c3'
-        dp_c3 = kf.deg_filter(dp_c3, ang_deg, sigma_level, n_iter)
-        dp_c3 = np.array(dp_c3)
-        dp_c3a = dp_c3[dp_c3 < dp_sb]
-        dp_c3b = dp_c3[dp_c3 > dp_se]
-
-        data.select(ants=ant, pol=pol, scans='track', targets=4)
-        dp_c4 = data.dumps
-        for i in dp_c4:
-            if i not in dp_tt or flags_1ch[i] == True:
-                dp_c4 = list(dp_c4)
-                dp_c4.remove(i)
-                #print 'rm '+str(i)+' from dp_c4'
-        dp_c4 = kf.deg_filter(dp_c4, ang_deg, sigma_level, n_iter)
-        dp_c4 = np.array(dp_c4)
-        dp_c4a = dp_c4[dp_c4 < dp_sb]
-        dp_c4b = dp_c4[dp_c4 > dp_se]
-        # overwrite
-        dp_ca = list(dp_c0a)+list(dp_c1a)+list(dp_c2a) + \
-            list(dp_c3a)+list(dp_c4a)
-        dp_cb = list(dp_c0b)+list(dp_c1b)+list(dp_c2b) + \
-            list(dp_c3b)+list(dp_c4b)
-        result = dp_ca, dp_cb, dp_c0a, dp_c1a, dp_c2a, dp_c3a, dp_c4a, dp_c0b, dp_c1b, dp_c2b, dp_c3b, dp_c4b
-    data.select()  # recover after select!!!
-    data.select(ants=ant, pol=pol)
-    return result
+    assert len(times.shape) == 1, "'times' must be a 1D array"
+    idxs = np.arange(times.size, dtype=np.integer)
+    
+    # Time indices when noise diode starts being on and ends being on
+    # (noise diode fires span two time samples; the first is 'start' 
+    # and second is 'stop')
+    idxs_on_start = idxs[offset::period]
+    idxs_on_stop = idxs[offset+1::period]
+    
+    # Indices of all time samples where the noise diode is on (union of 
+    # on_start and on_end); interleave so that ordering should be correct
+    idxs_on = np.zeros(idxs_on_start.size + idxs_on_stop.size, dtype=np.integer)
+    idxs_on[::2] = idxs_on_start
+    idxs_on[1::2] = idxs_on_stop
+    
+    # Time indices where noise diode is off
+    idxs_off = idxs[~np.isin(idxs, idxs_on)]
+    
+    # Perform intersections
+    if intersect is not None:
+        idxs_on = np.intersect1d(idxs_on, intersect)
+        idxs_off = np.intersect1d(idxs_off, intersect)
+        idxs_on_start = np.intersect1d(idxs_on_start, intersect)
+        idxs_on_stop = np.intersect1d(idxs_on_stop, intersect)
+    
+    return idxs_on, idxs_off, idxs_on_start, idxs_on_stop
 
 
-def cal_dp_u(dp_tt, dp_ss):
+def calibrator_time_indices(meta, idxs_track, idxs_scan, flags, ang_deg, 
+                            targets=[0,1], sigma=10., niter=3):
     """
-
+    Return the indices of time samples at various pointings on and around the 
+    calibration source (pointing strategy varies for different observations).
+    
     Parameters
     ----------
-
+    meta : obj
+        katdal metadata object.
+    
+    idxs_track, idxs_scan : array_like
+        Time indices for samples taken during tracking and scanning modes 
+        respectively.
+        
+        This function finds the calibration source time indices from the 
+        tracking time indices. The scanning indices are only needed to split 
+        the cal. source time indices into pre-scanning and post-scanning groups.
+    
+    flags : array_like
+        1D boolean array of flags for time samples. Should be for a single 
+        frequency channel.
+    
+    ang_deg : float
+        ???.
+    
+    targets : list
+        List of target field IDs to cycle through. Not every file has the same 
+        calibration strategy; all files have targets 0 (on-source) and 1 (off-
+        source, in outskirts), while some have several other off-source 
+        pointings.
+    
+    sigma : float, optional
+        Default: 10.
+    
+    niter : int, optional
+        Default: 3.
+    
     Returns
     -------
-
+    indices : dict
+        Dictionary of time indices corresponding to calibration source 
+        pointings.
+        
+        The keys of the dict correspond to the numerical ID of each calibration 
+        pointing, e.g. 0.
+        
+        The items of the dict are tuples containing a pair of arrays, 
+        (idxs_prescan, idxs_postscan), for calibration observations taken 
+        before and after the scanning phase.
     """
-    dp_u = list(dp_tt)+list(dp_ss)
-    dp_u.sort()
-    dp_u = np.array(dp_u)
-    return dp_u
+    # Get start/stop time indices of scan
+    idx_scan_start = idxs_scan[0]
+    idx_scan_stop = idxs_scan[-1]
+    
+    # Loop over targets and get corresponding time indices
+    calibrator_time_idxs = {}
+    for target in targets:
+        
+        # Select target from tracking-mode observations
+        meta.select(ants=ant, pol=pol, scans='track', targets=target)
+        
+        # Select time samples that were taken in track mode and aren't flagged
+        idxs_cal = np.intersect1d(meta.dumps[~flags], idxs_track)
+        
+        idxs_cal = kfilter.deg_filter(idxs_cal, ang_deg=ang_deg, sigma=sigma, 
+                                      niter=niter)
+        idxs_prescan = idxs_cal[idxs_cal < idx_scan_start] # before scan starts
+        idxs_postscan = idxs_cal[idxs_cal > idx_scan_stop] # after scan stops
+        
+        # Reset select (FIXME: assumed to not be a time-consuming operation)
+        meta.select()
+        meta.select(ants=ant, pol=pol)
+        
+        # Add to dict
+        idx_dict[target] = (idxs_prescan, idxs_postscan)
+        
+    #if fname in ['1551055211', '1551037708'], do 2,3,4
+    return idx_dict
+    
 
-
-
-
-
-
-def label_nd_injection(fname, vis, timestamps, dp_ss, dump_period):
-
-    # Validate filename
-    fname = valid_filename(fname)
-
-    ######set a jump limit###############
-    f = 10.
-    if fname in ['1555793534', '1551055211', '1551037708', '1555775533']:
-        f = 10
-    if fname == '1556120503':
-        f = 2
-    if fname == '1556052116':
-        f = 15.
-
-    ch_plot0 = 800  # only for edge detection
-
-    lmax = abs(np.nanmax(vis[dp_ss, ch_plot0]))
-    lmin = abs(np.nanmin(vis[dp_ss, ch_plot0]))
-    lim = (lmax-lmin)/f
-
-    #print lmax,lmin,lim
-
-    mark = []
-    nd_1 = []
-    nd_1a = []
-    nd_1b = []
-    for i in range(1, len(timestamps)):
-        if (np.abs(vis[i, ch_plot0])-np.abs(vis[i-1, ch_plot0]) > lim  # have a jump
-            and vis[i, ch_plot0] > 0 and vis[i-1, ch_plot0] > 0
-                and timestamps[i-1]-timestamps[0] - dump_period/2. not in mark):  # not jump the one before
-
-            m = timestamps[i]-timestamps[0]-dump_period/2.
-            #print i,m
-            mark.append(m)  # for plot
-            nd_1.append(i)  # on
-            nd_1a.append(i)  # on1
-            if i+1 < len(timestamps):
-                nd_1.append(i+1)  # on
-                nd_1b.append(i+1)  # on2
-    return mark, nd_1, nd_1a, nd_1b, lmin, lmax
-
-
-def gap_list(list):
-    gap_list = []
-    for i in range(1, len(list)):
-        gap_list.append(list[i]-list[i-1])
-
-    gap_list = np.array(gap_list)
-    return gap_list
-
-
-def gap_mode(list):
-    gap_list = []
-    for i in range(1, len(list)):
-        gap_list.append(list[i]-list[i-1])
-
-    gap_list = np.array(gap_list)
-    mode = stats.mode(gap_list)[0][0]
-    return mode
-
-
-def cal_nd_wro_0(nd_1a):
-    nd_gap_list = gap_list(nd_1a)
-    nd_gap_mode = gap_mode(nd_1a)
-    nd_wro_0 = np.where(nd_gap_list != nd_gap_mode)[0]
-    return nd_gap_mode, nd_wro_0
-
-
-def cal_t_line(fname, timestamps, nd_set, nd_cycle, dump_period):
-    # t_line samples at start of injection, not needed for cal
-    t_line = []
-    nd_tb = nd_set-timestamps[0]
-    nd_te = dump_period*len(timestamps)
-
-    for t in np.arange(nd_tb, nd_te+dump_period, nd_cycle):
-        t_line.append(t)
-
-    # Adjustment caused by the diode lead time
-    time_idxs = ds.get_diode_info(fname, 'time_range')
-    t_line = t_line[time_idxs[0]:time_idxs[1]]
-    return t_line
-
-
-def call_nd_1a_param(fname, ds=None):
-    """
-
-    Parameters
-    ----------
-    fname : str
-        Name of file to get diode info for.
-
-    Returns
-    -------
-    nd_1a_gap : int
-        ??
-
-    nd_1a0 : int
-        ??
-    """
-    nd_1a_gap = 10
-    nd_1a0 = ds.get_diode_info(fname, 'offset')
-
-    return nd_1a_gap, nd_1a0
-
-
-def call_nd_1_list(fname, timestamps):
-    nd_1a_gap, nd_1a0 = call_nd_1a_param(fname)
-    nd_1aa = []
-    for i in range(1000):
-        a = nd_1a0 + i*nd_1a_gap
-        if a >= 0:
-            if a >= len(timestamps):
-                break
-            nd_1aa.append(a)
-
-    nd_1bb = []
-    for i in range(1000):
-        a = nd_1a0 + 1 + i*nd_1a_gap
-        if a >= 0:
-            if a >= len(timestamps):
-                break
-            max = i
-            nd_1bb.append(a)
-    nd_11 = list(nd_1aa) + list(nd_1bb)
-    nd_11.sort()
-
-    nd_00 = []
-    for i in range(len(timestamps)):
-        if i not in nd_11:
-            nd_00.append(i)
-
-    assert(len(nd_00) + len(nd_11) == len(timestamps))
-
-    # 0 = off, 1 = on, 1a = first sample in injection, 1b = second sample in injection
-    return nd_1aa, nd_1bb, nd_11, nd_00
-
-
-def cal_nds_list(dp_ss, nd_1a, nd_1b, nd_1, nd_0):  # dp_ss/dp_s
-    nd_s0 = []
-    for i in dp_ss:
-        if i in nd_0:
-            nd_s0.append(i)
-    #print np.shape(nd_s0)
-
-    nd_s1 = []
-    nd_s1a = []
-    nd_s1b = []
-    for i in dp_ss:
-        if i in nd_1:
-            nd_s1.append(i)
-        if i in nd_1a:
-            nd_s1a.append(i)
-        if i in nd_1b:
-            nd_s1b.append(i)
-    # same as fn above, but only during scan
-    return nd_s1a, nd_s1b, nd_s1, nd_s0
-
-
-def cal_ndt_list(dp_tt, nd_1a, nd_1b, nd_1, nd_0):  # dp_tt/dp_s
-    nd_t0 = []
-    for i in dp_tt:
-        if i in nd_0:
-            nd_t0.append(i)
-    #print np.shape(nd_t0)
-
-    nd_t1 = []
-    nd_t1a = []
-    nd_t1b = []
-    for i in dp_tt:
-        if i in nd_1:
-            nd_t1.append(i)
-        if i in nd_1a:
-            nd_t1a.append(i)
-        if i in nd_1b:
-            nd_t1b.append(i)
-    # same as above, but only during track
-    return nd_t1a, nd_t1b, nd_t1, nd_t0
-
-
-def cal_az_edge_list(az, dp_sb, dp_se):
-    dp_az_min = []
-    dp_az_max = []
-    for i in range(dp_sb, dp_se+1):  # dp_w included
-        if az[i] < az[i-1] and az[i] < az[i+1]:
-            dp_az_min.append(i)
-        if az[i] > az[i-1] and az[i] > az[i+1]:
-            dp_az_max.append(i)
-    dp_az_edge = list(dp_az_min+dp_az_max)
-    dp_az_edge.sort()
-    return dp_az_min, dp_az_max, dp_az_edge

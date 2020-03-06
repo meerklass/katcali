@@ -92,11 +92,11 @@ class DataSet(object):
         self._metadata[filename] = meta
     
     
-    def load_data(self, filename, recv, pol, verbose=True):
-        return self.get_data(filename, recv, pol, verbose=verbose)
+    def load_data(self, filename, ant, pol, verbose=True):
+        return self.get_data(filename, ant, pol, verbose=verbose)
     
     
-    def get_data(self, filename, recv, pol, verbose=True):
+    def get_data(self, filename, ant, pol, verbose=True):
         """
         Get visibility data from a given file for a given receiver.
         
@@ -105,8 +105,8 @@ class DataSet(object):
         filename : str
             Name of file to load data for.
         
-        recv : str
-            Name of receiver to load data for, e.g. 'm006'.
+        ant : str
+            Name of antenna to load data for, e.g. 'm006'.
         
         pol : str
             Name of polarisation to load data for, e.g. 'h' or 'v'.
@@ -129,7 +129,7 @@ class DataSet(object):
         info = self.files[filename]
         
         # Construct receiver-polarisation string
-        recvp = "%s%s" % (recv, pol)
+        recvp = "%s%s" % (ant, pol)
         
         # Construct filename
         tmpl = "{proj_root}/raw_vis/{data_root}/{fname}/{fname}_{recvp}_vis_data"
@@ -267,7 +267,7 @@ class DataSet(object):
                            "for this source was not found." % (filename, target))
     
     
-    def get_time_indices(self, filename, recv, pol, label, ch=None):
+    def get_time_indices(self, filename, ant, pol, label, ch=None):
         """
         Return an array of indices of time samples with a given label, e.g. 
         only time samples that were taken while the telescope was scanning.
@@ -277,8 +277,8 @@ class DataSet(object):
         filename : str
             Name of file.
         
-        recv : str
-            Name of receiver, e.g. 'm006'.
+        ant : str
+            Name of antenna, e.g. 'm006'.
         
         pol : str
             Name of polarisation, e.g. 'h' or 'v'.
@@ -310,12 +310,83 @@ class DataSet(object):
         # Load flags if needed
         if 'raw' not in label:
             assert ch is not None, "Channel 'ch' must be specified."
-            _vis, flags = self.get_data(filename=filename, recv=recv, pol=pol)
+            _vis, flags = self.get_data(filename=filename, ant=ant, pol=pol)
             flags = flags[:,ch]
         
         # Get time indices for this label
-        return timestream.time_indices(meta=meta, recv=recv, pol=pol, 
+        return timestream.time_indices(meta=meta, ant=ant, pol=pol, 
                                        label=label, flags=flags)
+    
+    
+    def get_calibrator_indices(self, filename, ant, pol, ch, ang_deg, 
+                               targets=[0,1], sigma=10., niter=3):
+        """
+        Return an array of indices of time samples during observations of the 
+        calibration source.
+        
+        Parameters
+        ----------
+        filename : str
+            Name of file.
+        
+        ant : str
+            Name of antenna, e.g. 'm006'.
+        
+        pol : str
+            Name of polarisation, e.g. 'h' or 'v'.
+        
+        ch : int
+            Which channel to retrieve flags for.
+        
+        ang_deg : float
+            ???.
+        
+        targets : list
+            List of target field IDs to cycle through. Not every file has the 
+            same calibration strategy; all files have targets 0 (on-source) 
+            and 1 (off-source, in outskirts), while some have several other 
+            off-source pointings.
+        
+        sigma : float, optional
+            Default: 10.
+        
+        niter : int, optional
+            Default: 3.
+        
+        Returns
+        -------
+        indices : dict
+            Dictionary of time indices corresponding to calibration source 
+            pointings.
+            
+            The keys of the dict correspond to the numerical ID of each 
+            calibration pointing, e.g. 0.
+            
+            The items of the dict are tuples containing a pair of arrays, 
+            (idxs_prescan, idxs_postscan), for calibration observations taken 
+            before and after the scanning phase.
+        """
+        # Validate filename
+        filename = valid_filename(filename)
+        
+        # Make sure metadata is loaded
+        meta = self.get_metadata(filename)
+        
+        # Load flags
+        _vis, flags = self.get_data(filename=filename, ant=ant, pol=pol)
+        flags = flags[:,ch]
+        
+        # Get time indices for tracking and scanning modes
+        idxs_track = timestream.time_indices(meta=meta, ant=ant, pol=pol, 
+                                             label='track-raw', flags=flags)
+        idxs_scan = timestream.time_indices(meta=meta, ant=ant, pol=pol, 
+                                            label='scan-raw', flags=flags)
+        
+        # Get time indices and return as a dict
+        return timestream.calibrator_time_indices(meta, idxs_track, idxs_scan, 
+                                                  flags=flags, ang_deg=ang_deg, 
+                                                  targets=targets, sigma=sigma, 
+                                                  niter=niter)    
     
     
     def get_noise_diode_indices(self, filename, intersect):
