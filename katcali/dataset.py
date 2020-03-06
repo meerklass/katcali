@@ -298,18 +298,11 @@ class DataSet(object):
         
         Returns
         -------
-        cal : CalSource
-            Returns instance of CalSource class corresponding to the primary 
-            calibration source for this file.
+        indices : array_like
+            Indices of time samples that match `label` in the time array.
         """
         # Validate filename
         filename = valid_filename(filename)
-        
-        # Check that label is valid
-        valid_labels = ['track', 'scan', 'flagged', 'waste', 'track-raw', 
-                        'scan-raw']
-        if label not in valid_labels:
-            raise ValueError("'%s' is not a valid label type." % label)
         
         # Make sure metadata is loaded
         meta = self.get_metadata(filename)
@@ -320,39 +313,53 @@ class DataSet(object):
             _vis, flags = self.get_data(filename=filename, recv=recv, pol=pol)
             flags = flags[:,ch]
         
-        # Return time indices with a given label
-        if 'track' in label:
-            idxs_track, scans_tw = timestream.select_track(meta, recv, pol)
-            
-            if 'raw' in label:
-                # Leave flagged samples in data
-                return idxs_track
-            else:
-                # Remove flagged samples
-                f = flags[idxs_track]
-                return idxs_track[~f] # negation of flags
-                
-        elif 'scan' in label:
-            idxs_scan, scans_sw = timestream.select_scan(meta, recv, pol)
-            
-            if 'raw' in label:
-                # Leave flagged samples in data
-                return idxs_scan
-            else:
-                # Remove flagged samples
-                f = flags[idxs_scan]
-                return idxs_scan[~f] # negation of flags
-                
-        elif label == 'waste':
-            idxs_waste = timestream.select_waste(meta, recv, pol)
-            return idxs_waste
-            
-        elif label == 'flagged':
-            return np.where(flags)[0]
-            
-        else:
-            return # should never get here
+        # Get time indices for this label
+        return timestream.time_indices(meta=meta, recv=recv, pol=pol, 
+                                       label=label, flags=flags)
+    
+    
+    def get_noise_diode_indices(self, filename, intersect):
+        """
+        Return an array of indices of time samples with a given label, e.g. 
+        only time samples that were taken while the telescope was scanning.
         
+        Parameters
+        ----------
+        filename : str
+            Name of file.
+            
+        intersect : array_like, optional
+            If specified, return the intersections of this array with the output 
+            arrays. Should be an integer array of time indices. Default: None.
+
+        Returns
+        -------
+        idxs_on : array_like
+            Time indices when noise diode is on.
+
+        idxs_off : array_like
+            Time indices when noise diode is off.
+
+        idxs_on_start : array_like
+            Time indices when noise diode first switches on. (Noise 
+            diode fires span two time samples; this is the first in 
+            each firing.)
+
+        idxs_on_stop : array_like
+            Time indices when noise diode stops being on. (Noise 
+            diode fires span two time samples; this is the last in 
+            each firing.)
+        """
+        times = self.get_times(filename)
+        
+        # Get noise diode settings
+        offset = self.get_diode_info(filename, field='offset')
+        period = self.get_diode_info(filename, field='jump_limit')
+        
+        return timestream.noise_diode_indices(times=times, offset=offset, 
+                                              period=period, 
+                                              intersect=intersect)
+    
     
     def get_coords(self, filename):
         """
