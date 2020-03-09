@@ -309,7 +309,7 @@ class DataSet(object):
         
         # Load flags if needed
         flags = None
-        if 'raw' not in label:
+        if 'raw' not in label and 'waste' not in label:
             assert ch is not None, "Channel 'ch' must be specified."
             _vis, flags = self.get_data(filename=filename, ant=ant, pol=pol)
             flags = flags[:,ch]
