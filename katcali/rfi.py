@@ -150,27 +150,27 @@ def vis_flag(vis, flags, idxs_nd_track, idxs_nd_scan, idxs_waste, thresholds,
     
     # Apply RFI flags to scan part of TOD
     if verbose: print("RFI flagging: scan TOD")
-    vis_clean[scan_off, :]      = seek_rfi_mask(vis_masked[scan_off, :], 
-                                                thres_scan_off, diode=False,
-                                                verbose=verbose)
-    vis_clean[scan_on_start, :] = seek_rfi_mask(vis_masked[scan_on_start, :], 
-                                                thres_scan_on, diode=True,
-                                                verbose=verbose)
-    vis_clean[scan_on_stop, :]  = seek_rfi_mask(vis_masked[scan_on_stop, :], 
-                                                thres_scan_on, diode=True, 
-                                                verbose=verbose)
+    vis_clean[scan_off,:]      = seek_rfi_mask(vis_masked[scan_off,:], 
+                                               thres_scan_off, diode=False,
+                                               verbose=verbose)
+    vis_clean[scan_on_start,:] = seek_rfi_mask(vis_masked[scan_on_start,:], 
+                                               thres_scan_on, diode=True,
+                                               verbose=verbose)
+    vis_clean[scan_on_stop,:]  = seek_rfi_mask(vis_masked[scan_on_stop,:], 
+                                               thres_scan_on, diode=True, 
+                                               verbose=verbose)
     
     # Apply RFI flags to track part of TOD
     if verbose: print("RFI flagging: track TOD")
-    vis_clean[track_off, :]      = seek_rfi_mask(vis_masked[scan_off, :], 
-                                                 thres_scan_off, diode=False,
-                                                 verbose=verbose)
-    vis_clean[track_on_start, :] = seek_rfi_mask(vis_masked[track_on_start, :], 
-                                                 thres_track_on, diode=True,
-                                                 verbose=verbose)
-    vis_clean[track_on_stop, :]  = seek_rfi_mask(vis_masked[track_on_stop, :], 
-                                                 thres_track_on, diode=True,
-                                                 verbose=verbose)
+    vis_clean[track_off,:]      = seek_rfi_mask(vis_masked[track_off,:], 
+                                                thres_track_off, diode=False,
+                                                verbose=verbose)
+    vis_clean[track_on_start,:] = seek_rfi_mask(vis_masked[track_on_start,:], 
+                                                thres_track_on, diode=True,
+                                                verbose=verbose)
+    vis_clean[track_on_stop,:]  = seek_rfi_mask(vis_masked[track_on_stop,:], 
+                                                thres_track_on, diode=True,
+                                                verbose=verbose)
     # Delete vis_masked to free-up memory
     del vis_masked
     
