@@ -149,7 +149,7 @@ def time_indices(meta, ant, pol, label, flags=None):
         raise ValueError("'%s' is not a valid label type." % label)
     
     # Load flags if needed
-    if 'raw' not in label:
+    if 'raw' not in label and 'waste' not in label:
         assert flags is not None, "'flags' must be specified."
     
     # Return time indices with a given label
