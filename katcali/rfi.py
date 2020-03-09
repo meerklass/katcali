@@ -190,20 +190,20 @@ def vis_flag(vis, flags, idxs_nd_track, idxs_nd_scan, idxs_waste, thresholds,
                 vis_clean.mask[i, ch] = True
 
         for i in track_on_stop:
-            if vis_clean.mask[i+1, ch_i]:
-                vis_clean.mask[i, ch_i] = True
+            if vis_clean.mask[i+1, ch]:
+                vis_clean.mask[i, ch] = True
     
     # Completely flag frequencies and times with poor flag fractions
     vis_final = vis_clean.copy()
     t_len, ch_len = vis_clean.shape
     for i in range(ch_len):
-        frac = float(np.array(vis_clean.mask[:, i] == True).sum()) / float(t_len)
+        frac = float(np.array(vis_clean.mask[:,i] == True).sum()) / float(t_len)
         if frac > flag_thres_time:
-            vis_final.mask[:, i] = True # flag all times at this freq
+            vis_final.mask[:,i] = True # flag all times at this freq
     for i in range(t_len):
-        frac = float(np.array(vis_clean.mask[i, :] == True).sum()) / float(ch_len)
+        frac = float(np.array(vis_clean.mask[i,:] == True).sum()) / float(ch_len)
         if frac > flag_thres_freq:
-            vis_final.mask[i, :] = True # flag all freqs at this time
+            vis_final.mask[i,:] = True # flag all freqs at this time
     
     return vis_final
 
