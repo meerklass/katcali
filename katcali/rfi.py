@@ -2,156 +2,212 @@ from seek.mitigation import sum_threshold
 import numpy as np
 import numpy.ma as ma
 from . import filter as kf
-from . import diode as kd
+from .timestream import time_indices #diode as kd
 # param set ref: https://seek.readthedocs.io/en/latest/_modules/seek/mitigation/sum_threshold.html
 
 
-def seek_rfi_mask(autodata, First_Threshold):
-    rfi_mask = sum_threshold.get_rfi_mask(tod=autodata.astype('float'),
-                                          mask=autodata.mask.astype('bool'),
-                                          chi_1=First_Threshold,
-                                          #sm_kwargs=sum_threshold.get_sm_kwargs(40, 20, 15, 7.5),
-                                          sm_kwargs=sum_threshold.get_sm_kwargs(
-                                              80, 80, 40, 40),
-                                          #di_kwargs=sum_threshold.get_di_kwrags(3, 7),
-                                          di_kwargs=sum_threshold.get_di_kwrags(
-        25, 30),
-        plotting=False)
+def seek_rfi_mask(data, thres0, diode=False, verbose=False):
+    """
+    Use the "Hide and Seek" code (`sum_threshold`) to generate a set of RFI 
+    flags.
+    
+    Parameters
+    ----------
+    data : array_like
+        Time-ordered data, as a numpy masked array.
+    
+    thres0 : float
+        First threshold to apply (chi_1).
+    
+    diode : bool, optional
+        Whether noise diode is switched on in these data. If True, runs Seek 
+        with di_kwargs = (1, 1); if False, runs Seek with di_kwargs = (25, 30).
+    
+    verbose : bool, optional
+        Whether to print summary stats. Default: False.
+    
+    Returns
+    -------
+    masked_data : array_like
+        Input data array with RFI flags added to mask.
+    """
+    # Settings for sum_threshold.get_rfi_mask
+    sm_kwargs = sum_threshold.get_sm_kwargs(80, 80, 40, 40)
+    if diode:
+        # Noise diode is switched on
+        di_kwargs = sum_threshold.get_di_kwrags(1, 1) # no expand
+    else:
+        # Noise diode is switched off
+        di_kwargs = sum_threshold.get_di_kwrags(25, 30)
+    
+    # Get RFI mask
+    rfi_mask = sum_threshold.get_rfi_mask( tod=data.astype('float'),
+                                           mask=data.mask.astype('bool'),
+                                           chi_1=thres0,
+                                           sm_kwargs=sm_kwargs,
+                                           di_kwargs=di_kwargs, 
+                                           plotting=False )
+    
+    # Create numpy masked array with rfi_mask
+    masked_data = ma.masked_array(data, mask=rfi_mask)
+    
+    # Print diagnostics
+    if verbose:
+        std_nomask = np.std(masked_data.compressed())
+        std_nomask_norm = np.std(masked_data) / np.mean(masked_data)
+        print('sigma(non-masked) = %2.2f' % std_nomask)
+        print('sigma(non-masked) / mean(non-masked) = %2.2f' % std_nomask_norm)
+    
+    return masked_data
 
-    tod_mask = ma.masked_array(autodata, mask=rfi_mask)
-    filval = -99999
-    filval_off = np.std(tod_mask.compressed())
-    filval_off2 = np.std(tod_mask)/np.mean(tod_mask)
 
-    print('Std of the non-masked elements of tod is ' + str(round(filval_off, 2)))
-    print('Std/Mean of the non-masked elements of tod is ' +
-          str(round(filval_off2, 2)))
+#def vis_flag(vis, flags, nd_label0, dp_w, First_Thresholds, verbose=False):
+def vis_flag(vis, flags, idxs_track, idxs_scan, idxs_waste, thresholds, 
+             flag_thres_time=0.5, flag_thres_freq=0.4, verbose=False):
+    """
+    
+    Parameters
+    ----------
+    vis : array_like
+        Time-ordered visibility data, as a 2D array.
+    
+    flags : array_like
+        Array of existing/low-level flags on data (2D).
+    
+    idxs_track : tuple of array_like
+        Tuple of arrays of (raw, unflagged) time indices for samples taken in 
+        tracking mode, in the order:
+        
+            track_on, track_off, track_on_start, track_on_stop
+        
+        Use `noise_diode_indices()` to generate these arrays in the appropriate 
+        format
+    
+    idxs_scan : tuple of array_like
+        Tuple of arrays of (raw, unflagged) time indices for samples taken in 
+        scan mode, in the order:
+        
+            scan_on, scan_off, scan_on_start, scan_on_stop
+        
+        Use `noise_diode_indices()` to generate these arrays in the appropriate 
+        format.
+    
+    idxs_waste : array_like
+        Array of time indices for wasted samples (use `timestream.time_indices`
+        with label='waste' to get this array in the appropriate format).
+    
+    thresholds : tuple of float
+        Initial thresholds (chi_1) to apply to each part of the TOD. This must 
+        be a tuple of 4 floats, in the following order:
+            
+            thres_scan_off, thres_scan_on, thres_track_off, thres_track_on
+        
+        where 'on' and 'off' correspond to when the noise diode is on and off.
+    
+    flag_thres_time : float, optional
+        If a time sample reaches a flag fraction above this value, flag all 
+        frequency channels at this time. Default: 0.5.
+    
+    flag_thres_freq : float, optional
+        If a frequency channel reaches a flag fraction above this value, flag 
+        the whole channel for all times. Default: 0.4.
+    
+    verbose : bool, optional
+        Whether to print summary stats and progress info. Default: False.
+    
+    Returns
+    -------
+    vis_final : array_like
+        Input time-ordered visibility array with RFI flags added (returned as a 
+        numpy masked array).
+    """
+    # Check that inputs have been passed in the right format
+    assert isinstance(idxs_track, tuple) and len(idxs_track) == 4, \
+        "'idxs_track' must be a tuple of 4 numpy arrays in the order: " \
+        "track_on, track_off, track_on_start, track_on_stop"
+    assert isinstance(idxs_scan, tuple) and len(idxs_scan) == 4, \
+        "'idxs_scan' must be a tuple of 4 numpy arrays in the order: " \
+        "scan_on, scan_off, scan_on_start, scan_on_stop"
+    assert isinstance(idxs_waste, np.ndarray), \
+        "'idxs_waste' must be a numpy array"
+    assert isinstance(thresholds, tuple) and len(thresholds) == 4, \
+        "'thresholds' must be a tuple of 4 floats in the order: " \
+        "thres_scan_off, thres_scan_on, thres_track_off, thres_track_on"
+    
+    # Unpack tuples
+    track_on, track_off, track_on_start, track_on_stop = idxs_track
+    scan_on, scan_off, scan_on_start, scan_on_stop = idxs_scan
+    thres_scan_off, thres_scan_on, thres_track_off, thres_track_on = thresholds
+    
+    # Create new masked array with low-level flags applied and mask waste data
+    vis_masked = np.ma.array(vis, mask=flags)
+    vis_masked[idxs_waste, :].mask = True
+    
+    # New masked array to add RFI mask to
+    vis_clean = np.ma.array(np.zeros_like(vis_masked), mask=True)
+    
+    # Apply RFI flags to scan part of TOD
+    if verbose: print("RFI flagging: scan TOD")
+    vis_clean[scan_off, :]      = seek_rfi_mask(vis_masked[scan_off, :], 
+                                                thres_scan_off, diode=False,
+                                                verbose=verbose)
+    vis_clean[scan_on_start, :] = seek_rfi_mask(vis_masked[scan_on_start, :], 
+                                                thres_scan_on, diode=True,
+                                                verbose=verbose)
+    vis_clean[scan_on_stop, :]  = seek_rfi_mask(vis_masked[scan_on_stop, :], 
+                                                thres_scan_on, diode=True, 
+                                                verbose=verbose)
+    
+    # Apply RFI flags to track part of TOD
+    if verbose: print("RFI flagging: track TOD")
+    vis_clean[track_off, :]      = seek_rfi_mask(vis_masked[scan_off, :], 
+                                                 thres_scan_off, diode=False,
+                                                 verbose=verbose)
+    vis_clean[track_on_start, :] = seek_rfi_mask(vis_masked[track_on_start, :], 
+                                                 thres_track_on, diode=True,
+                                                 verbose=verbose)
+    vis_clean[track_on_stop, :]  = seek_rfi_mask(vis_masked[track_on_stop, :], 
+                                                 thres_track_on, diode=True,
+                                                 verbose=verbose)
+    # Delete vis_masked to free-up memory
+    del vis_masked
+    
+    # If the neighbouring diode-off sample is masked, the diode-on sample 
+    # should be masked too
+    for ch in range(np.shape(vis)[1]):
+        for i in scan_on_start:
+            if vis_clean.mask[i-1, ch]:
+                vis_clean.mask[i, ch] = True
 
-    return tod_mask
-######for diode on ##########
+        for i in scan_on_stop:
+            if vis_clean.mask[i+1, ch]:
+                vis_clean.mask[i, ch] = True
 
+        for i in track_on_start:
+            if vis_clean.mask[i-1, ch]:
+                vis_clean.mask[i, ch] = True
 
-def seek_rfi_mask2(autodata, First_Threshold):
-    rfi_mask = sum_threshold.get_rfi_mask(tod=autodata.astype('float'),
-                                          mask=autodata.mask.astype('bool'),
-                                          chi_1=First_Threshold,
-                                          sm_kwargs=sum_threshold.get_sm_kwargs(
-                                              80, 80, 40, 40),
-                                          di_kwargs=sum_threshold.get_di_kwrags(
-                                              1, 1),  # no expand
-                                          plotting=False)
-
-    tod_mask = ma.masked_array(autodata, mask=rfi_mask)
-    filval = -99999
-    filval_off = np.std(tod_mask.compressed())
-    filval_off2 = np.std(tod_mask)/np.mean(tod_mask)
-
-    print('Std of the non-masked elements of tod is ' + str(round(filval_off, 2)))
-    print('Std/Mean of the non-masked elements of tod is ' +
-          str(round(filval_off2, 2)))
-
-    return tod_mask
-
-###########################################full vis mask###############################################################
-
-
-def vis_flag(vis_backup, flags, nd_label0, dp_w, First_Thresholds):
-    dp_s, dp_t, nd_1a, nd_1b, nd_1, nd_0 = nd_label0
-    nd_s1a, nd_s1b, nd_s1, nd_s0 = kd.cal_nds_list(
-        dp_s, nd_1a, nd_1b, nd_1, nd_0)  # dp_s here, not dp_ss
-    nd_t1a, nd_t1b, nd_t1, nd_t0 = kd.cal_ndt_list(
-        dp_t, nd_1a, nd_1b, nd_1, nd_0)  # dp_t here, not dp_tt
-    print('group shape (no flags):')
-    print(len(nd_s1a), len(nd_s1b), len(nd_s1), len(nd_s0),
-          len(nd_t1a), len(nd_t1b), len(nd_t1), len(nd_t0))
-    print('### load flags ###')
-    vis = np.ma.array(vis_backup, mask=flags)
-    n = np.shape(np.where(flags == True))[1]
-    print('data.flags ratio:')
-    print(float(n)/np.shape(vis)[0]/np.shape(vis)[1])
-
-    print('###mask data not track/scan###')
-    for i in range(np.shape(vis)[0]):
-        if i in dp_w:
-            vis[i, :].mask = 'True'
-
-    print('---------------------------------------------------')
-    print('###SEEK flagging###')
-    print('First_Threshold_0, First_Threshold_1, First_Threshold_00, First_Threshold_11= ' +
-          str(First_Thresholds))
-    First_Threshold_0 = First_Thresholds[0]
-    First_Threshold_1 = First_Thresholds[1]
-    First_Threshold_00 = First_Thresholds[2]
-    First_Threshold_11 = First_Thresholds[3]
-
-    print('#flagging scan and nd_0')
-    vis_s0_m = seek_rfi_mask(vis[nd_s0, :], First_Threshold_0)
-
-    print('#flagging scan and nd_1a')
-    vis_s1a_m = seek_rfi_mask2(vis[nd_s1a, :], First_Threshold_1)
-
-    print('#flagging scan and nd_1b')
-    vis_s1b_m = seek_rfi_mask2(vis[nd_s1b, :], First_Threshold_1)
-
-    print('#flagging track and nd_0')
-    vis_t0_m = seek_rfi_mask(vis[nd_t0, :], First_Threshold_00)
-
-    print('#flagging track and nd_1a')
-    vis_t1a_m = seek_rfi_mask2(vis[nd_t1a, :], First_Threshold_11)
-
-    print('#flagging track and nd_1b')
-    vis_t1b_m = seek_rfi_mask2(vis[nd_t1b, :], First_Threshold_11)
-
-    print('---------------------------------------------------')
-    print('#put all parts together')
-    vis_clean = np.ma.array(np.zeros_like(vis), mask=True)
-    # scan part
-    vis_clean[nd_s0, :] = vis_s0_m
-    vis_clean[nd_s1a, :] = vis_s1a_m
-    vis_clean[nd_s1b, :] = vis_s1b_m
-    # track part
-    vis_clean[nd_t0, :] = vis_t0_m
-    vis_clean[nd_t1a, :] = vis_t1a_m
-    vis_clean[nd_t1b, :] = vis_t1b_m
-
-    print('#checking neighbours')
-    # if the neighbor diode off is masked, the diode on should be masked also
-    for ch_i in range(np.shape(vis)[1]):
-        for i in nd_s1a:
-            if vis_clean.mask[i-1, ch_i] == True:
+        for i in track_on_stop:
+            if vis_clean.mask[i+1, ch_i]:
                 vis_clean.mask[i, ch_i] = True
-
-        for i in nd_s1b:
-            if vis_clean.mask[i+1, ch_i] == True:
-                vis_clean.mask[i, ch_i] = True
-
-        for i in nd_t1a:
-            if vis_clean.mask[i-1, ch_i] == True:
-                vis_clean.mask[i, ch_i] = True
-
-        for i in nd_t1b:
-            if vis_clean.mask[i+1, ch_i] == True:
-                vis_clean.mask[i, ch_i] = True
-
-    print('#cleaning the bad ratio part')
-
-    vis_clean2 = vis_clean.copy()
-    t_len = np.shape(vis_clean)[0]
-    ch_len = np.shape(vis_clean)[1]
-
+    
+    # Completely flag frequencies and times with poor flag fractions
+    vis_final = vis_clean.copy()
+    t_len, ch_len = vis_clean.shape
     for i in range(ch_len):
-        ratio = float(np.array(vis_clean.mask[:, i] == True).sum())/t_len
-        if ratio > 0.5:
-            vis_clean2.mask[:, i] = True
+        frac = float(np.array(vis_clean.mask[:, i] == True).sum()) / float(t_len)
+        if frac > flag_thres_time:
+            vis_final.mask[:, i] = True # flag all times at this freq
     for i in range(t_len):
-        ratio = float(np.array(vis_clean.mask[i, :] == True).sum())/ch_len
-        if ratio > 0.4:
-            vis_clean2.mask[i, :] = True
-    return vis_clean2
-###################################################################################
+        frac = float(np.array(vis_clean.mask[i, :] == True).sum()) / float(ch_len)
+        if frac > flag_thres_freq:
+            vis_final.mask[i, :] = True # flag all freqs at this time
+    
+    return vis_final
 
 
-##############single channel mask#######################################
+
+############## single channel mask #######################################
 def vis_flag_1ch(vis_clean, nd_labels, ch):
     nd_s1a, nd_s1b, nd_s1, nd_s0, nd_t1a, nd_t1b, nd_t1, nd_t0 = nd_labels
     print('group shape (with flags):')
@@ -194,4 +250,6 @@ def vis_flag_1ch(vis_clean, nd_labels, ch):
     for i in nd_s1b:
         if vis_clean.mask[i+1, ch] == True:
             vis_clean.mask[i, ch] = True
+    
     return vis_clean, nd_s0_clean
+    
