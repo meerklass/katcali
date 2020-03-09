@@ -109,7 +109,7 @@ def select_waste(data, ant, pol):
     return dp_w
 
 
-def time_indices(self, meta, ant, pol, label, flags=None):
+def time_indices(meta, ant, pol, label, flags=None):
     """
     Return an array of indices of time samples with a given label, e.g. 
     only time samples that were taken while the telescope was scanning.
