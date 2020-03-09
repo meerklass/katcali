@@ -308,6 +308,7 @@ class DataSet(object):
         meta = self.get_metadata(filename)
         
         # Load flags if needed
+        flags = None
         if 'raw' not in label:
             assert ch is not None, "Channel 'ch' must be specified."
             _vis, flags = self.get_data(filename=filename, ant=ant, pol=pol)
