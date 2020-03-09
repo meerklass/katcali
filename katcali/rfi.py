@@ -62,9 +62,11 @@ def seek_rfi_mask(data, thres0, diode=False, verbose=False):
 
 
 #def vis_flag(vis, flags, nd_label0, dp_w, First_Thresholds, verbose=False):
-def vis_flag(vis, flags, idxs_track, idxs_scan, idxs_waste, thresholds, 
+def vis_flag(vis, flags, idxs_nd_track, idxs_nd_scan, idxs_waste, thresholds, 
              flag_thres_time=0.5, flag_thres_freq=0.4, verbose=False):
     """
+    Find and flag RFI in visibility data, using the Hide and Seek algorithm. 
+    The noise diode on and off parts of the TOD are treated separately.
     
     Parameters
     ----------
@@ -74,18 +76,18 @@ def vis_flag(vis, flags, idxs_track, idxs_scan, idxs_waste, thresholds,
     flags : array_like
         Array of existing/low-level flags on data (2D).
     
-    idxs_track : tuple of array_like
+    idxs_nd_track : tuple of array_like
         Tuple of arrays of (raw, unflagged) time indices for samples taken in 
-        tracking mode, in the order:
+        tracking mode, split by whether noise diode is firing, in the order:
         
             track_on, track_off, track_on_start, track_on_stop
         
         Use `noise_diode_indices()` to generate these arrays in the appropriate 
         format
     
-    idxs_scan : tuple of array_like
+    idxs_nd_scan : tuple of array_like
         Tuple of arrays of (raw, unflagged) time indices for samples taken in 
-        scan mode, in the order:
+        scan mode, split by whether noise diode is firing, in the order:
         
             scan_on, scan_off, scan_on_start, scan_on_stop
         
@@ -122,10 +124,10 @@ def vis_flag(vis, flags, idxs_track, idxs_scan, idxs_waste, thresholds,
         numpy masked array).
     """
     # Check that inputs have been passed in the right format
-    assert isinstance(idxs_track, tuple) and len(idxs_track) == 4, \
+    assert isinstance(idxs_nd_track, tuple) and len(idxs_nd_track) == 4, \
         "'idxs_track' must be a tuple of 4 numpy arrays in the order: " \
         "track_on, track_off, track_on_start, track_on_stop"
-    assert isinstance(idxs_scan, tuple) and len(idxs_scan) == 4, \
+    assert isinstance(idxs_nd_scan, tuple) and len(idxs_nd_scan) == 4, \
         "'idxs_scan' must be a tuple of 4 numpy arrays in the order: " \
         "scan_on, scan_off, scan_on_start, scan_on_stop"
     assert isinstance(idxs_waste, np.ndarray), \
@@ -135,8 +137,8 @@ def vis_flag(vis, flags, idxs_track, idxs_scan, idxs_waste, thresholds,
         "thres_scan_off, thres_scan_on, thres_track_off, thres_track_on"
     
     # Unpack tuples
-    track_on, track_off, track_on_start, track_on_stop = idxs_track
-    scan_on, scan_off, scan_on_start, scan_on_stop = idxs_scan
+    track_on, track_off, track_on_start, track_on_stop = idxs_nd_track
+    scan_on, scan_off, scan_on_start, scan_on_stop = idxs_nd_scan
     thres_scan_off, thres_scan_on, thres_track_off, thres_track_on = thresholds
     
     # Create new masked array with low-level flags applied and mask waste data
