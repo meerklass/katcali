@@ -6,6 +6,47 @@ from .timestream import time_indices #diode as kd
 # param set ref: https://seek.readthedocs.io/en/latest/_modules/seek/mitigation/sum_threshold.html
 
 
+def moving_average(x, n=3, axis=0):
+    """
+    Calculate a moving average of a 1D or 2D array using a uniform (boxcar) 
+    window in one direction.
+    
+    This function returns an array the same shape as the input array, but there 
+    are edge effects as a result (the window only has partial support near the 
+    edges of the array).
+    
+    Parameters
+    ----------
+    x : array_like
+        Input array.
+    
+    n : int, optional
+        Size of boxcar window. Default: 3.
+    
+    axis : int, optional
+        Which axis of the input array to apply the moving average to. 
+        Default: 0.
+    
+    Returns
+    -------
+    avg : array_like
+        Array with moving average applied. Has the same shape as input array.
+    """
+    # Make sure array is at least 2D
+    if len(x.shape) == 1:
+        x = x[:,np.newaxis]
+    
+    # Do moving average over chosen axis
+    avg = np.zeros(x.shape, dtype=x.dtype)
+    if axis == 1:
+        for i in range(x.shape[0]):
+            avg[i,:] = np.convolve(x[i,:], np.ones(n), mode='same') / float(n)
+    else:
+        for i in range(x.shape[1]):
+            avg[:,i] = np.convolve(x[:,i], np.ones(n), mode='same') / float(n)
+    return avg
+
+
 def seek_rfi_mask(data, thres0, diode=False, verbose=False):
     """
     Use the "Hide and Seek" code (`sum_threshold`) to generate a set of RFI 
@@ -207,6 +248,75 @@ def vis_flag(vis, flags, idxs_nd_track, idxs_nd_scan, idxs_waste, thresholds,
     
     return vis_final
 
+
+def mnad_flagger(vis, flags, thres=3., window=3, flag_thres_time=0.5, 
+                 flag_thres_freq=0.4):
+    """
+    Median-normalised absolute difference (MNAD) filter, for flagging RFI. 
+    
+    This filter looks for RFI structure only in the frequency direction. It 
+    first calculates the absolute value of the gradient of the data in the 
+    frequency direction, then normalises this quantity by its median and 
+    applies a threshold.
+    
+    The absolute value of the gradient can be smoothed using a boxcar moving 
+    average, which helps pick out broader RFI features and reduce sensitivity 
+    to noise fluctuations.
+    
+    Parameters
+    ----------
+    vis : array_like
+        Array of visibility data, of shape (Ntimes, Nfreqs).
+    
+    flags : array_like
+        Array of low-level flags, with the same shape as `vis`.
+    
+    thres : float, optional
+        Threshold for MNAS statistic, above which a sample will be flagged. 
+        Default: 3.
+    
+    window : int, optional
+        Width of moving average boxcar in the frequency direction. Default: 3.
+    
+    flag_thres_time : float, optional
+        If a time sample reaches a flag fraction above this value, flag all 
+        frequency channels at this time. Default: 0.5.
+    
+    flag_thres_freq : float, optional
+        If a frequency channel reaches a flag fraction above this value, flag 
+        the whole channel for all times. Default: 0.4.
+    
+    Returns
+    -------
+    vis_masked : array_like
+        Array of visibility data as a numpy masked array, with flags applied in 
+        the mask.
+    """
+    # Calculate absolute difference in freq. direction
+    abs_diff = np.abs(np.gradient(vis, axis=1)) # abs. diff. in freq. direction
+    
+    # Calculate the median of the abs. diff. over freq. channels at each time
+    median_per_time = np.zeros((vis.shape[0],), dtype=vis.dtype)
+    for i in range(vis.shape[0]):
+        median_per_time[i] = np.median(abs_diff[i,:], axis=0)
+    median_per_time[np.where(median_per_time == 0.)] = np.nan
+    
+    # Apply moving average to absolute differences (in freq. direction)
+    smooth_abs_diff = moving_average(abs_diff, window, axis=1)
+    
+    # Calculate median-normalised abs. diff. statistic and apply mask
+    mnad = smooth_abs_diff / np.atleast_2d(median_per_time).T
+    vis_masked = np.ma.masked_where(mnad >= thres, vis)
+    
+    # Mask frequencies and times with high flag occupancy
+    frac_masked_freqs = np.mean(vis_masked.mask, axis=0)
+    frac_masked_times = np.mean(vis_masked.mask, axis=1)
+    for i in np.where(frac_masked_freqs > flag_thres_freq)[0]:
+        vis_masked.mask[:,i] = True
+    for i in np.where(frac_masked_times > flag_thres_time)[0]:
+        vis_masked.mask[i,:] = True
+    
+    return vis_masked
 
 
 ############## single channel mask #######################################
