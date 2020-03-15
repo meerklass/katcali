@@ -317,6 +317,7 @@ def calibrator_time_indices(meta, ant, pol, idxs_track, idxs_scan, flags, ang_de
     for target in targets:
         
         # Select target from tracking-mode observations
+        meta.select()
         meta.select(ants=ant, pol=pol, scans='track', targets=target)
         
         # Select time samples that were taken in track mode and aren't flagged
@@ -329,7 +330,6 @@ def calibrator_time_indices(meta, ant, pol, idxs_track, idxs_scan, flags, ang_de
         
         # Reset select (FIXME: assumed to not be a time-consuming operation)
         meta.select()
-        meta.select(ants=ant, pol=pol)
         
         # Add to dict
         idx_dict[target] = (idxs_prescan, idxs_postscan)

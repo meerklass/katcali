@@ -372,6 +372,7 @@ class DataSet(object):
         
         # Make sure metadata is loaded
         meta = self.get_metadata(filename)
+        meta.select()
         
         # Load flags
         _vis, flags = self.get_data(filename=filename, ant=ant, pol=pol)
