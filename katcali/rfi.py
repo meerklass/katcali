@@ -292,12 +292,15 @@ def mnad_flagger(vis, flags, thres=3., window=3, flag_thres_time=0.5,
         Array of visibility data as a numpy masked array, with flags applied in 
         the mask.
     """
+    # Apply low-level flags
+    vis_masked = np.ma.masked_where(flags, vis) 
+    
     # Calculate absolute difference in freq. direction
-    abs_diff = np.abs(np.gradient(vis, axis=1)) # abs. diff. in freq. direction
+    abs_diff = np.abs(np.gradient(vis_masked, axis=1)) # abs. diff. in freq.
     
     # Calculate the median of the abs. diff. over freq. channels at each time
-    median_per_time = np.zeros((vis.shape[0],), dtype=vis.dtype)
-    for i in range(vis.shape[0]):
+    median_per_time = np.zeros((vis_masked.shape[0],), dtype=vis_masked.dtype)
+    for i in range(vis_masked.shape[0]):
         median_per_time[i] = np.median(abs_diff[i,:], axis=0)
     median_per_time[np.where(median_per_time == 0.)] = np.nan
     
@@ -306,7 +309,7 @@ def mnad_flagger(vis, flags, thres=3., window=3, flag_thres_time=0.5,
     
     # Calculate median-normalised abs. diff. statistic and apply mask
     mnad = smooth_abs_diff / np.atleast_2d(median_per_time).T
-    vis_masked = np.ma.masked_where(mnad >= thres, vis)
+    vis_masked = np.ma.masked_where(mnad >= thres, vis_masked)
     
     # Mask frequencies and times with high flag occupancy
     frac_masked_freqs = np.mean(vis_masked.mask, axis=0)
