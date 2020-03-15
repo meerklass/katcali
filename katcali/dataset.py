@@ -384,7 +384,8 @@ class DataSet(object):
                                             label='scan-raw', flags=flags)
         
         # Get time indices and return as a dict
-        return timestream.calibrator_time_indices(meta, idxs_track, idxs_scan, 
+        return timestream.calibrator_time_indices(meta, ant, pol, 
+                                                  idxs_track, idxs_scan, 
                                                   flags=flags, ang_deg=ang_deg, 
                                                   targets=targets, sigma=sigma, 
                                                   niter=niter)    

@@ -251,7 +251,7 @@ def noise_diode_indices(times, offset, period, intersect=None):
     return idxs_on, idxs_off, idxs_on_start, idxs_on_stop
 
 
-def calibrator_time_indices(meta, idxs_track, idxs_scan, flags, ang_deg, 
+def calibrator_time_indices(meta, ant, pol, idxs_track, idxs_scan, flags, ang_deg, 
                             targets=[0,1], sigma=10., niter=3):
     """
     Return the indices of time samples at various pointings on and around the 
@@ -261,6 +261,12 @@ def calibrator_time_indices(meta, idxs_track, idxs_scan, flags, ang_deg,
     ----------
     meta : obj
         katdal metadata object.
+    
+    ant : str
+        Antenna to use.
+        
+    pol : str
+        Polarisation to use.
     
     idxs_track, idxs_scan : array_like
         Time indices for samples taken during tracking and scanning modes 
