@@ -326,10 +326,12 @@ def calibrator_time_indices(meta, ant, pol, idxs_track, idxs_scan, flags, ang_de
         
         idxs_cal = kfilter.deg_filter(idxs_cal, ang_deg, sigma_level=sigma, 
                                       n_iter=niter)
+        print("DBG:", idx_scan_start, idx_scan_stop, idxs_cal)
+        
         idxs_prescan = idxs_cal[idxs_cal < idx_scan_start] # before scan starts
         idxs_postscan = idxs_cal[idxs_cal > idx_scan_stop] # after scan stops
         
-        # Reset select (FIXME: assumed to not be a time-consuming operation)
+        # Reset select
         meta.select()
         
         # Add to dict
