@@ -324,8 +324,8 @@ def calibrator_time_indices(meta, ant, pol, idxs_track, idxs_scan, flags, ang_de
         flag_segment = flags[meta.dumps] # get flags for this timestream segment
         idxs_cal = np.intersect1d(meta.dumps[~flag_segment], idxs_track)
         
-        idxs_cal = kfilter.deg_filter(idxs_cal, ang_deg=ang_deg, sigma=sigma, 
-                                      niter=niter)
+        idxs_cal = kfilter.deg_filter(idxs_cal, ang_deg, sigma_level=sigma, 
+                                      n_iter=niter)
         idxs_prescan = idxs_cal[idxs_cal < idx_scan_start] # before scan starts
         idxs_postscan = idxs_cal[idxs_cal > idx_scan_stop] # after scan stops
         
