@@ -321,7 +321,8 @@ def calibrator_time_indices(meta, ant, pol, idxs_track, idxs_scan, flags, ang_de
         meta.select(ants=ant, pol=pol, scans='track', targets=target)
         
         # Select time samples that were taken in track mode and aren't flagged
-        idxs_cal = np.intersect1d(meta.dumps[~flags], idxs_track)
+        flag_segment = flags[meta.dumps] # get flags for this timestream segment
+        idxs_cal = np.intersect1d(meta.dumps[~flag_segment], idxs_track)
         
         idxs_cal = kfilter.deg_filter(idxs_cal, ang_deg=ang_deg, sigma=sigma, 
                                       niter=niter)

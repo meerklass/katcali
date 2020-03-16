@@ -372,7 +372,6 @@ class DataSet(object):
         
         # Make sure metadata is loaded
         meta = self.get_metadata(filename)
-        meta.select()
         
         # Load flags
         _vis, flags = self.get_data(filename=filename, ant=ant, pol=pol)
@@ -385,7 +384,6 @@ class DataSet(object):
                                             label='scan-raw', flags=flags)
         
         # Get time indices and return as a dict
-        meta.select()
         return timestream.calibrator_time_indices(meta, ant, pol, 
                                                   idxs_track, idxs_scan, 
                                                   flags=flags, ang_deg=ang_deg, 
