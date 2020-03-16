@@ -327,7 +327,6 @@ def calibrator_time_indices(meta, ant, pol, idxs_track, idxs_scan, flags, ang_de
         idxs_cal = kfilter.deg_filter(idxs_cal, ang_deg, sigma_level=sigma, 
                                       n_iter=niter)
         idxs_cal = np.array(idxs_cal, dtype=np.int)
-        print("DBG:", idx_scan_start, idx_scan_stop, idxs_cal)
         
         idxs_prescan = idxs_cal[idxs_cal < idx_scan_start] # before scan starts
         idxs_postscan = idxs_cal[idxs_cal > idx_scan_stop] # after scan stops
@@ -336,9 +335,9 @@ def calibrator_time_indices(meta, ant, pol, idxs_track, idxs_scan, flags, ang_de
         meta.select()
         
         # Add to dict
-        idx_dict[target] = (idxs_prescan, idxs_postscan)
+        calibrator_time_idxs[target] = (idxs_prescan, idxs_postscan)
         
     #if fname in ['1551055211', '1551037708'], do 2,3,4
-    return idx_dict
+    return calibrator_time_idxs
     
 
