@@ -136,7 +136,12 @@ def call_nd_1a_param(fname):
     if fname=='1561650779':
         nd_1a0 =7
     if fname=='1562857793':
-        nd_1a0 =7    
+        nd_1a0 =7
+    if fname=='1579725085':
+        nd_1a0 =3
+    if fname=='1580260015':
+        nd_1a0 =2
+        
     if nd_1a0==-999:
         print 'no record, can ask astro.jywang@gmail.com'
     return nd_1a_gap,nd_1a0
@@ -207,6 +212,30 @@ def cal_ndt_list(dp_tt,nd_1a,nd_1b,nd_1,nd_0):#dp_tt/dp_s
         if i in nd_1b:
             nd_t1b.append(i)
     return nd_t1a,nd_t1b,nd_t1,nd_t0
+
+#label track dumps as before and after scan
+def cal_nd_t_c_list(nd_t0,nd_t1a, nd_t1b, dp_sb,dp_se):
+    
+    nd_t0_ca,nd_t0_cb,nd_t1a_ca,nd_t1a_cb,nd_t1b_ca,nd_t1b_cb=[],[],[],[],[],[]
+    
+    for i in nd_t0:
+        if i< dp_sb:
+            nd_t0_ca.append(i)
+        if i> dp_se:
+            nd_t0_cb.append(i)
+    for i in nd_t1a:
+        if i< dp_sb:
+            nd_t1a_ca.append(i)
+        if i> dp_se:
+            nd_t1a_cb.append(i)
+    for i in nd_t1b:
+        if i< dp_sb:
+            nd_t1b_ca.append(i)
+        if i> dp_se:
+            nd_t1b_cb.append(i)
+    nd_t0_ca,nd_t0_cb,nd_t1a_ca,nd_t1a_cb,nd_t1b_ca,nd_t1b_cb=np.array(nd_t0_ca),np.array(nd_t0_cb),np.array(nd_t1a_ca),np.array(nd_t1a_cb),np.array(nd_t1b_ca),np.array(nd_t1b_cb)
+    return nd_t0_ca,nd_t0_cb,nd_t1a_ca,nd_t1a_cb,nd_t1b_ca,nd_t1b_cb
+
 
 def cal_az_edge_list(az,dp_sb,dp_se):
     dp_az_min=[]

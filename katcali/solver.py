@@ -35,52 +35,56 @@ def calc_total_model(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, f
                                               +vis_ndstamp_model(timestamps, nd_0, nd_1a, nd_1b, Tnd, nd_ratio, ratio))
 
 
-def calc_logprob(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b):
+def calc_logprob(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, func_sm_param, func_sm_param0, nd_0, nd_1a, nd_1b):
     total_model=calc_total_model(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b)
     #calc_error=total_model/func_gt(timestamps,func_gt_param)/np.sqrt(d_freq*dump_period)
     calc_error=total_model/np.sqrt(d_freq*dump_period)*np.sqrt(2)
     #result=ma.sum(log_normal(vis[:,ch],total_model,calc_error))+log_normal(Tnd, Tnd_ref, 0.1*Tnd_std)+log_normal(eta_p, 1.0, 1e-30)
+    sm=np.ma.array(func_sm(timestamps, func_sm_param),mask=vis.mask[:,ch])
+    sm0=np.ma.array(func_sm(timestamps, func_sm_param0),mask=vis.mask[:,ch])
+                                                            
+  
     result=(ma.sum(log_normal(vis[:,ch],total_model,calc_error))
             #+3*ma.sum(log_normal(vis[nd_1a,ch],total_model[nd_1a],calc_error[nd_1a]))
             #+3*ma.sum(log_normal(vis[nd_1b,ch],total_model[nd_1b],calc_error[nd_1b]))
-            +log_normal(Tnd, Tnd_ref, Tnd_std)+log_normal(eta_p, 1.0, 1e-30))
-
+            +log_normal(Tnd, Tnd_ref, Tnd_std)+log_normal(eta_p, 1.0, 1e-30)
+            +ma.sum(log_normal(sm,sm0,0.5*np.ma.mean(sm0))) )
     return result
 
 
 def func_obj0(p, *args):
-    timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, nd_0, nd_1a, nd_1b=args
+    timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, func_sm_param0, nd_0, nd_1a, nd_1b=args
     Tnd=p[0]
     eta_p=p[1]
     func_sm_param=p[2]
     func_gt_param=p[3:-1]
     ratio=p[-1]      
-    return -calc_logprob(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b)
+    return -calc_logprob(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, func_sm_param, func_sm_param0, nd_0, nd_1a, nd_1b)
 
 
 def solve_params0(timestamps, vis, ch, nd_ratio, ratio0, Tptr, eta_p0, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param0, func_sm_param0, nd_0, nd_1a, nd_1b):
     return opt.fmin_powell(func_obj0,
                            xtol=1e-9, ftol=1e-9, maxiter=1e5,
                            x0=[Tnd_ref]+[eta_p0]+list(func_sm_param0)+list(func_gt_param0)+[ratio0],
-                           args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, nd_0, nd_1a, nd_1b))
+                           args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, func_sm_param0, nd_0, nd_1a, nd_1b))
 
 ####for track, union fitting########
 def func_obj2(p, *args):
-    timestamps, vis_part1, vis_part2, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, nd_0, nd_1a, nd_1b=args
+    timestamps, vis_part1, vis_part2, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, func_sm_param0, nd_0, nd_1a, nd_1b=args
     Tnd=p[0]
     eta_p=p[1]
     func_sm_param_a=p[2]
     func_sm_param_b=p[3]
     func_gt_param=p[4:-1]
     ratio=p[-1:]      
-    return -calc_logprob(timestamps, vis_part1, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, func_sm_param_a, nd_0, nd_1a, nd_1b)-calc_logprob(timestamps, vis_part2, ch, nd_ratio, ratio, Tptr, eta_p, Tnd,  Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, func_sm_param_b, nd_0, nd_1a, nd_1b)
+    return -calc_logprob(timestamps, vis_part1, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, func_sm_param_a, func_sm_param0, nd_0, nd_1a, nd_1b)-calc_logprob(timestamps, vis_part2, ch, nd_ratio, ratio, Tptr, eta_p, Tnd,  Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, func_sm_param_b, func_sm_param0, nd_0, nd_1a, nd_1b)
 
 
-def solve_params2(timestamps, vis_part1, vis_part2, ch, nd_ratio, ratio0, Tptr, eta_p0, Tnd_ref,Tnd_std, Tel, Tgal, func_gt_param0, func_sm_param_a0,  func_sm_param_b0, nd_0, nd_1a, nd_1b):
+def solve_params2(timestamps, vis_part1, vis_part2, ch, nd_ratio, ratio0, Tptr, eta_p0, Tnd_ref,Tnd_std, Tel, Tgal, func_gt_param0, func_sm_param0,  nd_0, nd_1a, nd_1b):
     return opt.fmin_powell(func_obj2,
                            xtol=1e-9, ftol=1e-9, maxiter=1e5,
-                           x0=[Tnd_ref]+[eta_p0]+list(func_sm_param_a0)+list(func_sm_param_b0)+list(func_gt_param0)+[ratio0],
-                           args=(timestamps, vis_part1, vis_part2, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, nd_0, nd_1a, nd_1b))
+                           x0=[Tnd_ref]+[eta_p0]+list(func_sm_param0)+list(func_sm_param0)+list(func_gt_param0)+[ratio0],
+                           args=(timestamps, vis_part1, vis_part2, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, func_sm_param0, nd_0, nd_1a, nd_1b))
 
 
 
@@ -90,30 +94,33 @@ def solve_params_sm(timestamps, vis, ch, nd_ratio, ratio0, Tptr, eta_p0, Tnd, Te
     return opt.fmin_powell(func_obj_sm,
                            xtol=1e-9, ftol=1e-9, maxiter=1e5,
                            x0=[eta_p0]+list(func_sm_param0)+list(func_gt_param0)+[ratio0], 
-                           args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd, Tel, Tgal,  nd_0, nd_1a, nd_1b))
+                           args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd, Tel, Tgal, func_sm_param0, nd_0, nd_1a, nd_1b))
 
 def func_obj_sm(p, *args):
-    timestamps, vis, ch, nd_ratio, Tptr, Tnd, Tel, Tgal, nd_0, nd_1a, nd_1b=args
+    timestamps, vis, ch, nd_ratio, Tptr, Tnd, Tel, Tgal, func_sm_param0, nd_0, nd_1a, nd_1b=args
     eta_p=p[0]
     func_sm_param=p[1:-6]
     func_gt_param=p[-6:-1]
     ratio=p[-1]
     
-    return -calc_logprob_sm(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param,
+    return -calc_logprob_sm(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, func_sm_param0,
                               nd_0, nd_1a, nd_1b)
 
 
-def calc_logprob_sm(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel,Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b):
+def calc_logprob_sm(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel,Tgal, func_gt_param, func_sm_param, func_sm_param0, nd_0, nd_1a, nd_1b):
     total_model=calc_total_model_sm(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b)
     #calc_error=total_model/func_gt(timestamps,func_gt_param)/np.sqrt(d_freq*dump_period)
     calc_error=total_model/np.sqrt(d_freq*dump_period)*np.sqrt(2)
+    sm=np.ma.array(func_sm(timestamps, func_sm_param),mask=vis.mask[:,ch])
+    sm0=np.ma.array(func_sm(timestamps, func_sm_param0),mask=vis.mask[:,ch])
+    
     #result = ma.sum(-(vis[:,ch]-total_model)**2/(2*error**2)-np.log(2*np.pi*error**2)/2.0) #supposing Gaussian
     #result=ma.sum(log_normal(vis[:,ch],total_model,calc_error))+log_normal(eta_p, 1.0, 1e-30) #no point source at the moment
     result=(ma.sum(log_normal(vis[:,ch],total_model,calc_error))
             +3*ma.sum(log_normal(vis[nd_1a,ch],total_model[nd_1a],calc_error[nd_1a]))
             +3*ma.sum(log_normal(vis[nd_1b,ch],total_model[nd_1b],calc_error[nd_1b]))
-            +log_normal(eta_p, 1.0, 1e-30))
-
+            +log_normal(eta_p, 1.0, 1e-30)
+            +ma.sum(log_normal(sm,sm0,0.5*np.ma.mean(sm0))) )
     return result
 
 def calc_total_model_sm(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b):
@@ -134,7 +141,7 @@ def vis_ndstamp_model(timestamps,nd_0,nd_1a,nd_1b, Tnd, nd_ratio, ratio):
     return vis_ndstamp
 
 def cal_gain0(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg,T_ptr,vis_clean):
-    if fname in ['1551055211','1551037708']:
+    if fname in ['1551055211','1551037708', '1579725085', '1580260015']:
         dp_ca,dp_cb,dp_c0a, dp_c1a,dp_c2a,dp_c3a,dp_c4a,dp_c0b,dp_c1b,dp_c2b,dp_c3b,dp_c4b=kl.cal_dp_c(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg)
         a1=vis_clean[dp_c0a,ch].min()-vis_clean[dp_ca,ch].min() #vis gap for calibrator
         b1=T_ptr[dp_ca].max()-T_ptr[dp_ca].min() # T model gap for calibrator

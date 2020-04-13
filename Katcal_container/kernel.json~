@@ -1,0 +1,11 @@
+{
+ "display_name": "katcal", 
+ "language": "python", 
+ "argv": [
+  "singularity", "exec", "/users/jywang/katcal.simg", "/usr/bin/python", 
+  "-m", 
+  "ipykernel", 
+  "-f", 
+  "{connection_file}"
+ ]
+}

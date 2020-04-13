@@ -13,10 +13,10 @@ python setup.py install --user
 ```
 ## Set the Container katcal
 ```
-cp -r katcali/katcal_container ~/.local/share/jupyter/kernels/
+cp -r katcali/Katcal_container ~/.local/share/jupyter/kernels/
 ```
 ```
-cd ~/.local/share/jupyter/kernels/katcal_container
+cd ~/.local/share/jupyter/kernels/Katcal_container
 ```
 ```
 emacs kernel.json

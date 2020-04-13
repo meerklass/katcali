@@ -30,6 +30,7 @@ def plot_data(x, y, z, gsize=30, scatter=False):
     yi = np.linspace(y.min(), y.max(), gsize)
     # grid the data.
     zi = griddata((x, y), z, (xi[None, :], yi[:, None]))
+    #zi = griddata((x, y), z, (xi[None, :], yi[:, None]), method='cubic')
     # print(zi.shape)
     # contour the gridded data, plotting dots at the randomly spaced data points.
     #CS = plt.contour(xi, yi, zi, 15, linewidths=0.5, colors='k')
@@ -43,4 +44,4 @@ def plot_data(x, y, z, gsize=30, scatter=False):
     # plot data points.
     plt.xlim(x.min(), x.max())
     plt.ylim(y.min(), y.max())
-    plt.title('griddata test (%d points)' % npts)
+    #plt.title('griddata test (%d points)' % npts)

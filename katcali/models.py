@@ -257,7 +257,9 @@ def flux_3C237(freq_GHz):
 
 def flux_PictorA(freq_GHz):
     F1410=66. #Jy
-    alpha=0.85
+    #alpha=0.85
+    F408=166. #Jy                                                                                                                              
+    alpha=-np.log10(F1410/F408)/np.log10(1410/408.)
     print 'alpha='+str(alpha)
     return pow((freq_GHz/1.41),-alpha)*F1410
 
@@ -346,3 +348,69 @@ def cal_Tspill_func(el, pol,freqs):
         Tspill=SpillOver2.spill['VV']
     return Tspill
             
+import scikits.fitting as fit 
+class Rec_Temp: #code from red_tipping_curve_AR1.py
+    """Load Receiver models and interpolate to centre observing frequency."""
+    def __init__(self,filenameH='',filenameV=''):
+        """ The class Rec_temp reads the receiver model from file and
+        produces fitted functions for a frequency
+        The class/__init__function takes in one parameter:
+        filenameH : (default='') This is the filename
+               of the receiver model
+               these files have 2 cols:
+                Frequency (MHz),temperature (MHz),
+               if there are no file 15k receiver  is assumed.
+        returns :
+               dict  spill with two elements 'HH' 'VV' that
+               are interpolation functions that take in Frequency(MHz)
+               and return temperature in Kelvin.
+        """
+        try:
+            receiver_h = (np.loadtxt(filenameH,comments='%',delimiter=',')[:,[0,2] ]/(1e6,1.)).T # Change units to MHz # discard the gain col
+            a800 = np.zeros((2,np.shape(receiver_h)[-1]+1))
+            a800[:,0] = [800,receiver_h[1,0]]
+            a800[:,1:] = receiver_h
+            receiver_h = a800
+            receiver_v = (np.loadtxt(filenameV,comments='%',delimiter=',')[:,[0,2] ]/(1e6,1.)).T # Change units to MHz  # discard the gain col
+            a800 = np.zeros((2,np.shape(receiver_v)[-1]+1))
+            a800[:,0] = [800,receiver_v[1,0]]
+            a800[:,1:] = receiver_v
+            receiver_v = a800
+        except IOError:
+            receiver_h = np.array([[800.,2000],[15.,15.]])
+            receiver_v = np.array([[800.,2000],[15.,15.]])
+            warnings.warn('Warning: Failed to load Receiver models, setting models to 15 K ')
+        #Assume  Provided models are a function of zenith angle & frequency
+        T_H = fit.PiecewisePolynomial1DFit()
+        T_V = fit.PiecewisePolynomial1DFit()
+        T_H.fit(receiver_h[0],receiver_h[1])
+        T_V.fit(receiver_v[0],receiver_v[1])
+        self.rec = {}
+        self.rec['HH'] = T_H # The HH and VV is a scape thing
+        self.rec['VV'] = T_V
+
+def cal_Trec(data, ant, pol, freqs):
+    rec = data.receivers[ant]
+   
+    # if defined us file specs, otherwise set L-band params
+    if ( rec.split(':')[0] != 'undefined' ):
+        Band,SN = data.receivers.get(ant,'l.4').split('.') # A safe Default
+    else:
+        Band = 'L'
+        SN = data.sensor['Antennas/'+ant.name+'/rsc_rxl_serial_number'][0]
+
+    print Band, SN
+
+    receiver_model_H = str("{}/Rx{}_SN{:0>4d}_calculated_noise_H_chan.dat".format('/users/jywang/MeerKAT/model_test/mkat_model/receiver-models/mkat',str.upper(Band),int(SN)))
+    receiver_model_V = str("{}/Rx{}_SN{:0>4d}_calculated_noise_V_chan.dat".format('/users/jywang/MeerKAT/model_test/mkat_model/receiver-models/mkat',str.upper(Band),int(SN)))
+    receiver = Rec_Temp(receiver_model_H, receiver_model_V)
+
+    if pol=='h':
+        rec_function=receiver.rec['HH']
+    if pol=='v':
+        rec_function=receiver.rec['VV']
+        
+    Trec=rec_function(freqs/1e6)#MHz
+
+    return Trec
+    
