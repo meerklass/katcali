@@ -33,3 +33,16 @@ def curve_filter(x,y,sigma=5,k=5):
     l=UnivariateSpline(a,b,k=k,s=None)(a)
     filtered_data = sigma_clip(b-l, sigma=sigma, iters=5)
     return a[filtered_data.mask==False] ###output is what want to keep
+
+def curve_filter_ma_array(x,y,sigma=5,k=5):
+    a=[]
+    b=[]
+    for i in range(len(x)):
+        if y[i] is not None and np.isnan(y[i]) is not True and y.mask[i]==False: 
+            a.append(x[i])
+            b.append(y[i])
+    a=np.array(a)
+    b=np.array(b)
+    l=UnivariateSpline(a,b,k=k,s=None)(a)
+    filtered_data = sigma_clip(b-l, sigma=sigma, iters=5)
+    return a[filtered_data.mask==True] ###output is what want to delete

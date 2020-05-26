@@ -261,7 +261,7 @@ def flux_PictorA(freq_GHz):
     F408=166. #Jy                                                                                                                              
     alpha=-np.log10(F1410/F408)/np.log10(1410/408.)
     print 'alpha='+str(alpha)
-    return pow((freq_GHz/1.41),-alpha)*F1410
+    return pow((freq_GHz/1.41),-alpha)*F1410 #*0.8
 
 def call_Tnd(data, ant,pol,freqs,ch,plot_key):
     print ("#cal_Tnd is for single channel only! Tnd_spl has higher efficiency for multi channel calibration")

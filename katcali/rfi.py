@@ -146,7 +146,7 @@ def clean_bad_ratio(vis,ratio_t=0.4,ratio_ch=0.5):
     return vis2
 
 ##############single channel mask#######################################
-def vis_flag_1ch(vis_clean,nd_s0,nd_s1a,nd_s1b,ch):
+def vis_flag_1ch(vis_clean,nd_s0,nd_s1a,nd_s1b,ch, sigma=5):
     
     print 'group shape (with flags):'
     print len(nd_s0), len(nd_s1a),len(nd_s1b)
@@ -166,7 +166,7 @@ def vis_flag_1ch(vis_clean,nd_s0,nd_s1a,nd_s1b,ch):
             nd_s0_i=nd_s0_clean2
             l1=len(nd_s0_clean2)
             
-        nd_s0_clean2=kf.curve_filter(nd_s0_i,vis_clean[nd_s0_i,ch]) ###output is the data want to keep
+        nd_s0_clean2=kf.curve_filter(nd_s0_i,vis_clean[nd_s0_i,ch],sigma=sigma) ###output is the data want to keep
         l2=len(nd_s0_clean2) #end len
         #print l1,l2
         

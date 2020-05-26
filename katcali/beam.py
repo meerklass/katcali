@@ -30,11 +30,14 @@ def calc_Aeff_max_from_sigma(sigma_deg, freq_Hz):
     light_speed = 2.99792485e8
     lbd = light_speed / freq_Hz
     return lbd ** 2 / calc_Omega_A_from_sigma(sigma_deg)
+
 def cal_Pn(pattern,timestamps,dp_ca,dp_cb,x_pix,y_pix):
+    assert(pattern.ndim==2)
     Pn=np.zeros_like(timestamps)
     for i in range(len(timestamps)):
         if i in dp_ca or i in dp_cb:
-            Pn[i]=pattern[x_pix[i],y_pix[i]]
+            #Pn[i]=pattern[x_pix[i],y_pix[i]]
+            Pn[i]=pattern[y_pix[i],x_pix[i]] #pattern is (el,az) so (y,x)
         else:
             Pn[i]=np.NaN
     return Pn
@@ -105,6 +108,7 @@ def cal_BMII(freqs,ch,pol,flux_model,ang_deg,beam_select):
 ############BM-III: beam from pattern#######################################
 def cal_BMIII(fname,data,ch,ant,pol,flux_model,c0, dp_ca,dp_cb,ang_deg,beam_select):
     print ("#cal_BMIII is for single channel only! cal_BMIII_1ch has higher efficiency for multi channel calibration")
+    assert(np.array(ch).ndim==0)
     timestamps=data.timestamps
     freqs=data.freqs
     az=data.az[:,0]
@@ -124,6 +128,7 @@ def cal_BMIII(fname,data,ch,ant,pol,flux_model,c0, dp_ca,dp_cb,ang_deg,beam_sele
         Aeffmax2=Aeff_max_VV[ch_local]
     print Aeffmax2
 
+    print data.ants[0]
     lon=Angle(data.ants[0].observer.lon,unit='rad')
     lat=Angle(data.ants[0].observer.lat, unit='rad')
     height=data.ants[0].observer.elevation
@@ -140,7 +145,7 @@ def cal_BMIII(fname,data,ch,ant,pol,flux_model,c0, dp_ca,dp_cb,ang_deg,beam_sele
         if ptr_az[i]>180:
             ptr_az[i]=ptr_az[i]-360
 
-    y_sep=el-ptr_el#ptr_el-el####test
+    y_sep=ptr_el-el
     azel=SkyCoord(az*u.deg, el*u.deg, frame='altaz')
     azel_ptr=SkyCoord(ptr_az*u.deg, ptr_el*u.deg, frame='altaz')
     r=azel.separation(azel_ptr).degree
@@ -242,7 +247,7 @@ def cal_pix_params(data,c0,Npix,Ddeg):
         if ptr_az[i]>180:
             ptr_az[i]=ptr_az[i]-360
 
-    y_sep=el-ptr_el#ptr_el-el####test
+    y_sep=ptr_el-el
     azel=SkyCoord(az*u.deg, el*u.deg, frame='altaz')
     azel_ptr=SkyCoord(ptr_az*u.deg, ptr_el*u.deg, frame='altaz')
     r=azel.separation(azel_ptr).degree
@@ -294,6 +299,7 @@ def load_pattern_fband(beam_select,pol):
     return imgs
 
 def cal_BMIII_1ch(data,ch,flux_model, dp_ca,dp_cb,pattern_fband,x_pix,y_pix,Aeff_max_fband):
+    assert(np.array(ch).ndim==0)
     timestamps=data.timestamps
     freqs=data.freqs
        
