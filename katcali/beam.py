@@ -202,8 +202,10 @@ def cal_BMIII(fname,data,ch,ant,pol,flux_model,c0, dp_ca,dp_cb,ang_deg,beam_sele
     print x_pc, y_pc
 
     print np.where(pattern==pattern.max())
-    x_pix_max=np.where(pattern==pattern.max())[0][0]
-    y_pix_max=np.where(pattern==pattern.max())[1][0]
+    #x_pix_max=np.where(pattern==pattern.max())[0][0]
+    #y_pix_max=np.where(pattern==pattern.max())[1][0]
+    x_pix_max=np.where(pattern==pattern.max())[1][0] #pattern is [el,az]
+    y_pix_max=np.where(pattern==pattern.max())[0][0]
     print x_pix_max,y_pix_max
 
     x_pix=x_pc+x_sep/Ddeg*Npix #relative on beam pattern
@@ -313,8 +315,10 @@ def cal_BMIII_1ch(data,ch,flux_model, dp_ca,dp_cb,pattern_fband,x_pix,y_pix,Aeff
     pattern=np.flip(pattern,axis=0) #updown flip to make sure smaller pix number is lower elevation
       
     print np.where(pattern==pattern.max())
-    x_pix_max=np.where(pattern==pattern.max())[0][0]
-    y_pix_max=np.where(pattern==pattern.max())[1][0]
+    #x_pix_max=np.where(pattern==pattern.max())[0][0]
+    #y_pix_max=np.where(pattern==pattern.max())[1][0]
+    x_pix_max=np.where(pattern==pattern.max())[1][0] #pattern is [el,az]
+    y_pix_max=np.where(pattern==pattern.max())[0][0]
     print x_pix_max,y_pix_max
       
     Pn=cal_Pn(pattern,timestamps,dp_ca,dp_cb,x_pix,y_pix)
