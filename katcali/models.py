@@ -215,7 +215,58 @@ def calc_atmosphere_model_1ch(autodata,ch): #copy from KAT-7
         #print i, atmo_v
    
     return atmo_table
+##########
 
+def calc_atmosphere_abs_factor_1ch(autodata,ch):
+    surface_temperature = autodata.temperature
+    T_atm = 1.12 * (273.15 + surface_temperature) - 50.0  # This is some equation , I can't remember where
+    air_relative_humidity = autodata.humidity / 100.  # this is a percentage in katdal
+    pressure = autodata.pressure
+    
+    #height = autodata.site.height / u.km  #KAT-7 # Height in kilometers above sea level
+    assert(len(autodata.ants))==1
+    height = autodata.ants[0].observer.elevation / 1000. #MeerKAT # Height in kilometers above sea level
+    
+    frequency = autodata.freqs[ch] / 1e9  # frequency in GHz.
+
+    #atmo_abs_table = np.zeros_like(autodata.vis)
+    atmo_abs_table = np.zeros_like(autodata.timestamps)
+    print np.shape(atmo_abs_table)
+    
+    for i in range(0, atmo_abs_table.shape[0]):
+        tau = calc_atmospheric_opacity(surface_temperature[i], air_relative_humidity[i], pressure[i], height, frequency)
+        atmo_v = np.exp(-tau / np.sin(np.radians(autodata.el[i])))
+        atmo_abs_table[i] = atmo_v
+
+    return atmo_abs_table
+
+def calc_atmosphere_abs_factor(autodata):
+    surface_temperature = autodata.temperature
+    T_atm = 1.12 * (273.15 + surface_temperature) - 50.0  # This is some equation , I can't remember where
+    air_relative_humidity = autodata.humidity / 100.  # this is a percentage in katdal
+    pressure = autodata.pressure
+    
+    #height = autodata.site.height / u.km  # Height in kilometers above sea level
+    assert(len(autodata.ants))==1
+    height = autodata.ants[0].observer.elevation / 1000. #MeerKAT # Height in kilometers above sea level
+    
+    frequency = autodata.freqs / 1e9  # frequency in GHz.
+
+    atmo_abs_table = np.zeros([len(autodata.timestamps),len(frequency)]) #don't use autodata.vis for MeerKAT!!!
+    tau_table=np.zeros([len(autodata.timestamps),len(frequency)]) 
+    print np.shape(atmo_abs_table)
+    
+    for i in range(0, atmo_abs_table.shape[0]):
+        tau = calc_atmospheric_opacity(surface_temperature[i], air_relative_humidity[i], pressure[i], height, frequency)
+        atmo_v = np.exp(-tau / np.sin(np.radians(autodata.el[i])))
+        atmo_abs_table[i, :] = atmo_v
+        tau_table[i,:]=tau
+        #print i,
+        #print tau,
+    return atmo_abs_table,tau_table
+
+
+##########
 
 def cal_Gal_model_np(vis ,freqs, ra, dec, ch_min, ch_max, nside):
     sky_config = {
