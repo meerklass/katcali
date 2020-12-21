@@ -121,6 +121,8 @@ def calc_logprob_sm(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel,
             +3*ma.sum(log_normal(vis[nd_1b,ch],total_model[nd_1b],calc_error[nd_1b]))
             +log_normal(eta_p, 1.0, 1e-30)
             +ma.sum(log_normal(sm,sm0,0.5*np.ma.mean(sm0))) )
+            #+ma.sum(log_normal(sm,sm0,1e-30))) #fix Trec as Mario asked...Orz Orz
+    #print 'test only!!! 2020-10-19'
     return result
 
 def calc_total_model_sm(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b):

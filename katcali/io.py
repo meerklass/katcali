@@ -166,3 +166,25 @@ def load_ang_deg(ra,dec,cc):
     ang_deg=cc.separation(c_obs)/u.deg
     return ang_deg
 
+def cal_freq(ch):
+    v_min=856.0 
+    v_max=1712.0 
+    dv=0.208984375
+    assert((v_max-v_min)/dv==4096)
+    freq_MHz=ch*dv+v_min
+    freq=freq_MHz*1e6
+    return freq
+
+def cal_freqs(ch_list):
+    freq_list=[]
+    v_min=856.0 
+    v_max=1712.0 
+    dv=0.208984375
+    assert((v_max-v_min)/dv==4096)
+    for ch in ch_list:
+        freq_MHz=ch*dv+v_min
+        freq=freq_MHz*1e6
+        freq_list.append(freq)
+    freq_list=np.array(freq_list)
+    return freq_list
+
