@@ -1,5 +1,6 @@
 # katcali: single dish calibration pipeline for MeerKAT
 
+Look at the "examples" folder for information on how to access the data.
 
 ## Installation
 Install to system-wise directory:
