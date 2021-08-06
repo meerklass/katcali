@@ -159,6 +159,42 @@ def cal_gain0(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg,T_ptr,vis_clean):
     gb0=a2/b2
     return ga0,gb0
 
+#######
+#######
+#################for without diode #############################
+def solve_params_sm_nd0(timestamps, vis, ch, Tptr, eta_p0, Tspill, eta_spill0, Tatmo, Tgal, atmo_trans, func_gt_param0, gt_deg, func_sm_param0, sm_deg, nd_0):
+    return opt.fmin_powell(func_obj_sm_nd0,
+                           xtol=1e-9, ftol=1e-9, maxiter=1e5,
+                           x0=[eta_p0]+[eta_spill0]+list(func_sm_param0)+list(func_gt_param0), 
+                           args=(timestamps, vis, ch, Tptr, Tspill, Tatmo, Tgal, atmo_trans, gt_deg, func_sm_param0, sm_deg, nd_0))
+
+def func_obj_sm_nd0(p, *args):
+    timestamps, vis, ch, Tptr, Tspill, Tatmo, Tgal, atmo_trans, gt_deg, func_sm_param0, sm_deg, nd_0=args
+    eta_p=p[0]
+    eta_spill=p[1]
+    func_sm_param=p[2:sm_deg+3]
+    func_gt_param=p[-gt_deg-1:]
+        
+    return -calc_logprob_sm_nd0(timestamps, vis, ch, Tptr, eta_p, Tspill, eta_spill, Tatmo, Tgal, atmo_trans, func_gt_param, func_sm_param, func_sm_param0, nd_0)
+
+
+def calc_logprob_sm_nd0(timestamps, vis, ch, Tptr, eta_p, Tspill, eta_spill, Tatmo, Tgal, atmo_trans, func_gt_param, func_sm_param, func_sm_param0, nd_0):
+    total_model=calc_total_model_sm_nd0(timestamps, Tptr, eta_p, Tspill, eta_spill, Tatmo, Tgal, atmo_trans, func_gt_param, func_sm_param, nd_0)
+    calc_error=total_model/np.sqrt(d_freq*dump_period)*np.sqrt(2)
+    sm=np.ma.array(func_sm(timestamps, func_sm_param),mask=vis.mask[:,ch])
+    sm0=np.ma.array(func_sm(timestamps, func_sm_param0),mask=vis.mask[:,ch])
+    
+    result=(ma.sum(log_normal(vis[:,ch],total_model,calc_error))
+            +log_normal(eta_p, 1.0, 1e-30)
+            +log_normal(eta_spill, 1.0, 1e-2)
+            +ma.sum(log_normal(sm,sm0,0.5*np.ma.mean(sm0))) )####test
+            
+    return result
+
+def calc_total_model_sm_nd0(timestamps, Tptr, eta_p, Tspill, eta_spill, Tatmo, Tgal, atmo_trans, func_gt_param, func_sm_param, nd_0):
+    
+    return func_gt(timestamps,func_gt_param)*(func_sm(timestamps, func_sm_param)+Tspill*eta_spill+Tatmo
+                                              +(Tgal+np.ones(len(timestamps))*Tcmb +Tptr*eta_p)*atmo_trans)
 
 
 #END
@@ -220,7 +256,7 @@ def func_sm_break(ts, p_sm, nt_az_edge): #ts is full list of timestamps
     return np.array(sm_part)
 ####END of TEST 0########
 '''
-
+'''
 #####TEST 1#######
 #use track gain value as start and end gain for scan part 2019.11.25 #######
 #######################for track test ############################################
@@ -308,7 +344,8 @@ def calc_total_model_sm_test(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel,
 
 ###END of TEST 1######
 
-
+'''
+'''
 
 #####TEST 2#######
 #use track gain value as the middle time gain for scan part #######
@@ -393,3 +430,4 @@ def calc_total_model_sm_test2(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel
                                               +vis_ndstamp_model(timestamps, nd_0, nd_1a, nd_1b, Tnd, nd_ratio, ratio))
 
 ###END of TEST 2######
+'''

@@ -1,5 +1,6 @@
 import matplotlib.colors as colors
 import numpy as np
+import matplotlib.pylab as plt
 
 def plot_data(x, y, z, gsize=30, levels=15, grid_method='linear', scatter=False):
     """Plotting function
@@ -178,3 +179,17 @@ class DivergingNorm(Normalize):
             result = np.atleast_1d(result)[0]
         return result
 
+def cmap1():
+    cmap = plt.cm.viridis
+    cmap.set_bad('w', 1.0)
+    return cmap
+
+def cmap2():
+    cmap= plt.cm.RdBu_r
+    cmap.set_bad('w', 1.0)
+    return cmap
+
+def cmap3():
+    cmap=plt.cm.YlOrRd
+    cmap.set_bad('w', 1.0)
+    return cmap

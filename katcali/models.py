@@ -8,6 +8,7 @@ from astropy.coordinates import *
 from astropy import units as u
 from scipy.interpolate import  Rbf
 import matplotlib.pylab as plt
+from astropy.io import fits
 
 class Spill_Temp:
     """Load spillover models and interpolate to centre observing frequency."""
@@ -192,16 +193,20 @@ def calc_atmospheric_opacity(T, RH, P, h, f): #same to KAT-7
 
     return A*np.log(10)/10.0 # Convert dB to Nepers
 
-def calc_atmosphere_model_1ch(autodata,ch): #copy from KAT-7
+def calc_atmosphere_model_1ch(autodata,ch,key=0): #copy from KAT-7
     surface_temperature = autodata.temperature
     T_atm = 1.12 * (273.15 + surface_temperature) - 50.0  # This is some equation , I can't remember where
     air_relative_humidity = autodata.humidity / 100.  # this is a percentage in katdal
     pressure = autodata.pressure
     
     #height = autodata.site.height / u.km  #KAT-7 # Height in kilometers above sea level
-    assert(len(autodata.ants))==1
-    height = autodata.ants[0].observer.elevation / 1000. #MeerKAT # Height in kilometers above sea level
-    
+    if key==0:
+        assert(len(autodata.ants))==1
+        height = autodata.ants[0].observer.elevation / 1000. #MeerKAT # Height in kilometers above sea level
+    if key==-1:
+        height = autodata.ant_observer_elevation / 1000. #MeerKAT # Height in kilometers above sea level
+        print '### calculated from saved table'
+        
     frequency = autodata.freqs[ch] / 1e9  # frequency in GHz.
 
     #atmo_table = np.zeros_like(autodata.vis)
@@ -217,16 +222,20 @@ def calc_atmosphere_model_1ch(autodata,ch): #copy from KAT-7
     return atmo_table
 ##########
 
-def calc_atmosphere_abs_factor_1ch(autodata,ch):
+def calc_atmosphere_trans_factor_1ch(autodata,ch,key=0): #old name: calc_atmosphere_abs_factor_1ch
     surface_temperature = autodata.temperature
     T_atm = 1.12 * (273.15 + surface_temperature) - 50.0  # This is some equation , I can't remember where
     air_relative_humidity = autodata.humidity / 100.  # this is a percentage in katdal
     pressure = autodata.pressure
     
     #height = autodata.site.height / u.km  #KAT-7 # Height in kilometers above sea level
-    assert(len(autodata.ants))==1
-    height = autodata.ants[0].observer.elevation / 1000. #MeerKAT # Height in kilometers above sea level
-    
+    if key==0:
+        assert(len(autodata.ants))==1
+        height = autodata.ants[0].observer.elevation / 1000. #MeerKAT # Height in kilometers above sea level
+    if key==-1:
+        height = autodata.ant_observer_elevation / 1000. #MeerKAT # Height in kilometers above sea level
+        print '### calculated from saved table'
+        
     frequency = autodata.freqs[ch] / 1e9  # frequency in GHz.
 
     #atmo_abs_table = np.zeros_like(autodata.vis)
@@ -240,16 +249,20 @@ def calc_atmosphere_abs_factor_1ch(autodata,ch):
 
     return atmo_abs_table
 
-def calc_atmosphere_abs_factor(autodata):
+def calc_atmosphere_trans_factor(autodata,key=0): #old name: calc_atmosphere_abs_factor
     surface_temperature = autodata.temperature
     T_atm = 1.12 * (273.15 + surface_temperature) - 50.0  # This is some equation , I can't remember where
     air_relative_humidity = autodata.humidity / 100.  # this is a percentage in katdal
     pressure = autodata.pressure
     
     #height = autodata.site.height / u.km  # Height in kilometers above sea level
-    assert(len(autodata.ants))==1
-    height = autodata.ants[0].observer.elevation / 1000. #MeerKAT # Height in kilometers above sea level
-    
+    if key==0:
+        assert(len(autodata.ants))==1
+        height = autodata.ants[0].observer.elevation / 1000. #MeerKAT # Height in kilometers above sea level
+    if key==-1:
+        height = autodata.ant_observer_elevation / 1000. #MeerKAT # Height in kilometers above sea level
+        print '### calculated from saved table'    
+        
     frequency = autodata.freqs / 1e9  # frequency in GHz.
 
     atmo_abs_table = np.zeros([len(autodata.timestamps),len(frequency)]) #don't use autodata.vis for MeerKAT!!!
@@ -290,6 +303,32 @@ def cal_Gal_model_np(vis ,freqs, ra, dec, ch_min, ch_max, nside):
         
     return result
 
+def cal_Gal_model_np2(vis ,freqs, ra, dec, ch_min, ch_max, nside, model_key=0):
+    
+    c = SkyCoord(ra=ra * u.degree, dec=dec * u.degree, frame='icrs')
+    theta = 90 - (c.galactic.b / u.degree).value
+    phi = (c.galactic.l / u.degree).value
+
+    result = np.zeros_like(vis)
+    
+    if model_key==0:
+        model_I=pysm.components.read_map('/users/jywang/MeerKAT/katcali/katcali/template/gal/synch_t_new.fits',nside)/1e6 #K
+        print '# synch_t_new.fits loaded...'
+    if model_key==-1:
+        model_I=hp.read_map('/users/jywang/MeerKAT/katcali/katcali/template/gal/haslam408_dsds_Remazeilles2014.fits')-8.9
+        print '# haslam408_dsds_Remazeilles2014.fits loaded...'
+    model_index=pysm.components.read_map('/users/jywang/MeerKAT/katcali/katcali/template/gal/synch_beta.fits',nside)
+    print '# synch_beta.fits loaded...'
+    print np.shape(model_I), np.shape(model_index)
+    
+    for i in range(ch_min, ch_max):
+          
+        I0 = hp.pixelfunc.get_interp_val(model_I, theta / 180 * np.pi, phi / 180 * np.pi) 
+        index=hp.pixelfunc.get_interp_val(model_index, theta / 180 * np.pi, phi / 180 * np.pi)
+        result[:, i] = I0*(freqs[i]/408e6)**index
+        
+    return result
+
 ###point source sepctrum ########
 
 def flux_3C273(freq_GHz):
@@ -314,10 +353,14 @@ def flux_PictorA(freq_GHz):
     print 'alpha='+str(alpha)
     return pow((freq_GHz/1.41),-alpha)*F1410 #*0.8
 
-def call_Tnd(data, ant,pol,freqs,ch,plot_key):
+def call_Tnd(data, ant,pol,freqs,ch,plot_key,key=0):
     print ("#cal_Tnd is for single channel only! Tnd_spl has higher efficiency for multi channel calibration")
-    noise_id=data.receivers[ant]
-    
+    if key==0:
+        noise_id=data.receivers[ant]
+    if key==-1:
+        noise_id=data.receivers.__getattribute__(ant)
+        print '### calculated from saved table'
+        
     noise={}
     for pol_i in ['h','v'] :  
         print noise_id,pol_i 
@@ -346,9 +389,13 @@ def call_Tnd(data, ant,pol,freqs,ch,plot_key):
 
     return Tnd_std,Tnd_ref,noise,Tnd_spl
 #################
-def Tnd_spl(data, ant,pol):
-    noise_id=data.receivers[ant]
-    
+def Tnd_spl(data, ant,pol,key=0):
+    if key==0:
+        noise_id=data.receivers[ant]
+    if key==-1:    
+        noise_id=data.receivers.__getattribute__(ant)
+        print '### calculated from saved table'
+        
     noise={}
     for pol_i in ['h','v'] :  
         print noise_id,pol_i 
@@ -440,12 +487,18 @@ class Rec_Temp: #code from red_tipping_curve_AR1.py
         self.rec['HH'] = T_H # The HH and VV is a scape thing
         self.rec['VV'] = T_V
 
-def cal_Trec(data, ant, pol, freqs):
-    rec = data.receivers[ant]
-   
+def cal_Trec(data, ant, pol, freqs,key=0):
+    
+    if key==0:
+        rec=data.receivers[ant]
+    if key==-1:
+        rec=data.receivers.__getattribute__(ant)
+        print '### calculated from saved table'
+        
     # if defined us file specs, otherwise set L-band params
     if ( rec.split(':')[0] != 'undefined' ):
-        Band,SN = data.receivers.get(ant,'l.4').split('.') # A safe Default
+        #Band,SN = data.receivers.get(ant,'l.4').split('.') # A safe Default
+        Band,SN = rec.split('.') 
     else:
         Band = 'L'
         SN = data.sensor['Antennas/'+ant.name+'/rsc_rxl_serial_number'][0]

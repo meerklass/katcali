@@ -27,7 +27,7 @@ def seek_rfi_mask(autodata, First_Threshold, sm_kwargs_para=(80,80,40,40),di_kwa
     return tod_mask
 
 ###########################################full vis mask###############################################################
-def vis_flag(vis_backup,flags,nd_label0, dp_w, First_Thresholds,flag_step):
+def vis_flag(vis_backup,flags,nd_label0, dp_w, First_Thresholds,flag_step, key=0):
     dp_s,dp_t,nd_1a,nd_1b,nd_1,nd_0=nd_label0
     nd_s1a,nd_s1b,nd_s1,nd_s0=kd.cal_nds_list(dp_s,nd_1a,nd_1b,nd_1,nd_0)#dp_s here, not dp_ss
     nd_t1a,nd_t1b,nd_t1,nd_t0=kd.cal_ndt_list(dp_t,nd_1a,nd_1b,nd_1,nd_0)#dp_t here, not dp_tt
@@ -126,8 +126,11 @@ def vis_flag(vis_backup,flags,nd_label0, dp_w, First_Thresholds,flag_step):
 
 
     print '#cleaning the bad ratio part'
-    vis_clean2=clean_bad_ratio(vis_clean)
-    
+    if key==0:
+        vis_clean2=clean_bad_ratio(vis_clean)
+    if key==-1:
+        print '## ratio clean is cancelled!!!'
+        vis_clean2=clean_bad_ratio(vis_clean, ratio_t=1.,ratio_ch=1.)
     return vis_clean2
 ###################################################################################
 def clean_bad_ratio(vis,ratio_t=0.4,ratio_ch=0.5):

@@ -188,3 +188,18 @@ def cal_freqs(ch_list):
     freq_list=np.array(freq_list)
     return freq_list
 
+################ for data has no rdb link #####################
+#tools to save the parameters
+def is_dict(x):
+    return issubclass(dict, type(x))
+
+class RecDictWrapper(object):
+    def __init__(self, data):
+        self.keys=[]
+        for k,v in data.items():
+            self.keys.append(k)
+            if is_dict(v):
+                self.__setattr__(k,RecDictWrapper(v))
+            else:
+                self.__setattr__(k, v)
+###############################################################

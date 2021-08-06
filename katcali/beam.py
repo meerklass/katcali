@@ -106,13 +106,18 @@ def cal_BMII(freqs,ch,pol,flux_model,ang_deg,beam_select):
 
 
 ############BM-III: beam from pattern#######################################
-def cal_BMIII(fname,data,ch,ant,pol,flux_model,c0, dp_ca,dp_cb,ang_deg,beam_select):
+def cal_BMIII(fname,data,ch,ant,pol,flux_model,c0, dp_ca,dp_cb,ang_deg,beam_select,key=0):
     print ("#cal_BMIII is for single channel only! cal_BMIII_1ch has higher efficiency for multi channel calibration")
     assert(np.array(ch).ndim==0)
     timestamps=data.timestamps
     freqs=data.freqs
-    az=data.az[:,0]
-    el=data.el[:,0]
+    if key==0:
+        az=data.az[:,0]
+        el=data.el[:,0]
+    if key==-1:
+        az=data.az
+        el=data.el
+        print '### az,el are loaded from saved table'
     print np.shape(az),np.shape(el)
     Bdata,ch_local,beam_file= load_Bdata(ch,beam_select)
 
@@ -128,10 +133,16 @@ def cal_BMIII(fname,data,ch,ant,pol,flux_model,c0, dp_ca,dp_cb,ang_deg,beam_sele
         Aeffmax2=Aeff_max_VV[ch_local]
     print Aeffmax2
 
-    print data.ants[0]
-    lon=Angle(data.ants[0].observer.lon,unit='rad')
-    lat=Angle(data.ants[0].observer.lat, unit='rad')
-    height=data.ants[0].observer.elevation
+    if key==0:
+        print data.ants[0]
+        lon=Angle(data.ants[0].observer.lon,unit='rad')
+        lat=Angle(data.ants[0].observer.lat, unit='rad')
+        height=data.ants[0].observer.elevation
+    if key==-1:
+        lon=Angle(data.ant_observer_lon,unit='rad')
+        lat=Angle(data.ant_observer_lat, unit='rad')
+        height=data.ant_observer_elevation
+        print '### ant location is loaded from saved table'
     ant_location=EarthLocation(lon=lon,lat=lat,height=height)
 
     radec_ptr = ac.SkyCoord(ra=c0.ra, dec=c0.dec) 
@@ -228,14 +239,23 @@ def cal_BMIII(fname,data,ch,ant,pol,flux_model,c0, dp_ca,dp_cb,ang_deg,beam_sele
 
 
 ####split cal_BMIII to avoid repeat calucluation ################################################
-def cal_pix_params(data,c0,Npix,Ddeg):
+def cal_pix_params(data,c0,Npix,Ddeg,key=0):
     timestamps=data.timestamps
-    az=data.az[:,0]
-    el=data.el[:,0]
-    print np.shape(az),np.shape(el)
-    lon=Angle(data.ants[0].observer.lon,unit='rad')
-    lat=Angle(data.ants[0].observer.lat, unit='rad')
-    height=data.ants[0].observer.elevation
+    if key==0:
+        az=data.az[:,0]
+        el=data.el[:,0]
+        print np.shape(az),np.shape(el)
+        lon=Angle(data.ants[0].observer.lon,unit='rad')
+        lat=Angle(data.ants[0].observer.lat, unit='rad')
+        height=data.ants[0].observer.elevation
+    if key==-1:
+        az=data.az
+        el=data.el
+        print np.shape(az),np.shape(el)
+        lon=Angle(data.ant_observer_lon,unit='rad')
+        lat=Angle(data.ant_observer_lat, unit='rad')
+        height=data.ant_observer_elevation
+        
     ant_location=EarthLocation(lon=lon,lat=lat,height=height)
 
     radec_ptr = ac.SkyCoord(ra=c0.ra, dec=c0.dec) 
@@ -324,5 +344,45 @@ def cal_BMIII_1ch(data,ch,flux_model, dp_ca,dp_cb,pattern_fband,x_pix,y_pix,Aeff
     Pn=cal_Pn(pattern,timestamps,dp_ca,dp_cb,x_pix,y_pix)
     T_ptr2=beam_pattern_ptr(freqs[ch], flux_model, Aeffmax2, Pn)
     return T_ptr2,pattern,x_pix_max,y_pix_max
+###################################################################################
+def load_pattern_10d_fband(beam_select,pol):
+    if pol=='h':
+        #file=glob.glob('/users/jywang/MeerKAT/model_test/beam_model/eidos_sim/p513_d5_ch4096/primary_beam_'+beam_select+'_p513_ch4096_d5_HH.fits')
+        file=glob.glob('/users/jywang/MeerKAT/model_test/beam_model/eidos_sim/p257_d10_ch4096/primary_beam_'+beam_select+'_p257_ch4096_d10_HH.fits')
+    if pol=='v':
+        #file=glob.glob('/users/jywang/MeerKAT/model_test/beam_model/eidos_sim/p513_d5_ch4096/primary_beam_'+beam_select+'_p513_ch4096_d5_VV.fits')
+        file=glob.glob('/users/jywang/MeerKAT/model_test/beam_model/eidos_sim/p257_d10_ch4096/primary_beam_'+beam_select+'_p257_ch4096_d10_VV.fits')
+    assert(len(file)==1)
+    file=file[0]
+    print file    
+    imgs=pyfits.open(file)[0].data
+    return imgs
+
+def cal_BMIII_10d_1ch(data,ch,flux_model, dp_ca,dp_cb,pattern_10d_fband,x_pix,y_pix,Aeff_max_fband):
+    assert(np.array(ch).ndim==0)
+    timestamps=data.timestamps
+    freqs=data.freqs
+       
+    Aeffmax2=Aeff_max_fband[ch] #add in notebook
+    print Aeffmax2
+            
+    pattern=pattern_10d_fband[ch,:,:]
+    pattern=pattern/pattern.max()
+    
+    #in Khan's paper, smaller pix number (top in plots) is higher elevation
+    pattern=np.flip(pattern,axis=0) #updown flip to make sure smaller pix number is lower elevation
+      
+    print np.where(pattern==pattern.max())
+    #x_pix_max=np.where(pattern==pattern.max())[0][0]
+    #y_pix_max=np.where(pattern==pattern.max())[1][0]
+    x_pix_max=np.where(pattern==pattern.max())[1][0] #pattern is [el,az]
+    y_pix_max=np.where(pattern==pattern.max())[0][0]
+    print x_pix_max,y_pix_max
+      
+    Pn=cal_Pn(pattern,timestamps,dp_ca,dp_cb,x_pix,y_pix)
+    T_ptr2=beam_pattern_ptr(freqs[ch], flux_model, Aeffmax2, Pn)
+    
+    return T_ptr2,pattern,x_pix_max,y_pix_max
+
 ############END of split###################################################
 
