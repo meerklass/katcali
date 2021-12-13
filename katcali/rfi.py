@@ -62,48 +62,54 @@ def vis_flag(vis_backup,flags,nd_label0, dp_w, First_Thresholds,flag_step, key=0
         sm_kwargs_para_nd1=(40, 20, 20, 10)
         di_kwargs_para_nd1=(1, 10)
     
-    
-    print '#flagging scan and nd_0'
-    vis_s0_m=seek_rfi_mask(vis[nd_s0,:], First_Thresholds[0], sm_kwargs_para=sm_kwargs_para_nd0,di_kwargs_para=di_kwargs_para_nd0)
-    
-    print '#flagging scan and nd_1a'
-    vis_s1a_m=seek_rfi_mask(vis[nd_s1a,:], First_Thresholds[1], sm_kwargs_para=sm_kwargs_para_nd1,di_kwargs_para=di_kwargs_para_nd1)
-
-    print '#flagging scan and nd_1b'
-    vis_s1b_m=seek_rfi_mask(vis[nd_s1b,:], First_Thresholds[2], sm_kwargs_para=sm_kwargs_para_nd1,di_kwargs_para=di_kwargs_para_nd1)
-
-    print '#flagging track, nd_0, and before scan'
-    vis_t0_ca_m=seek_rfi_mask(vis[nd_t0_ca,:], First_Thresholds[3], sm_kwargs_para=sm_kwargs_para_nd0,di_kwargs_para=di_kwargs_para_nd0)
-
-    print '#flagging track, nd_1a, and before scan'
-    vis_t1a_ca_m=seek_rfi_mask(vis[nd_t1a_ca,:], First_Thresholds[4], sm_kwargs_para=sm_kwargs_para_nd1,di_kwargs_para=di_kwargs_para_nd1)
-    
-    print '#flagging track, nd_1b, and before scan'
-    vis_t1b_ca_m=seek_rfi_mask(vis[nd_t1b_ca,:], First_Thresholds[5], sm_kwargs_para=sm_kwargs_para_nd1,di_kwargs_para=di_kwargs_para_nd1)
-
-    print '#flagging track, nd_0, and after scan'
-    vis_t0_cb_m=seek_rfi_mask(vis[nd_t0_cb,:], First_Thresholds[6], sm_kwargs_para=sm_kwargs_para_nd0,di_kwargs_para=di_kwargs_para_nd0)
-    
-    print '#flagging track, nd_1a, and after scan'
-    vis_t1a_cb_m=seek_rfi_mask(vis[nd_t1a_cb,:], First_Thresholds[7], sm_kwargs_para=sm_kwargs_para_nd1,di_kwargs_para=di_kwargs_para_nd1)
-    
-    print '#flagging track, nd_1b, and after scan'
-    vis_t1b_cb_m=seek_rfi_mask(vis[nd_t1b_cb,:], First_Thresholds[8], sm_kwargs_para=sm_kwargs_para_nd1,di_kwargs_para=di_kwargs_para_nd1)
+    if len(nd_s0)>0:
+        print '#flagging scan and nd_0'
+        vis_s0_m=seek_rfi_mask(vis[nd_s0,:], First_Thresholds[0], sm_kwargs_para=sm_kwargs_para_nd0,di_kwargs_para=di_kwargs_para_nd0)
+    if len(nd_s1a)>0:
+        print '#flagging scan and nd_1a'
+        vis_s1a_m=seek_rfi_mask(vis[nd_s1a,:], First_Thresholds[1], sm_kwargs_para=sm_kwargs_para_nd1,di_kwargs_para=di_kwargs_para_nd1)
+    if len(nd_s1b)>0:    
+        print '#flagging scan and nd_1b'
+        vis_s1b_m=seek_rfi_mask(vis[nd_s1b,:], First_Thresholds[2], sm_kwargs_para=sm_kwargs_para_nd1,di_kwargs_para=di_kwargs_para_nd1)
+    if len(nd_t0_ca)>0:
+        print '#flagging track, nd_0, and before scan'
+        vis_t0_ca_m=seek_rfi_mask(vis[nd_t0_ca,:], First_Thresholds[3], sm_kwargs_para=sm_kwargs_para_nd0,di_kwargs_para=di_kwargs_para_nd0)
+    if len(nd_t1a_ca)>0:    
+        print '#flagging track, nd_1a, and before scan'
+        vis_t1a_ca_m=seek_rfi_mask(vis[nd_t1a_ca,:], First_Thresholds[4], sm_kwargs_para=sm_kwargs_para_nd1,di_kwargs_para=di_kwargs_para_nd1)
+    if len(nd_t1b_ca)>0:
+        print '#flagging track, nd_1b, and before scan'
+        vis_t1b_ca_m=seek_rfi_mask(vis[nd_t1b_ca,:], First_Thresholds[5], sm_kwargs_para=sm_kwargs_para_nd1,di_kwargs_para=di_kwargs_para_nd1)
+    if len(nd_t0_cb)>0:
+        print '#flagging track, nd_0, and after scan'
+        vis_t0_cb_m=seek_rfi_mask(vis[nd_t0_cb,:], First_Thresholds[6], sm_kwargs_para=sm_kwargs_para_nd0,di_kwargs_para=di_kwargs_para_nd0)
+    if len(nd_t1a_cb)>0:
+        print '#flagging track, nd_1a, and after scan'
+        vis_t1a_cb_m=seek_rfi_mask(vis[nd_t1a_cb,:], First_Thresholds[7], sm_kwargs_para=sm_kwargs_para_nd1,di_kwargs_para=di_kwargs_para_nd1)
+    if len(nd_t1b_cb)>0:
+        print '#flagging track, nd_1b, and after scan'
+        vis_t1b_cb_m=seek_rfi_mask(vis[nd_t1b_cb,:], First_Thresholds[8], sm_kwargs_para=sm_kwargs_para_nd1,di_kwargs_para=di_kwargs_para_nd1)
     print '---------------------------------------------------'        
     print '#put all parts together'
     vis_clean=np.ma.array(np.zeros_like(vis),mask=True)
     ####scan part
     vis_clean[nd_s0,:]=vis_s0_m
-    vis_clean[nd_s1a,:]=vis_s1a_m
-    vis_clean[nd_s1b,:]=vis_s1b_m
+    if len(nd_s1a)>0:
+        vis_clean[nd_s1a,:]=vis_s1a_m
+    if len(nd_s1b)>0:
+        vis_clean[nd_s1b,:]=vis_s1b_m
     ####track part a
     vis_clean[nd_t0_ca,:]=vis_t0_ca_m
-    vis_clean[nd_t1a_ca,:]=vis_t1a_ca_m
-    vis_clean[nd_t1b_ca,:]=vis_t1b_ca_m
+    if len(nd_t1a_ca)>0:
+        vis_clean[nd_t1a_ca,:]=vis_t1a_ca_m
+    if len(nd_t1b_ca)>0:
+        vis_clean[nd_t1b_ca,:]=vis_t1b_ca_m
     ####track part b
     vis_clean[nd_t0_cb,:]=vis_t0_cb_m
-    vis_clean[nd_t1a_cb,:]=vis_t1a_cb_m
-    vis_clean[nd_t1b_cb,:]=vis_t1b_cb_m
+    if len(nd_t1a_cb)>0:
+        vis_clean[nd_t1a_cb,:]=vis_t1a_cb_m
+    if len(nd_t1b_cb)>0:
+        vis_clean[nd_t1b_cb,:]=vis_t1b_cb_m
     
     print '#checking neighbours'  
     #if the neighbor diode off is masked, the diode on should be masked also

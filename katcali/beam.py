@@ -155,7 +155,12 @@ def cal_BMIII(fname,data,ch,ant,pol,flux_model,c0, dp_ca,dp_cb,ang_deg,beam_sele
     for i in range(len(ptr_az)):
         if ptr_az[i]>180:
             ptr_az[i]=ptr_az[i]-360
-
+            
+    for i in range(len(az)):
+        if az[i]>180:
+            az[i]=az[i]-360
+                        
+            
     y_sep=ptr_el-el
     azel=SkyCoord(az*u.deg, el*u.deg, frame='altaz')
     azel_ptr=SkyCoord(ptr_az*u.deg, ptr_el*u.deg, frame='altaz')

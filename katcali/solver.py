@@ -143,7 +143,7 @@ def vis_ndstamp_model(timestamps,nd_0,nd_1a,nd_1b, Tnd, nd_ratio, ratio):
     return vis_ndstamp
 
 def cal_gain0(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg,T_ptr,vis_clean):
-    if fname in ['1551055211','1551037708', '1579725085', '1580260015']:
+    if fname in ['1551055211','1551037708', '1579725085', '1580260015','1630519596']:
         dp_ca,dp_cb,dp_c0a, dp_c1a,dp_c2a,dp_c3a,dp_c4a,dp_c0b,dp_c1b,dp_c2b,dp_c3b,dp_c4b=kl.cal_dp_c(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg)
         a1=vis_clean[dp_c0a,ch].min()-vis_clean[dp_ca,ch].min() #vis gap for calibrator
         b1=T_ptr[dp_ca].max()-T_ptr[dp_ca].min() # T model gap for calibrator
@@ -198,6 +198,59 @@ def calc_total_model_sm_nd0(timestamps, Tptr, eta_p, Tspill, eta_spill, Tatmo, T
 
 
 #END
+#####version2 for data 2021####################
+def vis_ndstamp_model_v2(timestamps,nd_0,nd_1a,nd_1b, nd_1ab, Tnd, nd_ratio, ratio):
+    vis_ndstamp=np.ma.array(np.zeros_like(timestamps))
+    vis_ndstamp[nd_0]=0
+    vis_ndstamp[nd_1a]=Tnd*ratio
+    vis_ndstamp[nd_1b]=Tnd*(nd_ratio-ratio) #1.8s injection
+    if len(nd_1ab)>0:
+        vis_ndstamp[nd_1ab]=Tnd*nd_ratio
+    return vis_ndstamp
+
+
+
+#######################for track############################################
+def calc_total_model_v2(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b, nd_1ab=[]):
+    return func_gt(timestamps,func_gt_param)*(func_sm(timestamps, func_sm_param)
+                                              +Tptr*eta_p
+                                              +Tel 
+                                              +Tgal +np.ones(len(timestamps))*Tcmb
+                                              +vis_ndstamp_model_v2(timestamps, nd_0, nd_1a, nd_1b, nd_1ab, Tnd, nd_ratio, ratio))
+
+
+def calc_logprob_v2(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, func_sm_param, func_sm_param0, nd_0, nd_1a, nd_1b, nd_1ab=[]):
+    total_model=calc_total_model_v2(timestamps, nd_ratio, ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1a, nd_1b, nd_1ab)
+    #calc_error=total_model/func_gt(timestamps,func_gt_param)/np.sqrt(d_freq*dump_period)
+    calc_error=total_model/np.sqrt(d_freq*dump_period)*np.sqrt(2)
+    #result=ma.sum(log_normal(vis[:,ch],total_model,calc_error))+log_normal(Tnd, Tnd_ref, 0.1*Tnd_std)+log_normal(eta_p, 1.0, 1e-30)
+    sm=np.ma.array(func_sm(timestamps, func_sm_param),mask=vis.mask[:,ch])
+    sm0=np.ma.array(func_sm(timestamps, func_sm_param0),mask=vis.mask[:,ch])
+                                                            
+  
+    result=(ma.sum(log_normal(vis[:,ch],total_model,calc_error))
+            #+3*ma.sum(log_normal(vis[nd_1a,ch],total_model[nd_1a],calc_error[nd_1a]))
+            #+3*ma.sum(log_normal(vis[nd_1b,ch],total_model[nd_1b],calc_error[nd_1b]))
+            +log_normal(Tnd, Tnd_ref, Tnd_std)+log_normal(eta_p, 1.0, 1e-30)
+            +ma.sum(log_normal(sm,sm0,0.5*np.ma.mean(sm0))) )
+    return result
+
+
+def func_obj0_v2(p, *args):
+    timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, func_sm_param0, nd_0, nd_1a, nd_1b, nd_1ab=args
+    Tnd=p[0]
+    eta_p=p[1]
+    func_sm_param=p[2]
+    func_gt_param=p[3:-1]
+    ratio=p[-1]      
+    return -calc_logprob_v2(timestamps, vis, ch, nd_ratio, ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, func_sm_param, func_sm_param0, nd_0, nd_1a, nd_1b, nd_1ab)
+
+
+def solve_params0_v2(timestamps, vis, ch, nd_ratio, ratio0, Tptr, eta_p0, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param0, func_sm_param0, nd_0, nd_1a, nd_1b, nd_1ab=[]):
+    return opt.fmin_powell(func_obj0_v2,
+                           xtol=1e-9, ftol=1e-9, maxiter=1e5,
+                           x0=[Tnd_ref]+[eta_p0]+list(func_sm_param0)+list(func_gt_param0)+[ratio0],
+                           args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, func_sm_param0, nd_0, nd_1a, nd_1b, nd_1ab))
 
 ####### below only for test##########################
 ####### below only for test##########################

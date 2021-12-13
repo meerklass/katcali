@@ -112,7 +112,7 @@ def cal_dp_c(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg):
     
     #######################all have above#######################
 
-    if fname in ['1551055211','1551037708', '1579725085', '1580260015']:
+    if fname in ['1551055211','1551037708', '1579725085', '1580260015','1630519596','1631379874','1631387336','1631659886','1631667564']:
         data.select(ants=ant,pol=pol,scans='track',targets=2)
         dp_c2=data.dumps
         for i in dp_c2:
