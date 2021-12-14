@@ -312,12 +312,12 @@ def cal_Gal_model_np2(vis ,freqs, ra, dec, ch_min, ch_max, nside, model_key=0):
     result = np.zeros_like(vis)
     
     if model_key==0:
-        model_I=pysm.components.read_map('/users/jywang/MeerKAT/katcali/katcali/template/gal/synch_t_new.fits',nside)/1e6 #K
+        model_I=pysm.components.read_map('/idia/projects/hi_im/share/template/gal/synch_t_new.fits',nside)/1e6 #K
         print '# synch_t_new.fits loaded...'
     if model_key==-1:
-        model_I=hp.read_map('/users/jywang/MeerKAT/katcali/katcali/template/gal/haslam408_dsds_Remazeilles2014.fits')-8.9
+        model_I=hp.read_map('/idia/projects/hi_im/share/template/gal/haslam408_dsds_Remazeilles2014.fits')-8.9
         print '# haslam408_dsds_Remazeilles2014.fits loaded...'
-    model_index=pysm.components.read_map('/users/jywang/MeerKAT/katcali/katcali/template/gal/synch_beta.fits',nside)
+    model_index=pysm.components.read_map('/idia/projects/hi_im/share/template/gal/synch_beta.fits',nside)
     print '# synch_beta.fits loaded...'
     print np.shape(model_I), np.shape(model_index)
     

@@ -3,6 +3,22 @@
 Look at the "examples" folder for information on how to access the data.
 
 ## Installation
+
+On Ilifu (https://www.ilifu.ac.za/)
+
+Install to per-user directory:
+```
+srun --pty bash
+```
+```
+singularity shell /data/exp_soft/containers/katcal.sif
+```
+```
+python setup.py install --user
+```
+
+Not on Ilifu
+
 Install to system-wise directory:
 ```
 python setup.py install
@@ -12,15 +28,4 @@ Install to per-user directory:
 ```
 python setup.py install --user
 ```
-## Set the Container katcal
-```
-cp -r katcali/Katcal_container ~/.local/share/jupyter/kernels/
-```
-```
-cd ~/.local/share/jupyter/kernels/Katcal_container
-```
-```
-emacs kernel.json
-```
-change $username to your own username
 
