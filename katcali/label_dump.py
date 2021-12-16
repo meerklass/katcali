@@ -74,7 +74,7 @@ def label_dump_1ch(data,ant,pol,flags,ch):
             dp_f.append(i)
     return dp_tt,dp_ss,dp_f,dp_t,dp_s
     
-def cal_dp_c(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg):
+def cal_dp_c(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg, n_src_off=-1):
     sigma_level=10
     n_iter=3
     flags_1ch=flags[:,ch]
@@ -112,7 +112,7 @@ def cal_dp_c(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg):
     
     #######################all have above#######################
 
-    if fname in ['1551055211','1551037708', '1579725085', '1580260015','1630519596','1631379874','1631387336','1631659886','1631667564']:
+    if fname in ['1551055211','1551037708', '1579725085', '1580260015','1630519596','1631379874','1631387336','1631659886','1631667564'] or n_src_off==4:
         data.select(ants=ant,pol=pol,scans='track',targets=2)
         dp_c2=data.dumps
         for i in dp_c2:
