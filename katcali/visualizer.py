@@ -2,7 +2,7 @@ import matplotlib.colors as colors
 import numpy as np
 import matplotlib.pylab as plt
 
-def plot_data(x, y, z, gsize=30, levels=15, grid_method='linear', scatter=False):
+def plot_data(x, y, z, gsize=30, levels=15, grid_method='linear', scatter=False, cmap='jet'):
     """Plotting function
     This plots a rasterscan as an intensity image
     the scatter parameter adds markers to indecate the data points
@@ -39,7 +39,7 @@ def plot_data(x, y, z, gsize=30, levels=15, grid_method='linear', scatter=False)
     # contour the gridded data, plotting dots at the randomly spaced data points.
     #CS = plt.contour(xi, yi, zi, 15, linewidths=0.5, colors='k')
     #CS = plt.contourf(xi, yi, zi, 255, cmap=plt.cm.jet, linewidth=0.0)
-    CS = plt.imshow(zi[::-1, :], extent=(x.min(),x.max(),y.min(),y.max()), cmap=plt.get_cmap('jet',255), aspect='auto' )
+    CS = plt.imshow(zi[::-1, :], extent=(x.min(),x.max(),y.min(),y.max()), cmap=plt.get_cmap(cmap,255), aspect='auto')
     plt.colorbar()
     CS = plt.contour(xi, yi, zi, levels, linewidths=0.5, colors='k')
     #plt.contourf(xi, yi, zi, 255, cmap=plt.cm.jet, linewidth=0.0),

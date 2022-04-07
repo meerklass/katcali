@@ -248,3 +248,221 @@ def cal_az_edge_list(az,dp_sb,dp_se):
     dp_az_edge=list(dp_az_min+dp_az_max)
     dp_az_edge.sort()
     return dp_az_min,dp_az_max,dp_az_edge
+
+##########################added for 2021 data#######################################
+
+def cal_nd_basic_para(fname):
+    
+    nd_on_time=-999
+    
+    if fname=='1630519596':
+        nd_on_time=0.292376308037
+        nd_cycle=19.4917538692
+        nd_set=1630519596.16
+
+    if fname=='1631379874':
+        nd_on_time=0.292376308037
+        nd_cycle=19.4917538692
+        nd_set=1631379874.12
+
+    if fname=='1631387336':
+        nd_on_time=0.292376308037
+        nd_cycle=19.4917538692
+        nd_set=1631387336.24
+
+    if fname=='1631659886':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1631659886.03
+
+    if fname=='1631667564':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1631667564.78
+
+    if fname=='1631552188':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1631552188.37
+
+    if fname=='1631559762':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1631559762.04
+
+    if fname=='1631724508':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1631724508.42
+
+    if fname=='1631732038':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1631732038.16
+
+    if fname=='1631810671':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1631810671.59
+
+    if fname=='1631818149':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1631818149.54
+
+    if fname=='1634835083':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1634835083.86
+
+    if fname=='1631982988':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1631982988.79
+
+    if fname=='1631990463':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1631990463.06
+
+    if fname=='1632069690':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1632069690.79
+
+    if fname=='1632077222':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1632077222.54
+
+    if fname=='1632184922':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1632184922.75
+
+    if fname=='1632505883':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1632505883.88
+
+    if fname=='1632760885':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1632760885.0
+
+    if fname=='1633365980':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1633365980.96
+
+    if fname=='1633970780':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1633970780.76
+
+    if fname=='1634252028':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1634252028.72
+
+    if fname=='1634402485':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1634402485.21
+
+    if fname=='1634748682':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1634748682.76
+    if fname=='1640540184':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1640540184.68
+    if fname=='1639157507':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1639157507.43
+    if fname=='1638639082':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1638639082.19
+    if fname=='1638294319':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1638294319.33
+    '''
+    if fname=='':
+        nd_on_time=
+        nd_cycle=
+        nd_set=
+    '''    
+        
+    if nd_on_time==-999:
+        print '# No record, can ask < astro.jywang@gmail.com >'
+        
+    return nd_on_time,nd_cycle,nd_set
+
+def cal_nd_edges(timestamps,nd_set,nd_cycle,nd_on_time):
+    nd_on_edge,nd_off_edge=[],[]
+    for i in range(1000):
+        edge1=nd_set+nd_cycle*i
+        edge2=edge1+nd_on_time
+
+        if edge1>timestamps[-1]:
+            print 'edge number 0-'+str(i-1)
+            break
+        nd_on_edge.append(edge1)
+        nd_off_edge.append(edge2)
+    nd_on_edge,nd_off_edge=np.array(nd_on_edge),np.array(nd_off_edge)
+    return nd_on_edge,nd_off_edge
+
+def cal_nd_ratio(timestamps, nd_on_time, nd_on_edge, dump_period):
+    nd_ratio=np.zeros_like(timestamps)
+    nd_1x=[]
+
+    for i in range(len(nd_on_edge)):
+        on_edge_local=nd_on_edge[i]
+        gap_list=abs(on_edge_local-timestamps)
+        dp_gap_min=np.where(gap_list==np.min(gap_list))[0][0]
+        gap_min=gap_list[dp_gap_min]
+        #print i, dp_gap_min, gap_min,
+        if gap_min > dump_period/2. :
+            print '*** diode '+str(i)+' was fired out of timestamps list: '+str(on_edge_local-timestamps[0])+' not in [0,'+str(timestamps[-1]-timestamps[0])+']'
+        else:
+            #time_edge=(timestamps[dp_gap_min]+timestamps[dp_gap_min+1])/2 
+            time_edge=timestamps[dp_gap_min]+dump_period/2. 
+            if time_edge - on_edge_local < nd_on_time: #diode in two dumps
+                ratio1=(time_edge - on_edge_local)/dump_period
+                nd_1x.append(dp_gap_min)
+                nd_ratio[dp_gap_min]=ratio1
+                if  dp_gap_min+1 <len(timestamps): #to make sure the second nd in the timestamps list    
+                    ratio2=nd_on_time/dump_period-ratio1
+                    nd_1x.append(dp_gap_min+1)
+                    nd_ratio[dp_gap_min+1]=ratio2
+                #print ratio1+ratio2,
+                #print '=',
+                #print ratio1,ratio2
+            if time_edge - on_edge_local >= nd_on_time:  #diode in one dump
+                ratio=nd_on_time/dump_period            
+                nd_1x.append(dp_gap_min)            
+                nd_ratio[dp_gap_min]=ratio
+                #print ratio
+                
+    nd_0=np.where(nd_ratio==0)[0]
+    #print nd_0
+    assert(len(nd_0)+len(nd_1x)==len(timestamps))
+    print '# checked: len(nd_0)+len(nd_1x)==len(timestamps)'
+    return nd_ratio, nd_0, nd_1x
+
+def cal_nd_ratio_group(nd_ratio):
+    nd_ratio_set=list(set(nd_ratio)) #check how many numbers for nd_ratio
+    #print nd_ratio_set
+
+    list_local=[]
+    for i in nd_ratio_set:
+        list_local.append(round(i,5)) #ignore the small differences
+    nd_ratio_group=list(set(list_local))
+    nd_ratio_group.sort()
+    print nd_ratio_group
+    return nd_ratio_group
+

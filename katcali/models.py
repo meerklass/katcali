@@ -353,6 +353,25 @@ def flux_PictorA(freq_GHz):
     print 'alpha='+str(alpha)
     return pow((freq_GHz/1.41),-alpha)*F1410 #*0.8
 
+def flux_1934_inter(freq_list_GHz):
+    #408.MHz-8640.MHz 
+    a0,a1,a2,a3= -30.7667, 26.4908, -7.0977, 0.605334 #Lband-flux-calibrators.csv, katcofig
+        
+    #log(S) =a0+a1log(νG) +a2[log(νG)]2+a3[log(νG)]3+... #https://arxiv.org/pdf/1609.05940.pdf
+    v=freq_list_GHz*1e3
+    logS=a0+a1*np.log10(v)+a2*(np.log10(v))**2+a3*(np.log10(v))**3
+    #print logS
+    return 10**logS
+
+
+def flux_1934_sd(freq_list_GHz):
+    #PKS 
+    PKS_freq_GHz=[.408, 1.410, 2.700, 5.000, 8.400]
+    PKS_flux=[6.24, 16.4, 11.5, 6.13, 3] #Jy
+    p = np.polyfit(np.log10(PKS_freq_GHz),np.log10(PKS_flux),3)
+
+    return 10**np.polyval(p,np.log10(freq_list_GHz))
+
 def call_Tnd(data, ant,pol,freqs,ch,plot_key,key=0):
     print ("#cal_Tnd is for single channel only! Tnd_spl has higher efficiency for multi channel calibration")
     if key==0:

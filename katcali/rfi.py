@@ -1,8 +1,11 @@
 from seek.mitigation import sum_threshold
 import numpy as np
+import matplotlib.pylab as plt
 import numpy.ma as ma
 from . import filter as kf
 from . import diode as kd 
+from . import label_dump as kl
+
 #param set ref: https://seek.readthedocs.io/en/latest/_modules/seek/mitigation/sum_threshold.html
 def seek_rfi_mask(autodata, First_Threshold, sm_kwargs_para=(80,80,40,40),di_kwargs_para=(25,30)):
     rfi_mask = sum_threshold.get_rfi_mask(tod=autodata.astype('float'),
@@ -197,4 +200,143 @@ def vis_flag_1ch(vis_clean,nd_s0,nd_s1a,nd_s1b,ch, sigma=5):
         if vis_clean.mask[i+1,ch]==True:
             vis_clean.mask[i,ch]=True
     return vis_clean,nd_s0_clean
+
+
+##########################added for 2021 data#######################################
+def vis_flag_v2(data,flags,ch_ref,ant,pol,vis,timestamps, nd_on_time, nd_on_edge, dump_period, ang_deg, flag_step, Threshold_factor1, Threshold_factor2, ratio_clean_key=0, plt_key=0):
+    
+    dp_tt,dp_ss,dp_f,dp_w, dp_t,dp_s,dp_slew,dp_stop=kl.cal_dp_label(data,flags,ant,pol,ch_ref,ang_deg)
+    nd_ratio,nd_0, nd_1x=kd.cal_nd_ratio(timestamps, nd_on_time, nd_on_edge, dump_period)
+    nd_t0,nd_t1x,nd_s0,nd_s1x,nd_t0_ca,nd_t0_cb,nd_t1x_ca,nd_t1x_cb=kl.cal_label_intersec(dp_tt,dp_ss,nd_0,nd_1x)
+    labels_1x=kl.cal_label_intersec_complex(dp_tt,dp_ss,nd_0,nd_1x,nd_ratio)
+    
+    labels=labels_1x+[list(nd_t0_ca)]+[list(nd_s0)]+[list(nd_t0_cb)]
+    group_num=len(labels)
+    group_num_1x=len(labels_1x)
+    print 'group number in total: '+str(group_num)
+    
+    print '### load flags ###'
+    if np.shape(flags)==np.shape(vis):
+        print '### RFI flagging for full vis ### '
+        vis=np.ma.array(vis,mask=flags)
+        n=np.shape(np.where(flags==True))[1]
+        print 'data.flags ratio:'
+        print float(n)/np.shape(vis)[0]/np.shape(vis)[1]
+    if np.shape(flags)> np.shape(vis):
+        print '### RFI flagging for small region ### '
+
+    print '### mask data not track/scan ###' 
+    for i in range(np.shape(vis)[0]):
+        if i in dp_w:
+            vis[i,:].mask='True'
+
+         
+    print '### SEEK flagging ###'
+    print 'flag_step: '+str(flag_step)
+   
+    #nd_ratio_group=cal_nd_ratio_group(nd_ratio)
+
+
+    vis_clean=np.ma.array(np.zeros_like(vis),mask=True)
+    dump_checker=[]
+    
+    for l_i in range(group_num):
+        
+        l=labels[l_i]
+        print 'group '+str(l_i)+', dp num '+str(len(l))
+        if len(l)>0 and (vis[l,:].mask==True).all()==False:
+            
+            print 'data shape is '+str(np.shape(vis[l,:]))
+            
+            if flag_step==1:
+                if l_i<group_num_1x:
+                    sm_kwargs_para_nd=(60, 50, 30, 25)
+                    di_kwargs_para_nd=(1, 20)
+                    Threshold_factor=Threshold_factor2
+                    print 'Threshold_factor2='+str(Threshold_factor2)+' applied on nd_1x'
+                if l_i==group_num_1x+1:               
+                    sm_kwargs_para_nd=(60, 50, 30, 25)
+                    di_kwargs_para_nd=(20, 20)
+                    Threshold_factor=Threshold_factor1
+                    print 'Threshold_factor1='+str(Threshold_factor1)+' applied on nd_s0'
+                if l_i==group_num_1x or l_i==group_num_1x+2:               
+                    sm_kwargs_para_nd=(60, 50, 30, 25)
+                    di_kwargs_para_nd=(20, 20)
+                    Threshold_factor=Threshold_factor1/2.
+                    print 'Threshold_factor1='+str(Threshold_factor1/2.)+' applied on nd_t0'
+                    
+            if flag_step==2:
+                if l_i<group_num_1x:
+                    sm_kwargs_para_nd=(40, 20, 20, 10)
+                    di_kwargs_para_nd=(1, 10)
+                    Threshold_factor=Threshold_factor2
+                    print 'Threshold_factor2='+str(Threshold_factor2)+' applied on nd_1x'
+                if l_i==group_num_1x+1:  
+                    sm_kwargs_para_nd=(40, 20, 20, 10)
+                    di_kwargs_para_nd=(5, 10)
+                    Threshold_factor=Threshold_factor1
+                    print 'Threshold_factor1='+str(Threshold_factor1)+' applied on nd_s0'
+                if l_i==group_num_1x or l_i==group_num_1x+2:  
+                    sm_kwargs_para_nd=(40, 20, 20, 10)
+                    di_kwargs_para_nd=(5, 10)
+                    Threshold_factor=Threshold_factor1/2.
+                    print 'Threshold_factor1='+str(Threshold_factor1/2.)+' applied on nd_t0'
+                    
+       
+            Threshold_local=np.ma.median(vis[l,:])/Threshold_factor
+           
+            print 'Threshold_local is '+str(Threshold_local)
+            
+           
+            print 'RFI flagging applied on group'+str(l_i)
+            vis_m=seek_rfi_mask(vis[l,:], Threshold_local, sm_kwargs_para=sm_kwargs_para_nd, di_kwargs_para=di_kwargs_para_nd)
+            vis_clean[l,:]=vis_m.copy()
+            dump_checker.append(list(l))
+            
+            if plt_key==0:
                 
+                plt.figure(figsize=(15,3))
+                plt.subplot(131)
+                plt.imshow(vis[l,:],aspect='auto')
+                plt.colorbar()
+                plt.title('before')
+                plt.subplot(132)
+                plt.imshow(vis_m,aspect='auto')
+                plt.colorbar()
+                plt.title('after')
+                plt.subplot(133)
+                plt.imshow(vis_clean,aspect='auto')
+                plt.colorbar()
+                plt.title('add into vis_clean')
+                plt.show()
+
+            
+        else:
+            print '*** no data, skipped ***'
+    vis_clean2=vis_clean.copy()    
+  
+    print '#checking neighbours'  
+    #if the neighbor diode off is masked, the diode on should be masked also
+    for ch_i in range(np.shape(vis_clean)[1]):
+        for i in nd_1x:
+            if i==0 and vis_clean.mask[i+1,ch_i]==True:
+                vis_clean2.mask[i,ch_i]=True
+            if i==np.shape(vis_clean)[0]-1 and vis_clean.mask[i-1,ch_i]==True:
+                vis_clean2.mask[i,ch_i]=True
+            if i>0 and i<np.shape(vis_clean)[0]-1: 
+                if vis_clean.mask[i-1,ch_i]==True or vis_clean.mask[i+1,ch_i]==True:
+                    vis_clean2.mask[i,ch_i]=True
+                    
+    print '#cleaning the bad ratio part'
+    if ratio_clean_key==0:
+        vis_clean3=clean_bad_ratio(vis_clean2)
+    if ratio_clean_key==-1:
+        print '## ratio clean is cancelled!!!'
+        vis_clean3=clean_bad_ratio(vis_clean2, ratio_t=1.,ratio_ch=1.)
+    
+    a=list(dump_checker).sort()
+    b=(list(dp_tt)+list(dp_ss)).sort()
+    assert(a==b)
+    print '# all dp_tt and dp_ss checked'
+    
+    return vis_clean3

@@ -9,16 +9,107 @@ def load_data(fname):
         data = katdal.open('/idia/projects/hi_im/SCI-20180330-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
     if fname in ['1555775533','1555793534', '1555861810', '1556034219', '1556052116', '1556120503', '1556138397','1555879611','1561650779']:
         data = katdal.open('/idia/projects/hi_im/SCI-20190418-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
-    if fname in['1558464584','1558472940']:
+    if fname in ['1558464584','1558472940']:
         data = katdal.open('/idia/projects/hi_im/COM-20190418-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
     if fname=='1562857793':
         data = katdal.open('/idia/projects/hi_im//1562857793/1562857793/1562857793_sdp_l0.full.rdb')
+    if fname in ['1630519596','1631552188','1631667564','1631810671','1631990463','1632184922','1633365980','1634402485','1637346562','1637699408',
+                '1638301944','1638647186','1639331184','1640712986','1631379874','1631559762','1631724508','1631818149','1632069690','1632505883',
+                '1633970780','1634748682','1637354605','1638130295','1638386189','1638898468','1639935088','1640799689','1631387336','1631659886',
+                '1631732038','1631982988','1632077222','1632760885','1634252028','1634835083','1637691677','1638294319','1638639082','1639157507',
+                '1640540184']:
+        data = katdal.open('/idia/projects/hi_im/SCI-20210212-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
     return data
 
 
 def check_ants(fname):
-    ##############will be updated by Brandon's summary################
+    if fname=='1630519596':
+        bad_ants=[]
+        target='PKS1934-638'
+    if fname=='1631379874':
+        bad_ants=[]
+        target='PKS1934-638'
+    if fname=='1631387336':
+        bad_ants=[]
+        target='PKS1934-638'
+    if fname=='1631559762':
+        bad_ants=[]
+        target='PKS1934-638'
+    if fname=='1631659886':
+        bad_ants=[]
+        target='PictorA'
+    if fname=='1631667564':
+        bad_ants=[]
+        target='PictorA'
+    if fname=='1631724508': 
+        bad_ants=['m013','m017']
+        target='PKS1934-638'
+    if fname=='1631732038': 
+        bad_ants=['m013','m017']
+        target='PKS1934-638'
+    if fname=='1631810671':
+        bad_ants=[]
+        target='PKS1934-638'    
+    if fname=='1631818149': 
+        bad_ants=['m020','m052']
+        target='PKS1934-638'  
+    if fname=='1631982988': 
+        bad_ants=['m020','m052']
+        target='PKS1934-638'  
+    if fname=='1631990463': 
+        bad_ants=['m031']
+        target='PKS1934-638'  
+    if fname=='1632069690': 
+        bad_ants=['m033']        
+        target='PKS1934-638'  
+    if fname=='1632077222': 
+        bad_ants=['m033']
+        target='PKS1934-638'  
+    if fname=='1632184922':
+        bad_ants=[]
+        target='PictorA'    
+        
+        
+        
+        
+    if fname=='1634835083': 
+        bad_ants=['m012','m044','m047']
+    if fname=='1634748682': 
+        bad_ants=['m034','m041']
+    if fname=='1634402485': 
+        bad_ants=['m003','m006','m035']
+    if fname=='1633970780': 
+        bad_ants=['m027']
+    if fname=='1632505883': 
+        bad_ants=['m063']
+
+
+
     
+
+    
+    if fname=='1631552188': 
+        bad_ants=['m013','m014','m032']
+        target='PKS1934-638'
+    
+    if fname=='1640540184':
+        bad_ants=[]
+        target='PictorA'
+    if fname=='1639157507':
+        bad_ants=[]
+        target='PictorA'
+    if fname=='1638639082':
+        bad_ants=[]
+        target='PictorA'
+    if fname=='1638294319':
+        bad_ants=[]
+        target='PictorA'
+    '''    
+    if fname=='':
+        bad_ants=[]
+        target=''
+    '''    
+################################################################################################################################33        
     if fname=='1551037708':
         bad_ants=['m001', 'm007', 'm008', 'm018', 'm023', 'm025', 'm032', 'm036', 'm038', 'm040', 'm041', 'm059']
         target='3C237'
@@ -105,6 +196,9 @@ def check_ants(fname):
     if target=='PictorA':
         flux_model=km.flux_PictorA
         cc = SkyCoord(79.9571708*u.deg,  -45.7788278*u.deg, frame='icrs') #Pictor A
+    if target=='PKS1934-638':
+        flux_model=km.flux_1934_sd
+        cc=SkyCoord(294.854275*u.deg, -63.712674*u.deg, frame='icrs')#PKS 1934-63 (1934-638)
 
     print 'calibrator: '+str(target)+', ra,dec= '+str(cc.ra)+', '+str(cc.dec)
     print 'bad_ants: '+ str(bad_ants)
@@ -124,7 +218,13 @@ def call_vis(fname,recv):
         data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/SCI-20190418-MS-01/'+str(fname)+'/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
     if fname in['1558464584','1558472940']:
         data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/COM-20190418-MS-01/'+str(fname)+'/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
-   
+    if fname in ['1630519596','1631552188','1631667564','1631810671','1631990463','1632184922','1633365980','1634402485','1637346562','1637699408',
+                '1638301944','1638647186','1639331184','1640712986','1631379874','1631559762','1631724508','1631818149','1632069690','1632505883',
+                '1633970780','1634748682','1637354605','1638130295','1638386189','1638898468','1639935088','1640799689','1631387336','1631659886',
+                '1631732038','1631982988','1632077222','1632760885','1634252028','1634835083','1637691677','1638294319','1638639082','1639157507',
+                '1640540184']:
+        data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/SCI-20210212-MS-01/'+str(fname)+'/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
+        
     print data1['recv_pair']
     recv1=data1['recv_pair'][0]
     assert(recv1==recv)
