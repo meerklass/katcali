@@ -23,55 +23,19 @@ def load_data(fname):
 
 
 def check_ants(fname):
-    if fname=='1630519596':
-        bad_ants=[]
+    ###########2021  data ############
+
+    if fname in ['1634835083', '1634748682', '1634402485', '1633970780', '1633365980', '1632760885', '1632505883', '1632077222', '1632069690', '1631990463', '1631982988', '1631818149', '1631810671', '1631732038', '1631724508', '1631559762', '1631552188', '1631387336', '1631379874', '1630519596']:
+
         target='PKS1934-638'
-    if fname=='1631379874':
-        bad_ants=[]
-        target='PKS1934-638'
-    if fname=='1631387336':
-        bad_ants=[]
-        target='PKS1934-638'
-    if fname=='1631559762':
-        bad_ants=[]
-        target='PKS1934-638'
-    if fname=='1631659886':
-        bad_ants=[]
+
+    if fname in ['1640799689', '1640712986', '1640540184', '1639935088', '1639331184', '1639157507', '1638898468', '1638647186', '1638639082', '1638386189', '1638301944', '1638294319', '1638130295', '1637699408', '1637691677', '1637354605', '1637346562', '1634252028', '1632184922', '1631667564', '1631659886']:
+
         target='PictorA'
-    if fname=='1631667564':
-        bad_ants=[]
-        target='PictorA'
-    if fname=='1631724508': 
-        bad_ants=['m013','m017']
-        target='PKS1934-638'
-    if fname=='1631732038': 
-        bad_ants=['m013','m017']
-        target='PKS1934-638'
-    if fname=='1631810671':
-        bad_ants=[]
-        target='PKS1934-638'    
-    if fname=='1631818149': 
-        bad_ants=['m020','m052']
-        target='PKS1934-638'  
-    if fname=='1631982988': 
-        bad_ants=['m020','m052']
-        target='PKS1934-638'  
-    if fname=='1631990463': 
-        bad_ants=['m031']
-        target='PKS1934-638'  
-    if fname=='1632069690': 
-        bad_ants=['m033']        
-        target='PKS1934-638'  
-    if fname=='1632077222': 
-        bad_ants=['m033']
-        target='PKS1934-638'  
-    if fname=='1632184922':
-        bad_ants=[]
-        target='PictorA'    
-        
-        
-        
-        
+
+    bad_ants=[]
+
+    #######from Marta######
     if fname=='1634835083': 
         bad_ants=['m012','m044','m047']
     if fname=='1634748682': 
@@ -82,33 +46,63 @@ def check_ants(fname):
         bad_ants=['m027']
     if fname=='1632505883': 
         bad_ants=['m063']
-
-
-
-    
-
-    
+    if fname=='1632077222': 
+        bad_ants=['m033']
+    if fname=='1632069690': 
+        bad_ants=['m033']
+    if fname=='1631990463': 
+        bad_ants=['m031']
+    if fname=='1631818149': 
+        bad_ants=['m020','m052']
+    if fname=='1631732038': 
+        bad_ants=['m013','m017']
+    if fname=='1631724508': 
+        bad_ants=['m013','m017']
     if fname=='1631552188': 
         bad_ants=['m013','m014','m032']
-        target='PKS1934-638'
-    
-    if fname=='1640540184':
-        bad_ants=[]
-        target='PictorA'
-    if fname=='1639157507':
-        bad_ants=[]
-        target='PictorA'
-    if fname=='1638639082':
-        bad_ants=[]
-        target='PictorA'
-    if fname=='1638294319':
-        bad_ants=[]
-        target='PictorA'
-    '''    
-    if fname=='':
-        bad_ants=[]
-        target=''
-    '''    
+    if fname=='1639157507': 
+        bad_ants=['m022','m034','m054']
+    if fname=='1638898468': 
+        bad_ants=['m036']
+    if fname=='1638639082': 
+        bad_ants=['m009','m011']
+    if fname=='1638386189': 
+        bad_ants=['m063']
+    if fname=='1638294319': 
+        bad_ants=['m025','m031']
+    if fname=='1637699408': 
+        bad_ants=['m052','m060']
+    if fname=='1637691677': 
+        bad_ants=['m022','m026','m052','m063']
+    if fname=='1637346562': 
+        bad_ants=['m037','m049']
+    if fname=='1634835083': 
+        bad_ants=['m012','m044','m047']
+    if fname=='1634748682': 
+        bad_ants=['m034','m041']
+    if fname=='1634402485': 
+        bad_ants=['m003','m006','m035']
+    if fname=='1633970780': 
+        bad_ants=['m027']
+    if fname=='1632505883': 
+        bad_ants=['m063']
+    if fname=='1632077222': 
+        bad_ants=['m033']
+    if fname=='1632069690': 
+        bad_ants=['m033']
+    if fname=='1631990463': 
+        bad_ants=['m031']
+    if fname=='1631818149': 
+        bad_ants=['m020','m052']
+    if fname=='1631732038': 
+        bad_ants=['m013','m017']
+    if fname=='1631724508': 
+        bad_ants=['m013','m017']
+    if fname=='1631552188': 
+        bad_ants=['m013','m014','m032']
+    #######from Marta#######
+
+
 ################################################################################################################################33        
     if fname=='1551037708':
         bad_ants=['m001', 'm007', 'm008', 'm018', 'm023', 'm025', 'm032', 'm036', 'm038', 'm040', 'm041', 'm059']

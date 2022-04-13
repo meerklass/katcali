@@ -255,6 +255,7 @@ def cal_nd_basic_para(fname):
     
     nd_on_time=-999
     
+    ###from Mel###
     if fname=='1630519596':
         nd_on_time=0.292376308037
         nd_cycle=19.4917538692
@@ -264,27 +265,27 @@ def cal_nd_basic_para(fname):
         nd_on_time=0.292376308037
         nd_cycle=19.4917538692
         nd_set=1631379874.12
-
+    
     if fname=='1631387336':
         nd_on_time=0.292376308037
         nd_cycle=19.4917538692
         nd_set=1631387336.24
-
+    
     if fname=='1631659886':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1631659886.03
-
+    
     if fname=='1631667564':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1631667564.78
-
+    
     if fname=='1631552188':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1631552188.37
-
+    
     if fname=='1631559762':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
@@ -294,109 +295,173 @@ def cal_nd_basic_para(fname):
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1631724508.42
-
+        
     if fname=='1631732038':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1631732038.16
-
+    
     if fname=='1631810671':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1631810671.59
-
+    
     if fname=='1631818149':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1631818149.54
-
+    
     if fname=='1634835083':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1634835083.86
-
+    
     if fname=='1631982988':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1631982988.79
-
+        
     if fname=='1631990463':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1631990463.06
-
+        
     if fname=='1632069690':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1632069690.79
-
+        
     if fname=='1632077222':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1632077222.54
-
+        
     if fname=='1632184922':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1632184922.75
-
+        
     if fname=='1632505883':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1632505883.88
-
+        
     if fname=='1632760885':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1632760885.0
-
+        
     if fname=='1633365980':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1633365980.96
-
+    
     if fname=='1633970780':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1633970780.76
-
+        
     if fname=='1634252028':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1634252028.72
-
+        
     if fname=='1634402485':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1634402485.21
-
+        
     if fname=='1634748682':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1634748682.76
-    if fname=='1640540184':
+    
+    if fname=='1637346562':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
-        nd_set=1640540184.68
-    if fname=='1639157507':
+        nd_set=1637346562.68
+        
+    if fname=='1637354605':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
-        nd_set=1639157507.43
-    if fname=='1638639082':
+        nd_set=1637354605.11
+        
+    if fname=='1637691677':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
-        nd_set=1638639082.19
+        nd_set=1637691677.34
+        
+    if fname=='1637699408':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1637699408.3
+        
+    if fname=='1638130295':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1638130295.17
+        
     if fname=='1638294319':
         nd_on_time=0.584752616075
         nd_cycle=19.4917538692
         nd_set=1638294319.33
-    '''
-    if fname=='':
-        nd_on_time=
-        nd_cycle=
-        nd_set=
-    '''    
         
+    if fname=='1638301944':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1638301944.04
+        
+    if fname=='1638386189':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1638386189.11
+        
+    if fname=='1638639082':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1638639082.19
+        
+    if fname=='1638647186':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1638647186.71
+        
+    if fname=='1638898468':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1638898468.77
+        
+    if fname=='1639157507':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1639157507.43
+        
+    if fname=='1639331184':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1639331184.4
+        
+    if fname=='1639935088':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1639935088.65
+        
+    if fname=='1640540184':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1640540184.68
+        
+    if fname=='1640712986':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1640712986.13
+        
+    if fname=='1640799689':
+        nd_on_time=0.584752616075
+        nd_cycle=19.4917538692
+        nd_set=1640799689.6
+    ###from Mel###
+    
     if nd_on_time==-999:
         print '# No record, can ask < astro.jywang@gmail.com >'
         
