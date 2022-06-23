@@ -5,8 +5,7 @@ import numpy.ma as ma
 from . import filter as kf
 from . import diode as kd 
 from . import label_dump as kl
-#test git
-#test git2
+
 #param set ref: https://seek.readthedocs.io/en/latest/_modules/seek/mitigation/sum_threshold.html
 def seek_rfi_mask(autodata, First_Threshold, sm_kwargs_para=(80,80,40,40),di_kwargs_para=(25,30)):
     rfi_mask = sum_threshold.get_rfi_mask(tod=autodata.astype('float'),
