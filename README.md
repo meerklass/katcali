@@ -1,10 +1,28 @@
-# katcali: single dish calibration pipeline for MeerKAT
+# KATcali: single dish calibration pipeline for MeerKAT
 
 Look at the "examples" folder for information on how to access the data.
 
 ## Installation
+New user
+```
+git clone git@github.com:meerklass/katcali.git
+```
 
-On Ilifu (https://www.ilifu.ac.za/)
+Old user
+```
+cd katcali/
+```
+```
+git pull
+```
+
+*the current version is in Python3, if you want to switch to Python2 version (mostly for 2019 data) then one more line is needed*
+```
+*git checkout a07fa3f*
+
+```
+
+### On Ilifu (https://www.ilifu.ac.za/)
 
 Install to per-user directory:
 ```
@@ -17,7 +35,7 @@ singularity shell /data/exp_soft/containers/katcal.sif
 python setup.py install --user
 ```
 
-Not on Ilifu
+### Not on Ilifu
 
 Install to system-wise directory:
 ```
