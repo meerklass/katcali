@@ -3,12 +3,12 @@
 Look at the "examples" folder for information on how to access the data.
 
 ## Installation
-New user
+### New user:
 ```
 git clone git@github.com:meerklass/katcali.git
 ```
 
-Old user
+### Old user:
 ```
 cd katcali/
 ```
@@ -16,9 +16,9 @@ cd katcali/
 git pull
 ```
 
-*the current version is in Python3, if you want to switch to Python2 version (mostly for 2019 data) then one more line is needed*
+*if you want to switch to Python2 version (mostly for 2019 data) then one more line is needed*
 ```
-*git checkout a07fa3f*
+git checkout a07fa3f
 
 ```
 
