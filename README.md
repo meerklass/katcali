@@ -23,7 +23,7 @@ Congrats you can skip this step
 #### Python2 version:
 if you want to switch to Python2 version (mostly for 2019 data) then one more line is needed
 ```
-git checkout a07fa3f
+git checkout py2
 ```
 ### Step III:
 #### On Ilifu (https://www.ilifu.ac.za/)
