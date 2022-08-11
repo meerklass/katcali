@@ -3,26 +3,30 @@
 Look at the "examples" folder for information on how to access the data.
 
 ## Installation
-### New user:
+### Step I:
+#### New user:
 ```
 git clone git@github.com:meerklass/katcali.git
 ```
 
-### Old user:
+#### Old user:
 ```
 cd katcali/
 ```
 ```
 git pull
 ```
+### Step II:
+#### Python3 version:
+Congrats you can skip this step
 
-*if you want to switch to Python2 version (mostly for 2019 data) then one more line is needed*
+#### Python2 version:
+if you want to switch to Python2 version (mostly for 2019 data) then one more line is needed
 ```
 git checkout a07fa3f
-
 ```
-
-### On Ilifu (https://www.ilifu.ac.za/)
+### Step III:
+#### On Ilifu (https://www.ilifu.ac.za/)
 
 Install to per-user directory:
 ```
@@ -35,7 +39,7 @@ singularity shell /data/exp_soft/containers/katcal.sif
 python setup.py install --user
 ```
 
-### Not on Ilifu
+#### Not on Ilifu
 
 Install to system-wise directory:
 ```
