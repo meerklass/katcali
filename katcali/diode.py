@@ -143,7 +143,7 @@ def call_nd_1a_param(fname):
         nd_1a0 =2
         
     if nd_1a0==-999:
-        print 'no record, can ask astro.jywang@gmail.com'
+        print ('no record, can ask astro.jywang@gmail.com')
     return nd_1a_gap,nd_1a0
 
 def call_nd_1_list(fname,timestamps):
@@ -463,7 +463,7 @@ def cal_nd_basic_para(fname):
     ###from Mel###
     
     if nd_on_time==-999:
-        print '# No record, can ask < astro.jywang@gmail.com >'
+        print ('# No record, can ask < astro.jywang@gmail.com >')
         
     return nd_on_time,nd_cycle,nd_set
 
@@ -474,7 +474,7 @@ def cal_nd_edges(timestamps,nd_set,nd_cycle,nd_on_time):
         edge2=edge1+nd_on_time
 
         if edge1>timestamps[-1]:
-            print 'edge number 0-'+str(i-1)
+            print ('edge number 0-'+str(i-1))
             break
         nd_on_edge.append(edge1)
         nd_off_edge.append(edge2)
@@ -492,7 +492,7 @@ def cal_nd_ratio(timestamps, nd_on_time, nd_on_edge, dump_period):
         gap_min=gap_list[dp_gap_min]
         #print i, dp_gap_min, gap_min,
         if gap_min > dump_period/2. :
-            print '*** diode '+str(i)+' was fired out of timestamps list: '+str(on_edge_local-timestamps[0])+' not in [0,'+str(timestamps[-1]-timestamps[0])+']'
+            print ('*** diode '+str(i)+' was fired out of timestamps list: '+str(on_edge_local-timestamps[0])+' not in [0,'+str(timestamps[-1]-timestamps[0])+']')
         else:
             #time_edge=(timestamps[dp_gap_min]+timestamps[dp_gap_min+1])/2 
             time_edge=timestamps[dp_gap_min]+dump_period/2. 
@@ -516,7 +516,7 @@ def cal_nd_ratio(timestamps, nd_on_time, nd_on_edge, dump_period):
     nd_0=np.where(nd_ratio==0)[0]
     #print nd_0
     assert(len(nd_0)+len(nd_1x)==len(timestamps))
-    print '# checked: len(nd_0)+len(nd_1x)==len(timestamps)'
+    print ('# checked: len(nd_0)+len(nd_1x)==len(timestamps)')
     return nd_ratio, nd_0, nd_1x
 
 def cal_nd_ratio_group(nd_ratio):
@@ -528,6 +528,6 @@ def cal_nd_ratio_group(nd_ratio):
         list_local.append(round(i,5)) #ignore the small differences
     nd_ratio_group=list(set(list_local))
     nd_ratio_group.sort()
-    print nd_ratio_group
+    print (nd_ratio_group)
     return nd_ratio_group
 

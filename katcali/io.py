@@ -194,8 +194,8 @@ def check_ants(fname):
         flux_model=km.flux_1934_sd
         cc=SkyCoord(294.854275*u.deg, -63.712674*u.deg, frame='icrs')#PKS 1934-63 (1934-638)
 
-    print 'calibrator: '+str(target)+', ra,dec= '+str(cc.ra)+', '+str(cc.dec)
-    print 'bad_ants: '+ str(bad_ants)
+    print ('calibrator: '+str(target)+', ra,dec= '+str(cc.ra)+', '+str(cc.dec))
+    print ('bad_ants: '+ str(bad_ants))
     return target,cc,bad_ants,flux_model
 
 def ant_list(data):
@@ -217,10 +217,13 @@ def call_vis(fname,recv):
                 '1633970780','1634748682','1637354605','1638130295','1638386189','1638898468','1639935088','1640799689','1631387336','1631659886',
                 '1631732038','1631982988','1632077222','1632760885','1634252028','1634835083','1637691677','1638294319','1638639082','1639157507',
                 '1640540184']:
-        data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/SCI-20210212-MS-01/'+str(fname)+'/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
-        
-    print data1['recv_pair']
-    recv1=data1['recv_pair'][0]
+        try:
+            data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/SCI-20210212-MS-01/'+str(fname)+'/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
+        except(Exception):
+            data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/SCI-20210212-MS-01/'+str(fname)+'/'+str(fname)+'_'+str(recv)+'_vis_data','rb'), encoding='latin-1')
+            print ('# loaded data was saved in python2')
+    print (data1['recv_pair'].astype(np.str_))
+    recv1=data1['recv_pair'].astype(np.str_)[0]
     assert(recv1==recv)
 
     vis=data1['vis']

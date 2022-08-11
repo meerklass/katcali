@@ -7,7 +7,7 @@ def deg_filter(dump, ang_deg_list, sigma_level, n_iter):
     ang_std=ang_deg_list[dump].std()
     dump_iter=list(dump)
     #print 'deg_filter'
-    print 'deg filter start: '+str(ang_mean)+'+/-'+str(ang_std)
+    print ('deg filter start: '+str(ang_mean)+'+/-'+str(ang_std))
     
     for n in range(n_iter):
         for i in dump_iter:
@@ -18,7 +18,7 @@ def deg_filter(dump, ang_deg_list, sigma_level, n_iter):
         ang_mean=ang_deg_list[dump_iter].mean()
         ang_std=ang_deg_list[dump_iter].std()
         #print str(n)+': '+str(ang_mean)+'+/-'+str(ang_std)
-    print 'deg filter end: '+str(ang_mean)+'+/-'+str(ang_std)+'\n'
+    print ('deg filter end: '+str(ang_mean)+'+/-'+str(ang_std)+'\n')
     return dump_iter
 
 def curve_filter(x,y,sigma=5,k=5):
@@ -31,7 +31,8 @@ def curve_filter(x,y,sigma=5,k=5):
     a=np.array(a)
     b=np.array(b)
     l=UnivariateSpline(a,b,k=k,s=None)(a)
-    filtered_data = sigma_clip(b-l, sigma=sigma, iters=5)
+    #filtered_data = sigma_clip(b-l, sigma=sigma, iters=5)
+    filtered_data = sigma_clip(b-l, sigma=sigma, maxiters=5)
     return a[filtered_data.mask==False] ###output is what want to keep
 
 def curve_filter_ma_array(x,y,sigma=5,k=5):
@@ -44,5 +45,6 @@ def curve_filter_ma_array(x,y,sigma=5,k=5):
     a=np.array(a)
     b=np.array(b)
     l=UnivariateSpline(a,b,k=k,s=None)(a)
-    filtered_data = sigma_clip(b-l, sigma=sigma, iters=5)
+    #filtered_data = sigma_clip(b-l, sigma=sigma, iters=5)
+    filtered_data = sigma_clip(b-l, sigma=sigma, maxiters=5)
     return a[filtered_data.mask==True] ###output is what want to delete

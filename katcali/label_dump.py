@@ -241,14 +241,14 @@ def cal_label_intersec_complex(dp_tt,dp_ss,nd_0,nd_1x,nd_ratio):
     output=[]
     
     nd_ratio_group=kd.cal_nd_ratio_group(nd_ratio) #load ratio list
-    print '# nd ratio number in total: ' + str(len(nd_ratio_group)) 
+    print ('# nd ratio number in total: ' + str(len(nd_ratio_group))) 
     assert(nd_ratio_group[0]==0) # num0 is diode off so ignore it
     
     for i in range(1,len(nd_ratio_group)): #for each ratio number
         ratio_local=nd_ratio_group[i]
-        print 'ratio'+str(i),
-        print ratio_local,
-        print ': ',
+        print ('ratio'+str(i),end=" ")
+        print (ratio_local,end="")
+        print (': ',end="")
         
         label0=np.where(abs(nd_ratio-ratio_local)<1e-5)[0] #all dump with this ratio
         label0=list(set(label0).intersection(set(dp_ss+dp_tt))) #delete the waste dumps
@@ -258,14 +258,15 @@ def cal_label_intersec_complex(dp_tt,dp_ss,nd_0,nd_1x,nd_ratio):
         label2=list(set(label0).intersection(set(nd_s1x)))
         label3=list(set(label0).intersection(set(nd_t1x_cb)))
         label1.sort(),label2.sort(),label3.sort()
-        print len(label0),len(label1),len(label2),len(label3)
+        print (len(label0),len(label1),len(label2),len(label3))
         assert(len(label1)+len(label2)+len(label3)==len(label0))
         output.append(label1)
         output.append(label2)
         output.append(label3)
-    l=np.shape(output)[0]
+    #l=np.shape(output)[0]
+    l=len(output)
     assert(l==3*(len(nd_ratio_group)-1))
-    print '# total label groups for nd_1x: '+str(l)
+    print ('# total label groups for nd_1x: '+str(l))
     return output
     
 def cal_ptr_mask(p,p_radec,nd_s0, dp_sb,dp_se,ang_lim):
