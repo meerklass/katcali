@@ -76,7 +76,7 @@ class Spill_Temp:
             self.spill['HH'] = T_H # The HH and VV is a scape thing
             self.spill['VV'] = T_V
             warnings.warn('Warning: Failed to load Spillover models, setting models to zeros')
-            print "error"
+            print ("error")
         # the models are in a format of theta=0  == el=90
 
 ######updated spill model######################################################################
@@ -136,7 +136,7 @@ class Spill_Temp2:
             self.spill['HH'] = T_H # The HH and VV is a scape thing
             self.spill['VV'] = T_V
             warnings.warn('Warning: Failed to load Spillover models, setting models to zeros')
-            print "error"
+            print ("error")
         # the models are in a format of theta=0  == el=90
 
 def calc_atmospheric_opacity(T, RH, P, h, f): #same to KAT-7
@@ -205,7 +205,7 @@ def calc_atmosphere_model_1ch(autodata,ch,key=0): #copy from KAT-7
         height = autodata.ants[0].observer.elevation / 1000. #MeerKAT # Height in kilometers above sea level
     if key==-1:
         height = autodata.ant_observer_elevation / 1000. #MeerKAT # Height in kilometers above sea level
-        print '### calculated from saved table'
+        print ('### calculated from saved table')
         
     frequency = autodata.freqs[ch] / 1e9  # frequency in GHz.
 
@@ -234,13 +234,13 @@ def calc_atmosphere_trans_factor_1ch(autodata,ch,key=0): #old name: calc_atmosph
         height = autodata.ants[0].observer.elevation / 1000. #MeerKAT # Height in kilometers above sea level
     if key==-1:
         height = autodata.ant_observer_elevation / 1000. #MeerKAT # Height in kilometers above sea level
-        print '### calculated from saved table'
+        print ('### calculated from saved table')
         
     frequency = autodata.freqs[ch] / 1e9  # frequency in GHz.
 
     #atmo_abs_table = np.zeros_like(autodata.vis)
     atmo_abs_table = np.zeros_like(autodata.timestamps)
-    print np.shape(atmo_abs_table)
+    print (np.shape(atmo_abs_table))
     
     for i in range(0, atmo_abs_table.shape[0]):
         tau = calc_atmospheric_opacity(surface_temperature[i], air_relative_humidity[i], pressure[i], height, frequency)
@@ -261,13 +261,13 @@ def calc_atmosphere_trans_factor(autodata,key=0): #old name: calc_atmosphere_abs
         height = autodata.ants[0].observer.elevation / 1000. #MeerKAT # Height in kilometers above sea level
     if key==-1:
         height = autodata.ant_observer_elevation / 1000. #MeerKAT # Height in kilometers above sea level
-        print '### calculated from saved table'    
+        print ('### calculated from saved table')    
         
     frequency = autodata.freqs / 1e9  # frequency in GHz.
 
     atmo_abs_table = np.zeros([len(autodata.timestamps),len(frequency)]) #don't use autodata.vis for MeerKAT!!!
     tau_table=np.zeros([len(autodata.timestamps),len(frequency)]) 
-    print np.shape(atmo_abs_table)
+    print (np.shape(atmo_abs_table))
     
     for i in range(0, atmo_abs_table.shape[0]):
         tau = calc_atmospheric_opacity(surface_temperature[i], air_relative_humidity[i], pressure[i], height, frequency)
@@ -313,13 +313,13 @@ def cal_Gal_model_np2(vis ,freqs, ra, dec, ch_min, ch_max, nside, model_key=0):
     
     if model_key==0:
         model_I=pysm.components.read_map('/idia/projects/hi_im/share/template/gal/synch_t_new.fits',nside)/1e6 #K
-        print '# synch_t_new.fits loaded...'
+        print ('# synch_t_new.fits loaded...')
     if model_key==-1:
         model_I=hp.read_map('/idia/projects/hi_im/share/template/gal/haslam408_dsds_Remazeilles2014.fits')-8.9
-        print '# haslam408_dsds_Remazeilles2014.fits loaded...'
+        print ('# haslam408_dsds_Remazeilles2014.fits loaded...')
     model_index=pysm.components.read_map('/idia/projects/hi_im/share/template/gal/synch_beta.fits',nside)
-    print '# synch_beta.fits loaded...'
-    print np.shape(model_I), np.shape(model_index)
+    print ('# synch_beta.fits loaded...')
+    print (np.shape(model_I), np.shape(model_index))
     
     for i in range(ch_min, ch_max):
           
@@ -335,14 +335,14 @@ def flux_3C273(freq_GHz):
     F1410=42 #Jy
     F408=55.10 #Jy
     alpha=-np.log10(F1410/F408)/np.log10(1410/408.)
-    print 'alpha='+str(alpha)
+    print ('alpha='+str(alpha))
     return pow((freq_GHz/1.41),-alpha)*F1410
 
 def flux_3C237(freq_GHz):
     F1410=6.6 #Jy
     F408=15.4 #Jy
     alpha=-np.log10(F1410/F408)/np.log10(1410/408.)
-    print 'alpha='+str(alpha)
+    print ('alpha='+str(alpha))
     return pow((freq_GHz/1.41),-alpha)*F1410
 
 def flux_PictorA(freq_GHz):
@@ -350,7 +350,7 @@ def flux_PictorA(freq_GHz):
     #alpha=0.85
     F408=166. #Jy                                                                                                                              
     alpha=-np.log10(F1410/F408)/np.log10(1410/408.)
-    print 'alpha='+str(alpha)
+    print ('alpha='+str(alpha))
     return pow((freq_GHz/1.41),-alpha)*F1410 #*0.8
 
 def flux_1934_inter(freq_list_GHz):
@@ -378,11 +378,11 @@ def call_Tnd(data, ant,pol,freqs,ch,plot_key,key=0):
         noise_id=data.receivers[ant]
     if key==-1:
         noise_id=data.receivers.__getattribute__(ant)
-        print '### calculated from saved table'
+        print ('### calculated from saved table')
         
     noise={}
     for pol_i in ['h','v'] :  
-        print noise_id,pol_i 
+        print (noise_id,pol_i) 
     
         filename = '/users/jywang/MeerKAT/model_test/mkat_model/noise-diode-models/mkat/rx.%s.%s.csv'%(noise_id,pol_i)
         
@@ -390,7 +390,7 @@ def call_Tnd(data, ant,pol,freqs,ch,plot_key,key=0):
     x=noise[pol][:,0]/1e9
     y=noise[pol][:,1]
     Tnd_std=y.std()
-    print Tnd_std
+    print (Tnd_std)
     Tnd_spl = Rbf(x, y)
     Tnd_ref=Tnd_spl(freqs[ch]/1e9)
     if plot_key==1:
@@ -413,11 +413,11 @@ def Tnd_spl(data, ant,pol,key=0):
         noise_id=data.receivers[ant]
     if key==-1:    
         noise_id=data.receivers.__getattribute__(ant)
-        print '### calculated from saved table'
+        print ('### calculated from saved table')
         
     noise={}
     for pol_i in ['h','v'] :  
-        print noise_id,pol_i 
+        print (noise_id,pol_i) 
     
         filename = '/users/jywang/MeerKAT/model_test/mkat_model/noise-diode-models/mkat/rx.%s.%s.csv'%(noise_id,pol_i)
         
@@ -512,7 +512,7 @@ def cal_Trec(data, ant, pol, freqs,key=0):
         rec=data.receivers[ant]
     if key==-1:
         rec=data.receivers.__getattribute__(ant)
-        print '### calculated from saved table'
+        print ('### calculated from saved table')
         
     # if defined us file specs, otherwise set L-band params
     if ( rec.split(':')[0] != 'undefined' ):
@@ -522,7 +522,7 @@ def cal_Trec(data, ant, pol, freqs,key=0):
         Band = 'L'
         SN = data.sensor['Antennas/'+ant.name+'/rsc_rxl_serial_number'][0]
 
-    print Band, SN
+    print (Band, SN)
 
     receiver_model_H = str("{}/Rx{}_SN{:0>4d}_calculated_noise_H_chan.dat".format('/users/jywang/MeerKAT/model_test/mkat_model/receiver-models/mkat',str.upper(Band),int(SN)))
     receiver_model_V = str("{}/Rx{}_SN{:0>4d}_calculated_noise_V_chan.dat".format('/users/jywang/MeerKAT/model_test/mkat_model/receiver-models/mkat',str.upper(Band),int(SN)))

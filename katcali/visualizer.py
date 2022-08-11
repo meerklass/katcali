@@ -66,7 +66,7 @@ def plot_mdata(x, y, z, gsize=90, levels=6, x_mask=1,y_mask=1, grid_method='line
             yy = y[m]
             zz = z[m]
         else:
-            print 'shape error'
+            print ('shape error')
     # define grid.
     #npts = z.shape[0]
     xi = np.linspace(x.min(), x.max(), gsize)
