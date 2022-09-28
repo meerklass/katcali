@@ -76,7 +76,43 @@ def label_dump_1ch(data,ant,pol,flags,ch):
         else:
             dp_f.append(i)
     return dp_tt,dp_ss,dp_f,dp_t,dp_s
+
+def edge_dp_drop(dps,drop_num=1):
+    dps=list(dps)
+    dps.sort()
+    dps=np.array(dps)
+    l1=len(dps)
+    dps=dps[drop_num:-drop_num]
+    l2=len(dps)
+    print ('# edge drop applied: '+str(l1)+' -> '+str(l2))
+    return dps
+
+def cal_dp_c1_split(dp_c1a,dp_c2a,dp_c3a,dp_c1b,dp_c2b,dp_c3b):
+    i1=np.where(dp_c1a<np.min(dp_c2a))[0]
+    dp_c1a1=dp_c1a[i1]
+    i2=np.where(dp_c1a>np.max(dp_c3a))[0]
+    dp_c1a3=dp_c1a[i2]
+    dp_c1a2=dp_c1a[i1[-1]+1:i2[0]]
+    assert(len(dp_c1a)==len(dp_c1a1)+len(dp_c1a2)+len(dp_c1a3))
     
+    i1=np.where(dp_c1b<np.min(dp_c2b))[0]
+    dp_c1b1=dp_c1b[i1]
+    i2=np.where(dp_c1b>np.max(dp_c3b))[0]
+    dp_c1b3=dp_c1b[i2]
+    dp_c1b2=dp_c1b[i1[-1]+1:i2[0]]
+    assert(len(dp_c1b)==len(dp_c1b1)+len(dp_c1b2)+len(dp_c1b3))
+    
+    
+    dp_c1a1,dp_c1a2,dp_c1a3,dp_c1b1,dp_c1b2,dp_c1b3=list(dp_c1a1),list(dp_c1a2),list(dp_c1a3),list(dp_c1b1),list(dp_c1b2),list(dp_c1b3)
+    dp_c1a1.sort()
+    dp_c1a2.sort()
+    dp_c1a3.sort()
+    dp_c1b1.sort()
+    dp_c1b2.sort()
+    dp_c1b3.sort()
+
+    return dp_c1a1,dp_c1a2,dp_c1a3,dp_c1b1,dp_c1b2,dp_c1b3
+
 def cal_dp_c(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg, target_start=0, n_src_off=-1):
     sigma_level=10
     n_iter=3
@@ -151,12 +187,20 @@ def cal_dp_c(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg, target_start=0, n_
         dp_c4=np.array(dp_c4)
         dp_c4a=dp_c4[dp_c4<dp_sb]
         dp_c4b=dp_c4[dp_c4>dp_se]
+
+        dp_c1a1,dp_c1a2,dp_c1a3,dp_c1b1,dp_c1b2,dp_c1b3=cal_dp_c1_split(dp_c1a,dp_c2a,dp_c3a,dp_c1b,dp_c2b,dp_c3b)
+        dp_c1a1,dp_c1a2,dp_c1a3,dp_c1b1,dp_c1b2,dp_c1b3=edge_dp_drop(dp_c1a1),edge_dp_drop(dp_c1a2),edge_dp_drop(dp_c1a3),edge_dp_drop(dp_c1b1),edge_dp_drop(dp_c1b2),edge_dp_drop(dp_c1b3)
+        dp_c1a=list(dp_c1a1)+list(dp_c1a2)+list(dp_c1a3)
+        dp_c1b=list(dp_c1b1)+list(dp_c1b2)+list(dp_c1b3)
+        
+        dp_c0a, dp_c2a,dp_c3a,dp_c4a,dp_c0b,dp_c2b,dp_c3b,dp_c4b=edge_dp_drop(dp_c0a), edge_dp_drop(dp_c2a), edge_dp_drop(dp_c3a), edge_dp_drop(dp_c4a), edge_dp_drop(dp_c0b), edge_dp_drop(dp_c2b),edge_dp_drop(dp_c3b), edge_dp_drop(dp_c4b)
         #overwrite
         dp_ca=list(dp_c0a)+list(dp_c1a)+list(dp_c2a)+list(dp_c3a)+list(dp_c4a)
         dp_ca.sort()
         dp_cb=list(dp_c0b)+list(dp_c1b)+list(dp_c2b)+list(dp_c3b)+list(dp_c4b)
         dp_cb.sort()
-        result= dp_ca,dp_cb,dp_c0a, dp_c1a,dp_c2a,dp_c3a,dp_c4a,dp_c0b,dp_c1b,dp_c2b,dp_c3b,dp_c4b
+    #result= dp_ca,dp_cb,dp_c0a, dp_c1a,dp_c2a,dp_c3a,dp_c4a,dp_c0b,dp_c1b,dp_c2b,dp_c3b,dp_c4b
+    result= dp_ca,dp_cb,dp_c0a, dp_c1a,dp_c2a,dp_c3a,dp_c4a,dp_c0b,dp_c1b,dp_c2b,dp_c3b,dp_c4b,dp_c1a1,dp_c1a2,dp_c1a3,dp_c1b1,dp_c1b2,dp_c1b3
     data.select() #recover after select!!!
     data.select(ants=ant,pol=pol)
     return result

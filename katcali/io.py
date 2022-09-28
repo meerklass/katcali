@@ -263,6 +263,15 @@ def load_ang_deg(ra,dec,cc):
     ang_deg=cc.separation(c_obs)/u.deg
     return ang_deg
 
+def load_ang_deg2(ra,dec,cc):
+    c_obs = SkyCoord(ra*u.deg,  dec*u.deg, frame='icrs')
+    print ('# calibrator number: '+str(len(cc)))
+    ang_deg=[]
+    for i in range(len(cc)):
+        ang_deg_i=cc[i].separation(c_obs)/u.deg
+        ang_deg.append(ang_deg_i)
+    return np.array(ang_deg)
+
 def cal_freq(ch):
     v_min=856.0 
     v_max=1712.0 

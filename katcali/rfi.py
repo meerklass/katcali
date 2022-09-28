@@ -248,71 +248,77 @@ def vis_flag_v2(data,flags,ch_ref,ant,pol,vis,timestamps, nd_on_time, nd_on_edge
             
             print ('data shape is '+str(np.shape(vis[l,:])))
             
-            if flag_step==1:
-                if l_i<group_num_1x:
-                    sm_kwargs_para_nd=(60, 50, 30, 25)
-                    di_kwargs_para_nd=(1, 20)
-                    Threshold_factor=Threshold_factor2
-                    print ('Threshold_factor2='+str(Threshold_factor2)+' applied on nd_1x')
-                if l_i==group_num_1x+1:               
-                    sm_kwargs_para_nd=(60, 50, 30, 25)
-                    di_kwargs_para_nd=(20, 20)
-                    Threshold_factor=Threshold_factor1
-                    print ('Threshold_factor1='+str(Threshold_factor1)+' applied on nd_s0')
-                if l_i==group_num_1x or l_i==group_num_1x+2:               
-                    sm_kwargs_para_nd=(60, 50, 30, 25)
-                    di_kwargs_para_nd=(20, 20)
-                    Threshold_factor=Threshold_factor1/2.
-                    print ('Threshold_factor1='+str(Threshold_factor1/2.)+' applied on nd_t0')
-                    
-            if flag_step==2:
-                if l_i<group_num_1x:
-                    sm_kwargs_para_nd=(40, 20, 20, 10)
-                    di_kwargs_para_nd=(1, 10)
-                    Threshold_factor=Threshold_factor2
-                    print ('Threshold_factor2='+str(Threshold_factor2)+' applied on nd_1x')
-                if l_i==group_num_1x+1:  
-                    sm_kwargs_para_nd=(40, 20, 20, 10)
-                    di_kwargs_para_nd=(5, 10)
-                    Threshold_factor=Threshold_factor1
-                    print ('Threshold_factor1='+str(Threshold_factor1)+' applied on nd_s0')
-                if l_i==group_num_1x or l_i==group_num_1x+2:  
-                    sm_kwargs_para_nd=(40, 20, 20, 10)
-                    di_kwargs_para_nd=(5, 10)
-                    Threshold_factor=Threshold_factor1/2.
-                    print ('Threshold_factor1='+str(Threshold_factor1/2.)+' applied on nd_t0')
-                    
-       
-            Threshold_local=np.ma.median(vis[l,:])/Threshold_factor
-           
-            print ('Threshold_local is '+str(Threshold_local))
-            
-           
-            print ('RFI flagging applied on group'+str(l_i))
-            vis_m=seek_rfi_mask(vis[l,:], Threshold_local, sm_kwargs_para=sm_kwargs_para_nd, di_kwargs_para=di_kwargs_para_nd)
-            vis_clean[l,:]=vis_m.copy()
-            dump_checker.append(list(l))
-            
-            if plt_key==0:
-                
-                plt.figure(figsize=(15,3))
-                plt.subplot(131)
-                plt.imshow(vis[l,:],aspect='auto')
-                plt.colorbar()
-                plt.title('before')
-                plt.subplot(132)
-                plt.imshow(vis_m,aspect='auto')
-                plt.colorbar()
-                plt.title('after')
-                plt.subplot(133)
-                plt.imshow(vis_clean,aspect='auto')
-                plt.colorbar()
-                plt.title('add into vis_clean')
-                plt.show()
+            if len(l)>3:
+                if flag_step==1:
+                    if l_i<group_num_1x:
+                        sm_kwargs_para_nd=(60, 50, 30, 25)
+                        di_kwargs_para_nd=(1, 20)
+                        Threshold_factor=Threshold_factor2
+                        print ('Threshold_factor2='+str(Threshold_factor2)+' applied on nd_1x')
+                    if l_i==group_num_1x+1:               
+                        sm_kwargs_para_nd=(60, 50, 30, 25)
+                        di_kwargs_para_nd=(20, 20)
+                        Threshold_factor=Threshold_factor1
+                        print ('Threshold_factor1='+str(Threshold_factor1)+' applied on nd_s0')
+                    if l_i==group_num_1x or l_i==group_num_1x+2:               
+                        sm_kwargs_para_nd=(60, 50, 30, 25)
+                        di_kwargs_para_nd=(20, 20)
+                        Threshold_factor=Threshold_factor1/2.
+                        print ('Threshold_factor1='+str(Threshold_factor1/2.)+' applied on nd_t0')
 
-            
+                if flag_step==2:
+                    if l_i<group_num_1x:
+                        sm_kwargs_para_nd=(40, 20, 20, 10)
+                        di_kwargs_para_nd=(1, 10)
+                        Threshold_factor=Threshold_factor2
+                        print ('Threshold_factor2='+str(Threshold_factor2)+' applied on nd_1x')
+                    if l_i==group_num_1x+1:  
+                        sm_kwargs_para_nd=(40, 20, 20, 10)
+                        di_kwargs_para_nd=(5, 10)
+                        Threshold_factor=Threshold_factor1
+                        print ('Threshold_factor1='+str(Threshold_factor1)+' applied on nd_s0')
+                    if l_i==group_num_1x or l_i==group_num_1x+2:  
+                        sm_kwargs_para_nd=(40, 20, 20, 10)
+                        di_kwargs_para_nd=(5, 10)
+                        Threshold_factor=Threshold_factor1/2.
+                        print ('Threshold_factor1='+str(Threshold_factor1/2.)+' applied on nd_t0')
+
+
+                Threshold_local=np.ma.median(vis[l,:])/Threshold_factor
+
+                print ('Threshold_local is '+str(Threshold_local))
+
+
+                print ('RFI flagging applied on group'+str(l_i))
+                vis_m=seek_rfi_mask(vis[l,:], Threshold_local, sm_kwargs_para=sm_kwargs_para_nd, di_kwargs_para=di_kwargs_para_nd)
+                vis_clean[l,:]=vis_m.copy()
+                dump_checker.append(list(l))
+                
+                if plt_key==0:
+
+                    plt.figure(figsize=(15,3))
+                    plt.subplot(131)
+                    plt.imshow(vis[l,:],aspect='auto')
+                    plt.colorbar()
+                    plt.title('before')
+                    plt.subplot(132)
+                    plt.imshow(vis_m,aspect='auto')
+                    plt.colorbar()
+                    plt.title('after')
+                    plt.subplot(133)
+                    plt.imshow(vis_clean,aspect='auto')
+                    plt.colorbar()
+                    plt.title('add into vis_clean')
+                    plt.show()
+                
+            if len(l)<=3:
+                vis_clean[l,:]=vis[l,:].copy()
+                dump_checker.append(list(l))
+                print ('*** few data, no RFI flagging applied ***')
+                                           
         else:
             print ('*** no data, skipped ***')
+            
     vis_clean2=vis_clean.copy()    
   
     print ('#checking neighbours')  
