@@ -1,0 +1,28 @@
+{
+    "default": {
+        "Threshold_factor1": 5,
+        "Threshold_factor2": 3,
+        "Threshold_factor11": 1.05,
+        "Threshold_factor22": 1.0
+    },
+    "1631667564": {
+        "m005h": {
+            "Threshold_factor1": 5,
+            "Threshold_factor2": 3,
+            "Threshold_factor11": 1.05,
+            "Threshold_factor22": 1.0
+        },
+        "m005v": {
+            "Threshold_factor1": 5,
+            "Threshold_factor2": 3,
+            "Threshold_factor11": 1.05,
+            "Threshold_factor22": 1.0
+        },
+        "m006h": {
+            "Threshold_factor1": 5,
+            "Threshold_factor2": 3,
+            "Threshold_factor11": 1.05,
+            "Threshold_factor22": 1.0
+        }
+    }
+}

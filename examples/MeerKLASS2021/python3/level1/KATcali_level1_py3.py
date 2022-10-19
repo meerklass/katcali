@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 import faulthandler
+import json
+import os
+
 faulthandler.enable()
 import matplotlib
 matplotlib.use('AGG')
@@ -45,10 +48,18 @@ plt.rcParams['font.size'], plt.rcParams[u'axes.linewidth'],plt.rcParams['lines.l
 p_radec=np.loadtxt('radio_source2021.txt')
 ra_a4059,dec_a4059=-0.74042,-34.76056
 
+with open(os.path.join(os.path.dirname(__file__), 'KATcali_level1_py3_aoflagger_thresholds.json')) as json_file:
+    ini_file = json.load(json_file)
+
 output_file="/scratch3/users/jywang/MeerKLASS2021/level1/"
 #output_file="./"
-Threshold_factor1, Threshold_factor2=5,3 #diode off, on
-Threshold_factor11,Threshold_factor22=1.05,1. #diode off, on
+
+# set default threshold values
+Threshold_factor1 = ini_file['default']['Threshold_factor1']
+Threshold_factor2 = ini_file['default']['Threshold_factor2']
+Threshold_factor11 = ini_file['default']['Threshold_factor11']
+Threshold_factor22 = ini_file['default']['Threshold_factor22']
+
 ch_plot=800
 ch_ref=800
 
@@ -77,11 +88,20 @@ print (nd_on_time,nd_cycle,nd_set)
 ant=sys.argv[2] 
 if ant in ants_good: 
     try:
-
         for pol in ['h','v']:
+            recv=ant+pol
+            if fname in ini_file:  # block mentioned in json file
+                block_ini_file = ini_file[fname]
+                if recv in block_ini_file:  # receiver mentioned in block json
+                    receiver_ini_file = block_ini_file[recv]
+                    print(f'Block {fname} receiver {recv} use non-default AOflagger thresholds: {receiver_ini_file}')
+                    Threshold_factor1 = receiver_ini_file['Threshold_factor1']
+                    Threshold_factor2 = receiver_ini_file['Threshold_factor2']
+                    Threshold_factor11 = receiver_ini_file['Threshold_factor11']
+                    Threshold_factor22 = receiver_ini_file['Threshold_factor22']
+
             #load data, labels, and parameters
             data.select(ants=ant,pol=pol)
-            recv=ant+pol
             corr_id=kio.cal_corr_id(data,recv)
             assert(recv==data.corr_products[corr_id][0])
             assert(recv==data.corr_products[corr_id][1])
