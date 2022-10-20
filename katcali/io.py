@@ -1,9 +1,11 @@
+from typing import Tuple
+
 import katdal
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 import numpy as np
 import pickle
-from . import models as km 
+from . import models as km
 def load_data(fname):
     if fname in ['1551037708','1551055211', '1553966342','1554156377']:
         data = katdal.open('/idia/projects/hi_im/SCI-20180330-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
@@ -36,108 +38,108 @@ def check_ants(fname):
     bad_ants=[]
 
     #######from Marta######
-    if fname=='1634835083': 
+    if fname=='1634835083':
         bad_ants=['m012','m044','m047']
-    if fname=='1634748682': 
+    if fname=='1634748682':
         bad_ants=['m034','m041']
-    if fname=='1634402485': 
+    if fname=='1634402485':
         bad_ants=['m003','m006','m035']
-    if fname=='1633970780': 
+    if fname=='1633970780':
         bad_ants=['m027']
-    if fname=='1632505883': 
+    if fname=='1632505883':
         bad_ants=['m063']
-    if fname=='1632077222': 
+    if fname=='1632077222':
         bad_ants=['m033']
-    if fname=='1632069690': 
+    if fname=='1632069690':
         bad_ants=['m033']
-    if fname=='1631990463': 
+    if fname=='1631990463':
         bad_ants=['m031']
-    if fname=='1631818149': 
+    if fname=='1631818149':
         bad_ants=['m020','m052']
-    if fname=='1631732038': 
+    if fname=='1631732038':
         bad_ants=['m013','m017']
-    if fname=='1631724508': 
+    if fname=='1631724508':
         bad_ants=['m013','m017']
-    if fname=='1631552188': 
+    if fname=='1631552188':
         bad_ants=['m013','m014','m032']
-    if fname=='1639157507': 
+    if fname=='1639157507':
         bad_ants=['m022','m034','m054']
-    if fname=='1638898468': 
+    if fname=='1638898468':
         bad_ants=['m036']
-    if fname=='1638639082': 
+    if fname=='1638639082':
         bad_ants=['m009','m011']
-    if fname=='1638386189': 
+    if fname=='1638386189':
         bad_ants=['m063']
-    if fname=='1638294319': 
+    if fname=='1638294319':
         bad_ants=['m025','m031']
-    if fname=='1637699408': 
+    if fname=='1637699408':
         bad_ants=['m052','m060']
-    if fname=='1637691677': 
+    if fname=='1637691677':
         bad_ants=['m022','m026','m052','m063']
-    if fname=='1637346562': 
+    if fname=='1637346562':
         bad_ants=['m037','m049']
-    if fname=='1634835083': 
+    if fname=='1634835083':
         bad_ants=['m012','m044','m047']
-    if fname=='1634748682': 
+    if fname=='1634748682':
         bad_ants=['m034','m041']
-    if fname=='1634402485': 
+    if fname=='1634402485':
         bad_ants=['m003','m006','m035']
-    if fname=='1633970780': 
+    if fname=='1633970780':
         bad_ants=['m027']
-    if fname=='1632505883': 
+    if fname=='1632505883':
         bad_ants=['m063']
-    if fname=='1632077222': 
+    if fname=='1632077222':
         bad_ants=['m033']
-    if fname=='1632069690': 
+    if fname=='1632069690':
         bad_ants=['m033']
-    if fname=='1631990463': 
+    if fname=='1631990463':
         bad_ants=['m031']
-    if fname=='1631818149': 
+    if fname=='1631818149':
         bad_ants=['m020','m052']
-    if fname=='1631732038': 
+    if fname=='1631732038':
         bad_ants=['m013','m017']
-    if fname=='1631724508': 
+    if fname=='1631724508':
         bad_ants=['m013','m017']
-    if fname=='1631552188': 
+    if fname=='1631552188':
         bad_ants=['m013','m014','m032']
     #######from Marta#######
 
 
-################################################################################################################################33        
+################################################################################################################################33
     if fname=='1551037708':
         bad_ants=['m001', 'm007', 'm008', 'm018', 'm023', 'm025', 'm032', 'm036', 'm038', 'm040', 'm041', 'm059']
         target='3C237'
-        
+
     if fname=='1551055211':
         bad_ants=['m018', 'm025', 'm032', 'm036', 'm041']
         target='3C273'
-        
+
     if fname=='1553966342':
         bad_ants=['m004', 'm017', 'm024', 'm032', 'm036', 'm041']
         target='PictorA'
-    
+
     if fname=='1554156377':
         bad_ants=['m014', 'm017', 'm032', 'm036', 'm041', 'm054']
         target='3C273'
-    
+
     if fname=='1556034219':
         #bad_ants=['m000', 'm001', 'm002', 'm003', 'm004', 'm005', 'm006', 'm007', 'm008', 'm009', 'm010', 'm011', 'm012', 'm013', 'm014', 'm015', 'm016', 'm017', 'm018', 'm019', 'm020', 'm021', 'm022', 'm023', 'm024', 'm025', 'm026', 'm027', 'm028', 'm029', 'm030', 'm031', 'm032', 'm033', 'm034', 'm035', 'm036', 'm037', 'm038', 'm039', 'm040', 'm041', 'm042', 'm043', 'm044', 'm045', 'm046', 'm047', 'm048', 'm049', 'm050', 'm051', 'm052', 'm053', 'm054', 'm055', 'm056', 'm057', 'm058', 'm059', 'm060', 'm061', 'm062', 'm063']
         bad_ants=[] #for test
         target='PictorA'
-    
+
     if fname=='1556052116':
         #bad_ants=['m000', 'm001', 'm002', 'm003', 'm004', 'm005', 'm006', 'm007', 'm008', 'm009', 'm010', 'm011', 'm012', 'm013', 'm014', 'm015', 'm016', 'm017', 'm018', 'm019', 'm020', 'm021', 'm022', 'm023', 'm024', 'm025', 'm026', 'm027', 'm028', 'm029', 'm030', 'm031', 'm032', 'm033', 'm034', 'm035', 'm036', 'm037', 'm038', 'm039', 'm040', 'm041', 'm042', 'm043', 'm044', 'm045', 'm046', 'm047', 'm048', 'm049', 'm050', 'm051', 'm052', 'm053', 'm054', 'm055', 'm056', 'm057', 'm058', 'm059', 'm060', 'm061', 'm062', 'm063']
         bad_ants=[]
         target='3C273'
-    
+
     if fname=='1556120503':
         bad_ants=['m014', 'm017', 'm024', 'm032', 'm035', 'm041', 'm042', 'm057', 'm059']
         target='PictorA'
-     
+
     if fname=='1556138397':
         bad_ants=['m014', 'm015', 'm016', 'm017', 'm024', 'm032', 'm033', 'm041', 'm042', 'm057', 'm059']
         target='3C273'
-        
+
     if fname=='1555775533':
         #bad_ants=['m000', 'm001', 'm002', 'm003', 'm004', 'm005', 'm006', 'm007', 'm008', 'm009', 'm010', 'm011', 'm012', 'm013', 'm014', 'm015', 'm016', 'm017', 'm018', 'm019', 'm020', 'm021', 'm022', 'm023', 'm024', 'm025', 'm026', 'm027', 'm028', 'm029', 'm030', 'm031', 'm032', 'm033', 'm034', 'm035', 'm036', 'm037', 'm038', 'm039', 'm040', 'm041', 'm042', 'm043', 'm044', 'm045', 'm046', 'm047', 'm048', 'm049', 'm050', 'm051', 'm052', 'm053', 'm054', 'm055', 'm056', 'm057', 'm058', 'm059', 'm060', 'm061', 'm062', 'm063']
         bad_ants=[] #for test
@@ -147,15 +149,15 @@ def check_ants(fname):
         #bad_ants=['m000', 'm001', 'm002', 'm003', 'm004', 'm005', 'm006', 'm007', 'm008', 'm009', 'm010', 'm011', 'm012', 'm013', 'm014', 'm015', 'm016', 'm017', 'm018', 'm019', 'm020', 'm021', 'm022', 'm023', 'm024', 'm025', 'm026', 'm027', 'm028', 'm029', 'm030', 'm031', 'm032', 'm033', 'm034', 'm035', 'm036', 'm037', 'm038', 'm039', 'm040', 'm041', 'm042', 'm043', 'm044', 'm045', 'm046', 'm047', 'm048', 'm049', 'm050', 'm051', 'm052', 'm053', 'm054', 'm055', 'm056', 'm057', 'm058', 'm059', 'm060', 'm061', 'm062', 'm063']
         bad_ants=[] #for test
         target='3C273'
-        
+
     if fname=='1555861810':
         bad_ants=['m000', 'm001', 'm002', 'm003', 'm004', 'm005', 'm006', 'm007', 'm008', 'm009', 'm010', 'm011', 'm012', 'm013', 'm014', 'm015', 'm016', 'm017', 'm018', 'm019', 'm020', 'm021', 'm022', 'm023', 'm024', 'm025', 'm026', 'm027', 'm028', 'm029', 'm030', 'm031', 'm032', 'm033', 'm034', 'm035', 'm036', 'm037', 'm038', 'm039', 'm040', 'm041', 'm042', 'm043', 'm044', 'm045', 'm046', 'm047', 'm048', 'm049', 'm050', 'm051', 'm052', 'm053', 'm054', 'm055', 'm056', 'm057', 'm058', 'm059', 'm060', 'm061', 'm062', 'm063']
         target='PictorA'
-    
+
     if fname=='1555879611':
         bad_ants=['m000', 'm001', 'm002', 'm003', 'm004', 'm005', 'm006', 'm007', 'm008', 'm009', 'm010', 'm011', 'm012', 'm013', 'm014', 'm015', 'm016', 'm017', 'm018', 'm019', 'm020', 'm021', 'm022', 'm023', 'm024', 'm025', 'm026', 'm027', 'm028', 'm029', 'm030', 'm031', 'm032', 'm033', 'm034', 'm035', 'm036', 'm037', 'm038', 'm039', 'm040', 'm041', 'm042', 'm043', 'm044', 'm045', 'm046', 'm047', 'm048', 'm049', 'm050', 'm051', 'm052', 'm053', 'm054', 'm055', 'm056', 'm057', 'm058', 'm059', 'm060', 'm061', 'm062', 'm063']
         target='3C273'
-    
+
     if fname=='1561650779':
         bad_ants=['m001', 'm006', 'm039', 'm054', 'm056']
         target='3C273'
@@ -167,19 +169,19 @@ def check_ants(fname):
     if fname=='1558472940':
         bad_ants=['m006', 'm017', 'm024', 'm032', 'm036', 'm051', 'm052', 'm059', 'm061', 'm062']
         target='3C273'
-    
+
     if fname=='1562857793':
         bad_ants=['m000', 'm001', 'm002', 'm003', 'm035', 'm039', 'm043', 'm045', 'm048', 'm056', 'm058', 'm059', 'm060']
         target='3C273'
-                  
+
     if fname=='1580260015':#test only
         bad_ants=[]
         target='3C273'
-        
+
     if fname=='1579725085':#test only
         bad_ants=[]
         target='PictorA'
-        
+
     ################set calibrator coordinates####################################
     if target=='3C273':
         flux_model=km.flux_3C273
@@ -240,7 +242,7 @@ def cal_corr_id(data,recv):
 
 def load_coordinates(data):
     ra=data.ra[:,0]
-    dec=data.dec[:,0]    
+    dec=data.dec[:,0]
     az=data.az[:,0]
     el=data.el[:,0]
 
@@ -248,7 +250,7 @@ def load_coordinates(data):
 
 def load_ndparam(fname, data):
     nd_set=float(fname)
-    nd_time=1.799235 
+    nd_time=1.799235
     nd_cycle=19.9915424299 #only for stable diode noise pattern
     nd_ratio=1.8/data.dump_period #1.8???test
     return nd_set,nd_time,nd_cycle,nd_ratio
@@ -273,8 +275,8 @@ def load_ang_deg2(ra,dec,cc):
     return np.array(ang_deg)
 
 def cal_freq(ch):
-    v_min=856.0 
-    v_max=1712.0 
+    v_min=856.0
+    v_max=1712.0
     dv=0.208984375
     assert((v_max-v_min)/dv==4096)
     freq_MHz=ch*dv+v_min
@@ -283,8 +285,8 @@ def cal_freq(ch):
 
 def cal_freqs(ch_list):
     freq_list=[]
-    v_min=856.0 
-    v_max=1712.0 
+    v_min=856.0
+    v_max=1712.0
     dv=0.208984375
     assert((v_max-v_min)/dv==4096)
     for ch in ch_list:
@@ -309,3 +311,28 @@ class RecDictWrapper(object):
             else:
                 self.__setattr__(k, v)
 ###############################################################
+
+
+def load_rfi_thresholds(rfi_threshold_dict: dict,
+                        fname: str,
+                        recv: str) \
+        -> Tuple[float, float, float, float]:
+    """
+    Load and return the 4 RFI thresholds from `rfi_threshold_dict`. If `fname` or `recv` are not inside,
+    the default thresholds are returned.
+    """
+    # set default threshold values
+    Threshold_factor1 = rfi_threshold_dict['default']['Threshold_factor1']
+    Threshold_factor2 = rfi_threshold_dict['default']['Threshold_factor2']
+    Threshold_factor11 = rfi_threshold_dict['default']['Threshold_factor11']
+    Threshold_factor22 = rfi_threshold_dict['default']['Threshold_factor22']
+    if fname in rfi_threshold_dict:  # block mentioned in json file
+        block_ini_file = rfi_threshold_dict[fname]
+        if recv in block_ini_file:  # receiver mentioned in block json
+            receiver_ini_file = block_ini_file[recv]
+            print(f'Block {fname} receiver {recv} use non-default AOflagger thresholds: {receiver_ini_file}')
+            Threshold_factor1 = receiver_ini_file['Threshold_factor1']
+            Threshold_factor2 = receiver_ini_file['Threshold_factor2']
+            Threshold_factor11 = receiver_ini_file['Threshold_factor11']
+            Threshold_factor22 = receiver_ini_file['Threshold_factor22']
+    return Threshold_factor1, Threshold_factor2, Threshold_factor11, Threshold_factor22
