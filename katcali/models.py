@@ -523,9 +523,25 @@ def cal_Trec(data, ant, pol, freqs,key=0):
         SN = data.sensor['Antennas/'+ant.name+'/rsc_rxl_serial_number'][0]
 
     print (Band, SN)
-
+    
     receiver_model_H = str("{}/Rx{}_SN{:0>4d}_calculated_noise_H_chan.dat".format('/users/jywang/MeerKAT/model_test/mkat_model/receiver-models/mkat',str.upper(Band),int(SN)))
     receiver_model_V = str("{}/Rx{}_SN{:0>4d}_calculated_noise_V_chan.dat".format('/users/jywang/MeerKAT/model_test/mkat_model/receiver-models/mkat',str.upper(Band),int(SN)))
+    
+    
+    ### Temporary because some new data files have not been fetched ###   
+    from os.path import exists
+    if exists(receiver_model_H)==False or exists(receiver_model_V)==False:
+    
+        print ('# receiver model file does not exist, will be replaced by something similar')
+        if int(SN)<4000:
+            SN_rpl=4
+        if int(SN)>4000:
+            SN_rpl=4001
+        print (Band, SN_rpl)
+        receiver_model_H = str("{}/Rx{}_SN{:0>4d}_calculated_noise_H_chan.dat".format('/users/jywang/MeerKAT/model_test/mkat_model/receiver-models/mkat',str.upper(Band),int(SN_rpl)))
+        receiver_model_V = str("{}/Rx{}_SN{:0>4d}_calculated_noise_V_chan.dat".format('/users/jywang/MeerKAT/model_test/mkat_model/receiver-models/mkat',str.upper(Band),int(SN_rpl)))
+    ### Temporary because some new data files have not been fetched ###
+    
     receiver = Rec_Temp(receiver_model_H, receiver_model_V)
 
     if pol=='h':

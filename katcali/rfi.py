@@ -346,3 +346,67 @@ def vis_flag_v2(data,flags,ch_ref,ant,pol,vis,timestamps, nd_on_time, nd_on_edge
     print ('# all dp_tt and dp_ss checked')
     
     return vis_clean3
+
+#######extra for the weak calibrator source#####
+
+def cal_std_list(dp_track_list,vis_tod):
+    
+    mdn_list,std_list=[],[]
+    for i in range(len(dp_track_list)):
+        dp1=dp_track_list[i]
+        mdn1=np.ma.median(vis_tod[dp1])
+        std1=np.ma.std(vis_tod[dp1])
+        mdn_list.append(mdn1)
+        std_list.append(std1)
+    
+    return mdn_list,std_list
+
+def list_drop(mask_array_1d,drop_ratio=0.05):
+    
+    a=mask_array_1d.copy()
+    a=a[~a.mask]
+    a.sort()
+    drop_n=int(len(a)*drop_ratio)
+    
+    m1=a[drop_n]
+    return m1
+
+def set_vis_lim(dp_track_list,vis_tod):
+    assert(len(dp_track_list)==7)
+    lim_list=[]
+    for i in [1,3,5]:
+        dp1=dp_track_list[i]
+        lim_local=list_drop(vis_tod[dp1])
+        lim_list.append(lim_local)  
+    return np.min(lim_list)
+
+def filter_median(dp_track_list,mdn_list,m_lim,vis_ptr0,ch):
+    count=0
+    vis_ptr=vis_ptr0.copy()
+    l=len(dp_track_list)
+    assert(l==7)
+    for i in [0,2,4,6]:
+        dp1=dp_track_list[i]
+        mdn=mdn_list[i]
+        if mdn> m_lim:
+            vis_ptr.mask[dp1,:]=True
+            count+=1
+            print ('# group '+str(i)+ ' is masked due to high-median')
+    print ('# group num is '+str(l)+' in total, '+str(count)+' masked')
+    print('---------------------------------------')
+    return vis_ptr
+   
+def filter_std(dp_track_list,std_list,vis_ptr,std_lim,sigma_cut,ch):
+    count=0
+    l=len(dp_track_list)
+    for i in range(len(dp_track_list)):
+        dp1=dp_track_list[i]
+        std1=std_list[i]
+        if std1>sigma_cut*std_lim:
+            vis_ptr.mask[dp1,ch]=True
+            count+=1
+            print ('# group '+str(i)+' masked due to std')
+    print ('# group num is '+str(l)+' in total, '+str(count)+' masked')
+    print('---------------------------------------')
+    return vis_ptr
+

@@ -102,7 +102,7 @@ def solve_params2(timestamps, vis_part1, vis_part2, ch, nd_ratio, ratio0, Tptr, 
 
 #################for scan#############################
 def cal_gain0(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg,T_ptr,vis_clean, n_src_off=-1 ,target_start=0):
-    if fname in ['1551055211','1551037708', '1579725085', '1580260015','1630519596']:
+    if fname in ['1551055211','1551037708', '1579725085', '1580260015']:
         dp_ca,dp_cb,dp_c0a, dp_c1a,dp_c2a,dp_c3a,dp_c4a,dp_c0b,dp_c1b,dp_c2b,dp_c3b,dp_c4b=kl.cal_dp_c(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg,target_start=target_start)
         a1=vis_clean[dp_c0a,ch].min()-vis_clean[dp_ca,ch].min() #vis gap for calibrator
         b1=T_ptr[dp_ca].max()-T_ptr[dp_ca].min() # T model gap for calibrator
@@ -378,6 +378,9 @@ def calc_total_model_sm_v3(timestamps, nd_ratio, Tptr, eta_p, Tnd, Tel, Tgal, fu
 
 
 
+def cal_NRMSE(T_model,Tres):
+    N=len(Tres[Tres.mask==False])
+    return np.ma.sqrt(np.ma.sum(Tres**2/T_model**2)/N)
 
 
 

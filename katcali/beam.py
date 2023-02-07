@@ -75,7 +75,7 @@ def load_Bdata(ch,beam_select):
     return Bdata,ch_local,beam_file
 
 def load_Bdata_fband(beam_select):
-    Bdata=pickle.load(open('/users/jywang/MeerKAT/model_test/beam_model/eidos_sim/p513_d5_ch4096/beam_fit_'+beam_select+'_p513_ch4096_d5_data','rb'))
+    Bdata=pickle.load(open('/users/jywang/MeerKAT/model_test/beam_model/eidos_sim/p513_d5_ch4096/beam_fit_'+beam_select+'_p513_ch4096_d5_data','rb'),encoding='latin-1') #2022.10.31 for python3
     return Bdata
 
 ############BM-II: beam from gaussian fitting on Pattern ##############

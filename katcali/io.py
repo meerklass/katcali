@@ -309,3 +309,6 @@ class RecDictWrapper(object):
             else:
                 self.__setattr__(k, v)
 ###############################################################
+
+def mask_None(list_input):
+    return np.ma.masked_invalid(np.array(list_input,dtype=float), copy=False).astype(float)
