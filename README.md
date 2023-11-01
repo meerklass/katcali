@@ -37,6 +37,8 @@ singularity shell /data/exp_soft/containers/katcal.sif
 ```
 ```
 python setup.py install --user
+
+Note: you might need to enforce that Python3 is used: python3 setup.py install --user
 ```
 
 #### Not on Ilifu
