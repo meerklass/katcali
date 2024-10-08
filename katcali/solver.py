@@ -334,24 +334,27 @@ def solve_params0_v3(timestamps, vis, ch, nd_ratio, Tptr, eta_p0, Tnd_ref, Tnd_s
 
 
 def solve_params_sm_v3(timestamps, vis, ch, nd_ratio, Tptr, eta_p0, Tnd, Tel, Tgal, func_gt_param0, func_sm_param0,
-                      nd_0, nd_1x):
+                      nd_0, nd_1x,nd1_weight_plus=3): # modified 2023.4.3
+    if nd1_weight_plus!=3:
+        print ('*** nd1_weight_plus is reset to be '+str(nd1_weight_plus))
+        
     return opt.fmin_powell(func_obj_sm_v3,
                            xtol=1e-9, ftol=1e-9, maxiter=1e5,
                            x0=[eta_p0]+list(func_sm_param0)+list(func_gt_param0), 
-                           args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd, Tel, Tgal, func_sm_param0, nd_0, nd_1x))
+                           args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd, Tel, Tgal, func_sm_param0, nd_0, nd_1x, nd1_weight_plus)) # modified 2023.4.3
 
 def func_obj_sm_v3(p, *args):
-    timestamps, vis, ch, nd_ratio, Tptr, Tnd, Tel, Tgal, func_sm_param0, nd_0, nd_1x=args
+    timestamps, vis, ch, nd_ratio, Tptr, Tnd, Tel, Tgal, func_sm_param0, nd_0, nd_1x, nd1_weight_plus=args # modified 2023.4.3
     eta_p=p[0]
     func_sm_param=p[1:-5]
     func_gt_param=p[-5:]
     
     
     return -calc_logprob_sm_v3(timestamps, vis, ch, nd_ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, func_sm_param0,
-                              nd_0, nd_1x)
+                              nd_0, nd_1x, nd1_weight_plus) # modified 2023.4.3
 
 
-def calc_logprob_sm_v3(timestamps, vis, ch, nd_ratio,Tptr, eta_p, Tnd, Tel,Tgal, func_gt_param, func_sm_param, func_sm_param0, nd_0, nd_1x):
+def calc_logprob_sm_v3(timestamps, vis, ch, nd_ratio,Tptr, eta_p, Tnd, Tel,Tgal, func_gt_param, func_sm_param, func_sm_param0, nd_0, nd_1x, nd1_weight_plus): # modified 2023.4.3
     total_model=calc_total_model_sm_v3(timestamps, nd_ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1x)
     #calc_error=total_model/func_gt(timestamps,func_gt_param)/np.sqrt(d_freq*dump_period)
     calc_error=total_model/np.sqrt(d_freq*dump_period)*np.sqrt(2)
@@ -361,11 +364,10 @@ def calc_logprob_sm_v3(timestamps, vis, ch, nd_ratio,Tptr, eta_p, Tnd, Tel,Tgal,
     #result = ma.sum(-(vis[:,ch]-total_model)**2/(2*error**2)-np.log(2*np.pi*error**2)/2.0) #supposing Gaussian
     #result=ma.sum(log_normal(vis[:,ch],total_model,calc_error))+log_normal(eta_p, 1.0, 1e-30) #no point source at the moment
     result=(ma.sum(log_normal(vis[:,ch],total_model,calc_error))
-            +3*ma.sum(log_normal(vis[nd_1x,ch],total_model[nd_1x],calc_error[nd_1x]))
+            +nd1_weight_plus*ma.sum(log_normal(vis[nd_1x,ch],total_model[nd_1x],calc_error[nd_1x])) # modified 2023.4.3
             +log_normal(eta_p, 1.0, 1e-30)
             +ma.sum(log_normal(sm,sm0,0.5*np.ma.mean(sm0))) )
-            #+ma.sum(log_normal(sm,sm0,1e-30))) #fix Trec as Mario asked...Orz Orz
-    #print 'test only!!! 2020-10-19'
+      
     return result
 
 def calc_total_model_sm_v3(timestamps, nd_ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1x):
