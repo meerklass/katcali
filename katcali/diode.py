@@ -254,8 +254,19 @@ def cal_az_edge_list(az,dp_sb,dp_se):
 def cal_nd_basic_para(fname):
     
     nd_on_time=-999
-    
-    ###from Mel###
+    ###UHF#####
+
+    if fname=='1684087370':
+        nd_on_time=0.584099237647
+        nd_cycle=19.4699745882
+        nd_set=1684087370.34
+
+    if fname=='1675632179':
+        nd_on_time=0.584099237647
+        nd_cycle=19.4699745882
+        nd_set=1675632179.78
+        
+    ###L-band from Mel###
     if fname=='1630519596':
         nd_on_time=0.292376308037
         nd_cycle=19.4917538692
