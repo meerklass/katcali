@@ -109,7 +109,7 @@ for grid_i in range(len(freqs_MHz)):
         assert(z.max()==1)
         Omega_A=(Ddeg/Npix/180.*np.pi)**2*z.sum()
         light_speed = 2.99792485e8
-        lbd = light_speed / freqs_MHz[grid_i]
+        lbd = light_speed / (freqs_MHz[grid_i]*1e6)
         Aeff_max=lbd**2/Omega_A
         print (Aeff_max)
         
