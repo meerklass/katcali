@@ -139,6 +139,65 @@ class Spill_Temp2:
             print ("error")
         # the models are in a format of theta=0  == el=90
 
+#########start for UHF#########
+class Spill_Temp_UHF:
+    """Load spillover models and interpolate to centre observing frequency."""
+    def __init__(self,filename=None):
+        """ The class Spill_temp reads the spillover model from file and
+        produces fitted functions for a frequency
+        The class/__init__function takes in one parameter:
+        filename : (default=none) This is the filename containing
+               the spillover model ,this file has 3 cols:
+               theta(Degrees, 0 at Zenith),temperature (MHz),Frequency (MHz)
+               if there are no files zero spillover is assumed.
+               function save makes a file of the correct format
+        returns :
+               dict  spill with two elements 'HH' 'VV' that
+               are interpolation functions that take in elevation & Frequency(MHz)
+               and return temperature in Kelvin.
+        """
+#TODO Need to sort out better frequency interpolation & example
+        try:
+            datafile =np.loadtxt(filename)
+            elevation = 90.-datafile[1:,0]
+            numfreqs = (datafile.shape[1]-1)//2
+            freqs= datafile[0,1::2]
+            spill_hh_data=datafile[1:, 1::2]
+            spill_vv_data=datafile[1:, 2::2]
+            #modified here!!!!!!!!!
+            #modified here!!!!!!!!!
+                        
+            T_H = fit.Spline2DGridFit(degree=(3,3))
+            T_H.fit((elevation, freqs), spill_hh_data)
+            
+            T_V = fit.Spline2DGridFit(degree=(3,3))
+            T_V.fit((elevation, freqs), spill_vv_data)
+            
+            #modification ended
+            
+            self.spill = {}
+            self.spill['HH'] = T_H # The HH and VV is a scape thing
+            self.spill['VV'] = T_V
+            #print self.spill['HH']((90.-elevation_list,freq_list))
+
+        except IOError:
+            spillover_H = np.array([[0.,90.,0.,90.],[0.,0.,0.,0.],[500.,500.,1200.,1200.]]) #for UHF 
+            spillover_V = np.array([[0.,90.,0.,90.],[0.,0.,0.,0.],[500.,500.,1200.,1200.]]) #for UHF 
+            spillover_H[0]= 90-spillover_H[0]
+            spillover_V[0]= 90-spillover_V[0]
+            T_H = fit.Delaunay2DScatterFit()
+            T_V = fit.Delaunay2DScatterFit()
+            T_H.fit(spillover_H[[0,2],:],spillover_H[1,:])
+            T_V.fit(spillover_V[[0,2],:],spillover_V[1,:])
+            self.spill = {}
+            self.spill['HH'] = T_H # The HH and VV is a scape thing
+            self.spill['VV'] = T_V
+            warnings.warn('Warning: Failed to load Spillover models, setting models to zeros')
+            print ("error")
+        # the models are in a format of theta=0  == el=90
+
+###### end for UHF ####################
+
 def calc_atmospheric_opacity(T, RH, P, h, f): #same to KAT-7
     """
         Calculates zenith opacity according to ITU-R P.676-9. For elevations > 10 deg.
@@ -455,14 +514,27 @@ def cal_Tspill(el, pol,freqs,ch,version):
             Tspill=SpillOver2.spill['HH']((el,freqs[ch]/1e6))[:,0]
         if pol=='v':
             Tspill=SpillOver2.spill['VV']((el,freqs[ch]/1e6))[:,0]
+
+    if version=='UHF':
+        SpillOver_UHF = Spill_Temp_UHF(filename='/users/jywang/MeerKAT/model_test/mkat_model/spillover-models/mkat/MK_U_Tspill_AsBuilt_atm_mask.dat')
+
+        if pol=='h':
+            Tspill=SpillOver_UHF.spill['HH']((el,freqs[ch]/1e6))[:,0]
+        if pol=='v':
+            Tspill=SpillOver_UHF.spill['VV']((el,freqs[ch]/1e6))[:,0]
+            
     return Tspill
 
-def cal_Tspill_func(el, pol,freqs):
-    SpillOver2 = Spill_Temp2(filename='/users/jywang/MeerKAT/model_test/mkat_model/spillover-models/mkat/MK_L_Tspill_AsBuilt_atm_mask.dat')
+def cal_Tspill_func(el, pol,freqs, band='L'):
+    if band=='L':
+        SpillOver = Spill_Temp2(filename='/users/jywang/MeerKAT/model_test/mkat_model/spillover-models/mkat/MK_L_Tspill_AsBuilt_atm_mask.dat')
+    if band=='UHF':
+        SpillOver = Spill_Temp_UHF(filename='/users/jywang/MeerKAT/model_test/mkat_model/spillover-models/mkat/MK_U_Tspill_AsBuilt_atm_mask.dat')
+    
     if pol=='h':
-        Tspill=SpillOver2.spill['HH']
+        Tspill=SpillOver.spill['HH']
     if pol=='v':
-        Tspill=SpillOver2.spill['VV']
+        Tspill=SpillOver.spill['VV']
     return Tspill
             
 import scikits.fitting as fit 
@@ -505,8 +577,48 @@ class Rec_Temp: #code from red_tipping_curve_AR1.py
         self.rec = {}
         self.rec['HH'] = T_H # The HH and VV is a scape thing
         self.rec['VV'] = T_V
+        
+class Rec_Temp_UHF: #code from red_tipping_curve_AR1.py
+    """Load Receiver models and interpolate to centre observing frequency."""
+    def __init__(self,filenameH='',filenameV=''):
+        """ The class Rec_temp reads the receiver model from file and
+        produces fitted functions for a frequency
+        The class/__init__function takes in one parameter:
+        filenameH : (default='') This is the filename
+               of the receiver model
+               these files have 2 cols:
+                Frequency (MHz),temperature (MHz),
+               if there are no file 15k receiver  is assumed.
+        returns :
+               dict  spill with two elements 'HH' 'VV' that
+               are interpolation functions that take in Frequency(MHz)
+               and return temperature in Kelvin.
+        """
+        try:
+            receiver_h = (np.loadtxt(filenameH,comments='%',delimiter=',')[:,[0,2] ]/(1e6,1.)).T # Change units to MHz # discard the gain col
+            a500 = np.zeros((2,np.shape(receiver_h)[-1]+1)) #500 MHz as lower limit for UHF band
+            a500[:,0] = [500,receiver_h[1,0]]
+            a500[:,1:] = receiver_h
+            receiver_h = a500
+            receiver_v = (np.loadtxt(filenameV,comments='%',delimiter=',')[:,[0,2] ]/(1e6,1.)).T # Change units to MHz  # discard the gain col
+            a500 = np.zeros((2,np.shape(receiver_v)[-1]+1))
+            a500[:,0] = [500,receiver_v[1,0]]
+            a500[:,1:] = receiver_v
+            receiver_v = a500
+        except IOError:
+            receiver_h = np.array([[500.,1200],[15.,15.]])
+            receiver_v = np.array([[500.,1200],[15.,15.]])
+            warnings.warn('Warning: Failed to load Receiver models, setting models to 15 K ')
+        #Assume  Provided models are a function of zenith angle & frequency
+        T_H = fit.PiecewisePolynomial1DFit()
+        T_V = fit.PiecewisePolynomial1DFit()
+        T_H.fit(receiver_h[0],receiver_h[1])
+        T_V.fit(receiver_v[0],receiver_v[1])
+        self.rec = {}
+        self.rec['HH'] = T_H # The HH and VV is a scape thing
+        self.rec['VV'] = T_V
 
-def cal_Trec(data, ant, pol, freqs,key=0):
+def cal_Trec(data, ant, pol, freqs, band='L',key=0):
     
     if key==0:
         rec=data.receivers[ant]
@@ -519,9 +631,12 @@ def cal_Trec(data, ant, pol, freqs,key=0):
         #Band,SN = data.receivers.get(ant,'l.4').split('.') # A safe Default
         Band,SN = rec.split('.') 
     else:
-        Band = 'L'
-        SN = data.sensor['Antennas/'+ant.name+'/rsc_rxl_serial_number'][0]
-
+        if band == 'L':
+            Band = 'l'
+            SN = data.sensor['Antennas/'+ant.name+'/rsc_rxl_serial_number'][0]
+        if band == 'UHF':
+            Band = 'u'
+            SN = data.sensor['Antennas/'+ant.name+'/rsc_rxu_serial_number'][0] #new added for UHF @2025.1.2
     print (Band, SN)
     
     receiver_model_H = str("{}/Rx{}_SN{:0>4d}_calculated_noise_H_chan.dat".format('/users/jywang/MeerKAT/model_test/mkat_model/receiver-models/mkat',str.upper(Band),int(SN)))
@@ -541,9 +656,11 @@ def cal_Trec(data, ant, pol, freqs,key=0):
         receiver_model_H = str("{}/Rx{}_SN{:0>4d}_calculated_noise_H_chan.dat".format('/users/jywang/MeerKAT/model_test/mkat_model/receiver-models/mkat',str.upper(Band),int(SN_rpl)))
         receiver_model_V = str("{}/Rx{}_SN{:0>4d}_calculated_noise_V_chan.dat".format('/users/jywang/MeerKAT/model_test/mkat_model/receiver-models/mkat',str.upper(Band),int(SN_rpl)))
     ### Temporary because some new data files have not been fetched ###
-    
-    receiver = Rec_Temp(receiver_model_H, receiver_model_V)
-
+    if band == 'L':
+        receiver = Rec_Temp(receiver_model_H, receiver_model_V)
+    if band == 'UHF':
+        receiver = Rec_Temp_UHF(receiver_model_H, receiver_model_V)
+        
     if pol=='h':
         rec_function=receiver.rec['HH']
     if pol=='v':

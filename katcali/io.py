@@ -30,7 +30,7 @@ def load_data(fname):
 def check_ants(fname):
     #####UHF data#######
 
-    if fname in ['1684087370']:
+    if fname in ['1684087370','1675210948','1675643846']:
         target='3C273'
     if fname in ['1675632179']:
         target='PictorA'
@@ -223,7 +223,7 @@ def ant_list(data):
 
 def call_vis(fname,recv):
     ####UHF band####
-    if fname in ['1684087370','1675632179']:
+    if fname in ['1684087370','1675632179','1675210948','1675643846']:
         data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/MeerKLASS2023/'+str(fname)+'/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
     #####L-band####
     if fname in ['1551037708','1551055211', '1553966342','1554156377']:
