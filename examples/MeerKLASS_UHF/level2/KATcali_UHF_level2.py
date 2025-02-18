@@ -231,7 +231,7 @@ if ant in ants_good:
                 func_gt_param0=[ga0,0,0,0,0]
                 print (Tnd_ref)
                 ####fitting
-                instru_pa=ks.solve_params0_v3(timestamps, visa_ptr, ch_plot, nd_ratio, T_ptr, eta_p0, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param0, func_sm_param0, nd_0, nd_1x)
+                instru_pa=ks.solve_params0_v3(timestamps, visa_ptr, ch_plot, nd_ratio, T_ptr, eta_p0, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param0, func_sm_param0, nd_0, nd_1x, band='UHF')
                 
                 ####get fitting result
                 Tnda=instru_pa[0]
@@ -253,7 +253,7 @@ if ant in ants_good:
                 
                 ####fitting######
                 instru_pb=ks.solve_params0_v3(timestamps, visb_ptr, ch_plot, nd_ratio, T_ptr, eta_p0, Tnd_ref, Tnd_std, Tel, Tgal,
-                                      func_gt_param0, func_sm_param0, nd_0, nd_1x)
+                                      func_gt_param0, func_sm_param0, nd_0, nd_1x,band='UHF')
                 
                 ######get fitting result#####
                 Tndb=instru_pb[0]

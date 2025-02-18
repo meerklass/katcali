@@ -6,9 +6,12 @@ from . import label_dump as kl
 
 Tcmb=2.725
 #for MeerKAT
+#L-band
 d_freq=208984.375 
 dump_period=1.999154243
-
+#UHF-band
+d_freq_UHF=132812.5
+dump_period_UHF=1.9969204705882353
 
 def func_gt(t, gt):
     t_start=t[0]
@@ -292,10 +295,13 @@ def calc_total_model_v3(timestamps, nd_ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_
                                               +vis_ndstamp_model_v3(Tnd, nd_ratio))
 
 
-def calc_logprob_v3(timestamps, vis, ch, nd_ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, func_sm_param, func_sm_param0, nd_0, nd_1x):
+def calc_logprob_v3(timestamps, vis, ch, nd_ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, func_sm_param, func_sm_param0, nd_0, nd_1x,band):
     total_model=calc_total_model_v3(timestamps, nd_ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1x)
     #calc_error=total_model/func_gt(timestamps,func_gt_param)/np.sqrt(d_freq*dump_period)
-    calc_error=total_model/np.sqrt(d_freq*dump_period)*np.sqrt(2)
+    if band=='L':
+        calc_error=total_model/np.sqrt(d_freq*dump_period)*np.sqrt(2)
+    if band=='UHF':
+        calc_error=total_model/np.sqrt(d_freq_UHF*dump_period_UHF)*np.sqrt(2)
     #result=ma.sum(log_normal(vis[:,ch],total_model,calc_error))+log_normal(Tnd, Tnd_ref, 0.1*Tnd_std)+log_normal(eta_p, 1.0, 1e-30)
     sm=np.ma.array(func_sm(timestamps, func_sm_param),mask=vis.mask[:,ch])
     sm0=np.ma.array(func_sm(timestamps, func_sm_param0),mask=vis.mask[:,ch])
@@ -310,20 +316,20 @@ def calc_logprob_v3(timestamps, vis, ch, nd_ratio, Tptr, eta_p, Tnd, Tnd_ref, Tn
 
 
 def func_obj0_v3(p, *args):
-    timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, func_sm_param0, nd_0, nd_1x=args
+    timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, func_sm_param0, nd_0, nd_1x,band=args
     Tnd=p[0]
     eta_p=p[1]
     func_sm_param=p[2]
     func_gt_param=p[3:]
           
-    return -calc_logprob_v3(timestamps, vis, ch, nd_ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, func_sm_param, func_sm_param0, nd_0, nd_1x)
+    return -calc_logprob_v3(timestamps, vis, ch, nd_ratio, Tptr, eta_p, Tnd, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param, func_sm_param, func_sm_param0, nd_0, nd_1x,band)
 
 
-def solve_params0_v3(timestamps, vis, ch, nd_ratio, Tptr, eta_p0, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param0, func_sm_param0, nd_0, nd_1x):
+def solve_params0_v3(timestamps, vis, ch, nd_ratio, Tptr, eta_p0, Tnd_ref, Tnd_std, Tel, Tgal, func_gt_param0, func_sm_param0, nd_0, nd_1x,band='L'):
     return opt.fmin_powell(func_obj0_v3,
                            xtol=1e-9, ftol=1e-9, maxiter=1e5,
                            x0=[Tnd_ref]+[eta_p0]+list(func_sm_param0)+list(func_gt_param0),
-                           args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, func_sm_param0, nd_0, nd_1x))
+                           args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd_ref, Tnd_std, Tel, Tgal, func_sm_param0, nd_0, nd_1x,band))
 
 
 
@@ -334,30 +340,33 @@ def solve_params0_v3(timestamps, vis, ch, nd_ratio, Tptr, eta_p0, Tnd_ref, Tnd_s
 
 
 def solve_params_sm_v3(timestamps, vis, ch, nd_ratio, Tptr, eta_p0, Tnd, Tel, Tgal, func_gt_param0, func_sm_param0,
-                      nd_0, nd_1x,nd1_weight_plus=3): # modified 2023.4.3
+                      nd_0, nd_1x,nd1_weight_plus=3,band='L'): # modified 2023.4.3
     if nd1_weight_plus!=3:
         print ('*** nd1_weight_plus is reset to be '+str(nd1_weight_plus))
         
     return opt.fmin_powell(func_obj_sm_v3,
                            xtol=1e-9, ftol=1e-9, maxiter=1e5,
                            x0=[eta_p0]+list(func_sm_param0)+list(func_gt_param0), 
-                           args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd, Tel, Tgal, func_sm_param0, nd_0, nd_1x, nd1_weight_plus)) # modified 2023.4.3
+                           args=(timestamps, vis, ch, nd_ratio, Tptr, Tnd, Tel, Tgal, func_sm_param0, nd_0, nd_1x, nd1_weight_plus,band)) # modified 2023.4.3
 
 def func_obj_sm_v3(p, *args):
-    timestamps, vis, ch, nd_ratio, Tptr, Tnd, Tel, Tgal, func_sm_param0, nd_0, nd_1x, nd1_weight_plus=args # modified 2023.4.3
+    timestamps, vis, ch, nd_ratio, Tptr, Tnd, Tel, Tgal, func_sm_param0, nd_0, nd_1x, nd1_weight_plus,band=args # modified 2023.4.3
     eta_p=p[0]
     func_sm_param=p[1:-5]
     func_gt_param=p[-5:]
     
     
     return -calc_logprob_sm_v3(timestamps, vis, ch, nd_ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, func_sm_param0,
-                              nd_0, nd_1x, nd1_weight_plus) # modified 2023.4.3
+                              nd_0, nd_1x, nd1_weight_plus,band) # modified 2023.4.3
 
 
-def calc_logprob_sm_v3(timestamps, vis, ch, nd_ratio,Tptr, eta_p, Tnd, Tel,Tgal, func_gt_param, func_sm_param, func_sm_param0, nd_0, nd_1x, nd1_weight_plus): # modified 2023.4.3
+def calc_logprob_sm_v3(timestamps, vis, ch, nd_ratio,Tptr, eta_p, Tnd, Tel,Tgal, func_gt_param, func_sm_param, func_sm_param0, nd_0, nd_1x, nd1_weight_plus,band): # modified 2023.4.3
     total_model=calc_total_model_sm_v3(timestamps, nd_ratio, Tptr, eta_p, Tnd, Tel, Tgal, func_gt_param, func_sm_param, nd_0, nd_1x)
     #calc_error=total_model/func_gt(timestamps,func_gt_param)/np.sqrt(d_freq*dump_period)
-    calc_error=total_model/np.sqrt(d_freq*dump_period)*np.sqrt(2)
+    if band=='L':
+        calc_error=total_model/np.sqrt(d_freq*dump_period)*np.sqrt(2)
+    if band=='UHF':
+        calc_error=total_model/np.sqrt(d_freq_UHF*dump_period_UHF)*np.sqrt(2)
     sm=np.ma.array(func_sm(timestamps, func_sm_param),mask=vis.mask[:,ch])
     sm0=np.ma.array(func_sm(timestamps, func_sm_param0),mask=vis.mask[:,ch])
     
