@@ -10,7 +10,7 @@ def select_track(data,ant,pol):
     scans_t=[]
     scans_tw=[]
     for s in data.scans():
-        if data.shape[0]> 50:
+        if data.shape[0]> 10: #50 modified @20250224
             scans_t.append(data.scan_indices[0])
         else:
             scans_tw.append(data.scan_indices[0])
@@ -25,7 +25,7 @@ def select_scan(data,ant,pol):
     scans_s=[]
     scans_sw=[]
     for s in data.scans():
-        if data.shape[0]> 50:
+        if data.shape[0]> 10: #50 modified @20250224
             scans_s.append(data.scan_indices[0])
         else:
             scans_sw.append(data.scan_indices[0])
@@ -215,23 +215,30 @@ def cal_dp_u(dp_tt,dp_ss):
 ##########################added for 2021 data#######################################
 
 def cal_dp_label(data,flags,ant,pol,ch_ref,ang_deg):
+    
+    #### modified @20250224#####    
+    dp_t,scans_tw=select_track(data,ant,pol)
+    dp_s,scans_sw=select_scan(data,ant,pol)
+    dp_w=select_waste(data,ant,pol) #includes slew,stop,scan_waste, track_waste     
+    
     data.select() #reset
     data.select(ants=ant,pol=pol,scans='slew')
     dp_slew=data.dumps
     data.select(ants=ant,pol=pol,scans='stop')
     dp_stop=data.dumps
-    data.select(ants=ant,pol=pol,scans='track')
-    dp_t=data.dumps
-    data.select(ants=ant,pol=pol,scans='scan')
-    dp_s=data.dumps
+    ###data.select(ants=ant,pol=pol,scans='track')
+    ###dp_t=data.dumps
+    ###data.select(ants=ant,pol=pol,scans='scan')
+    ###dp_s=data.dumps
     data.select() #reset
     data.select(ants=ant,pol=pol)
 
-    dp_w=list(dp_slew)+list(dp_stop)
-    dp_w.sort()
+    ###dp_w=list(dp_slew)+list(dp_stop)
+    ###dp_w.sort()
+    
     #dp_sb=dp_s[0] #old version was dp_ss
     #dp_se=dp_s[-1]
-    
+        
     dp_tt=[]
     dp_ss=[]
     dp_f=[]
