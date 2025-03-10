@@ -275,6 +275,26 @@ def cal_nd_basic_para(fname):
         nd_on_time=0.584099237647
         nd_cycle=19.4699745882
         nd_set=1675632179.78
+
+    if fname == '1679247986':
+        nd_on_time = 0.584099237647
+        nd_cycle = 19.4699745882
+        nd_set = 1679247986.98
+
+    if fname == '1679592842':
+        nd_on_time = 0.584099237647
+        nd_cycle = 19.4699745882
+        nd_set = 1679592842.2
+    
+    if fname == '1679615321':
+        nd_on_time = 0.584099237647
+        nd_cycle = 19.4699745882
+        nd_set = 1679615321.57
+    
+    if fname == '1680644082':
+        nd_on_time = 0.584099237647
+        nd_cycle = 19.4699745882
+        nd_set = 1680644082.57
         
     ###L-band from Mel###
     if fname=='1630519596':
