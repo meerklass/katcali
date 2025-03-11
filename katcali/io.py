@@ -28,6 +28,9 @@ def load_data(fname):
 
 
 def check_ants(fname):
+    
+    bad_ants=[]
+    
     #####UHF data#######
 
     if fname in ['1684087370','1675210948','1675643846','1679615321', '1680644082']:
@@ -58,7 +61,7 @@ def check_ants(fname):
 
         target='PictorA'
 
-    bad_ants=[]
+    
 
     #######from Marta######
     if fname=='1634835083': 
