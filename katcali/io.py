@@ -6,11 +6,11 @@ import pickle
 from . import models as km 
 def load_data(fname):
     if fname in ['1551037708','1551055211', '1553966342','1554156377']:
-        data = katdal.open('/idia/projects/hi_im/SCI-20180330-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
+        data = katdal.open('/idia/projects/hi_im/MEERKLASS-1/SCI-20180330-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
     if fname in ['1555775533','1555793534', '1555861810', '1556034219', '1556052116', '1556120503', '1556138397','1555879611','1561650779']:
-        data = katdal.open('/idia/projects/hi_im/SCI-20190418-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
+        data = katdal.open('/idia/projects/hi_im/MEERKLASS-1/SCI-20190418-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
     if fname in ['1558464584','1558472940']:
-        data = katdal.open('/idia/projects/hi_im/COM-20190418-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
+        data = katdal.open('/idia/projects/hi_im/MEERKLASS-1/COM-20190418-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
     if fname=='1562857793':
         data = katdal.open('/idia/projects/hi_im//1562857793/1562857793/1562857793_sdp_l0.full.rdb')
     if fname in ['1630519596','1631552188','1631667564','1631810671','1631990463','1632184922','1633365980','1634402485','1637346562','1637699408',
@@ -18,12 +18,13 @@ def load_data(fname):
                 '1633970780','1634748682','1637354605','1638130295','1638386189','1638898468','1639935088','1640799689','1631387336','1631659886',
                 '1631732038','1631982988','1632077222','1632760885','1634252028','1634835083','1637691677','1638294319','1638639082','1639157507',
                 '1640540184']:
-        data = katdal.open('/idia/projects/hi_im/SCI-20210212-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
+        data = katdal.open('/idia/projects/hi_im/MEERKLASS-1/SCI-20210212-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
     ###UHF####        
     if fname in ['1665679673', '1666205857',  '1675021905', '1675816512', '1677174749', '1678295187', '1678899080', '1679615321', '1681920680',  '1688399183', '1665938490', '1666284501', '1675106912', '1676313206', '1677183387', '1678381591', '1679247986', '1680626188', '1682448988', ' 1689003684', '1666024766', '1666293386', '1675210948', '1676657789', '1677195529', '1678467685', '1679333668', '1680644082', '1683492604', '1689090392', '1666032415', '1666370606', '1675623808', '1677002481', '1677777992', '1678726283', '1679419886', '1680798562', '1684087370',  '1689176790', '1666111882', '1666543907', '1675632179', '1677011008', '1677795989', '1678734987', '1679592842', '1681143685', '1684781618',
 '1666198047', '1666630286', '1675643846', '1677020482', '1678122565', '1678743988', '1679605292', '1681229848', '1685641589']:
-        data= katdal.open('/idia/projects/hi_im/SCI-20220822-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
-        
+        data= katdal.open('/idia/projects/hi_im/MEERKLASS-1/SCI-20220822-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
+    if fname in ['1709659886', '1715108064']:
+        data = katdal.open('/idia/projects/hi_im/MEERKLASS-1/SCI-20230907-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
     return data
 
 
@@ -33,10 +34,12 @@ def check_ants(fname):
     
     #####UHF data#######
 
-    if fname in ['1684087370','1675210948','1675643846','1679615321', '1680644082']:
+    if fname in ['1684087370','1675210948','1675643846','1679615321', '1680644082', '1715108064']:
         target='3C273'
     if fname in ['1675632179', '1679247986', '1679592842']:
         target='PictorA'
+    if fname in ['1709659886']:
+        target='HydraA'
         
     if fname in ['1684087370']:
         bad_ants=['m050']
@@ -209,6 +212,13 @@ def check_ants(fname):
         target='PictorA'
         
     ################set calibrator coordinates####################################
+    if target=='HydraA':
+        flux_model=km.flux_HydraA
+        cc = SkyCoord(139.523617*u.deg, -12.095502*u.deg, frame='icrs') #HydraA
+    if target=='3C353':
+        flux_model=km.flux_3C353
+        cc = SkyCoord(260.117381*u.deg, -0.979642*u.deg, frame='icrs') #3C353
+    
     if target=='3C273':
         flux_model=km.flux_3C273
         cc = SkyCoord(187.2779154*u.deg,  2.0523883*u.deg, frame='icrs') #3C273
@@ -242,7 +252,7 @@ def call_vis(fname,recv):
                  '1680644082', '1683492604', '1689090392', '1666032415', '1666370606', '1675623808', '1677002481', '1677777992', '1678726283', 
                  '1679419886', '1680798562', '1684087370',  '1689176790', '1666111882', '1666543907', '1675632179', '1677011008', '1677795989', 
                  '1678734987', '1679592842', '1681143685', '1684781618', '1666198047', '1666630286', '1675643846', '1677020482', '1678122565',
-                 '1678743988', '1679605292', '1681229848', '1685641589']:
+                 '1678743988', '1679605292', '1681229848', '1685641589', '1709659886','1715108064']:
         data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/MeerKLASS2023/'+str(fname)+'/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
     #####L-band####
     if fname in ['1551037708','1551055211', '1553966342','1554156377']:

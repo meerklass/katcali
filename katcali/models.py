@@ -389,7 +389,48 @@ def cal_Gal_model_np2(vis ,freqs, ra, dec, ch_min, ch_max, nside, model_key=0):
     return result
 
 ###point source sepctrum ########
+def flux_HerculesA(freq_GHz):
+    F1410=47 #Jy
+    F408=169 #Jy
+    alpha=-np.log10(F1410/F408)/np.log10(1410/408.)
+    print ('alpha='+str(alpha))
+    return pow((freq_GHz/1.41),-alpha)*F1410
 
+def flux_CenA(freq_GHz):
+    F1400=41 #Jy ###CHIPASS value, only this one is 1400 MHz rather than 1410 MHz (Parkes)
+    F408=2746 #Jy
+    alpha=-np.log10(F1400/F408)/np.log10(1400/408.)
+    print ('alpha='+str(alpha))
+    return pow((freq_GHz/1.40),-alpha)*F1400
+
+def flux_3C161(freq_GHz):
+    F1410=18.5 #Jy
+    F408=44.7 #Jy
+    alpha=-np.log10(F1410/F408)/np.log10(1410/408.)
+    print ('alpha='+str(alpha))
+    return pow((freq_GHz/1.41),-alpha)*F1410
+
+def flux_PKS1932_46(freq_GHz):
+    F1410=12.6 #Jy
+    F408=39.6 #Jy
+    alpha=-np.log10(F1410/F408)/np.log10(1410/408.)
+    print ('alpha='+str(alpha))
+    return pow((freq_GHz/1.41),-alpha)*F1410
+
+def flux_HydraA(freq_GHz):
+    F1410=43.5 #Jy
+    F408=132 #Jy
+    alpha=-np.log10(F1410/F408)/np.log10(1410/408.)
+    print ('alpha='+str(alpha))
+    return pow((freq_GHz/1.41),-alpha)*F1410
+    
+def flux_3C353(freq_GHz):
+    F1410=54 #Jy
+    F408=138 #Jy
+    alpha=-np.log10(F1410/F408)/np.log10(1410/408.)
+    print ('alpha='+str(alpha))
+    return pow((freq_GHz/1.41),-alpha)*F1410
+    
 def flux_3C273(freq_GHz):
     F1410=42 #Jy
     F408=55.10 #Jy
@@ -430,6 +471,8 @@ def flux_1934_sd(freq_list_GHz):
     p = np.polyfit(np.log10(PKS_freq_GHz),np.log10(PKS_flux),3)
 
     return 10**np.polyval(p,np.log10(freq_list_GHz))
+
+######################end of calibrator models############################################
 
 def call_Tnd(data, ant,pol,freqs,ch,plot_key,key=0):
     print ("#cal_Tnd is for single channel only! Tnd_spl has higher efficiency for multi channel calibration")

@@ -255,6 +255,17 @@ def cal_nd_basic_para(fname):
     
     nd_on_time=-999
     ###UHF#####
+    if fname=='1709659886':
+        nd_on_time=0.584099237647
+        nd_cycle=19.4699745882
+        nd_set=1709659886.69
+        
+    if fname=='1715108064':
+        nd_on_time=0.584099237647
+        nd_cycle=19.4699745882
+        nd_set=1715108064.68
+
+    
     if fname=='1675643846':
         nd_on_time=0.584099237647
         nd_cycle=19.4699745882
