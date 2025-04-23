@@ -105,6 +105,7 @@ def solve_params2(timestamps, vis_part1, vis_part2, ch, nd_ratio, ratio0, Tptr, 
 
 #################for scan#############################
 def cal_gain0(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg,T_ptr,vis_clean, n_src_off=-1 ,target_start=0):
+    ga0,gb0=np.NaN, np.NaN
     if fname in ['1551055211','1551037708', '1579725085', '1580260015']:
         dp_ca,dp_cb,dp_c0a, dp_c1a,dp_c2a,dp_c3a,dp_c4a,dp_c0b,dp_c1b,dp_c2b,dp_c3b,dp_c4b=kl.cal_dp_c(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg,target_start=target_start)
         a1=vis_clean[dp_c0a,ch].min()-vis_clean[dp_ca,ch].min() #vis gap for calibrator
@@ -114,10 +115,13 @@ def cal_gain0(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg,T_ptr,vis_clean, n
         print ('n_src_off=4, c0 is the peak')
     if n_src_off==4:
         dp_ca,dp_cb,dp_c0a, dp_c1a,dp_c2a,dp_c3a,dp_c4a,dp_c0b,dp_c1b,dp_c2b,dp_c3b,dp_c4b,dp_c1a1,dp_c1a2,dp_c1a3,dp_c1b1,dp_c1b2,dp_c1b3=kl.cal_dp_c(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg,n_src_off=4,target_start=target_start)
-        a1=vis_clean[dp_c1a,ch].min()-vis_clean[dp_ca,ch].min() #vis gap for calibrator
-        b1=T_ptr[dp_ca].max()-T_ptr[dp_ca].min() # T model gap for calibrator
-        a2=vis_clean[dp_c1b,ch].min()-vis_clean[dp_cb,ch].min() #vis gap for calibrator
-        b2=T_ptr[dp_cb].max()-T_ptr[dp_cb].min() # T model gap for calibrator
+        
+        if len(dp_ca)>0:
+            a1=vis_clean[dp_c1a,ch].min()-vis_clean[dp_ca,ch].min() #vis gap for calibrator
+            b1=T_ptr[dp_ca].max()-T_ptr[dp_ca].min() # T model gap for calibrator
+        if len(dp_cb)>0:
+            a2=vis_clean[dp_c1b,ch].min()-vis_clean[dp_cb,ch].min() #vis gap for calibrator
+            b2=T_ptr[dp_cb].max()-T_ptr[dp_cb].min() # T model gap for calibrator
         print ('n_src_off=4, c1 is the peak')
     if fname not in ['1551055211','1551037708', '1579725085', '1580260015','1630519596'] and n_src_off<4:
         dp_ca,dp_cb,dp_c0a, dp_c1a,dp_c0b,dp_c1b=kl.cal_dp_c(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg,target_start=target_start)
@@ -126,8 +130,10 @@ def cal_gain0(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg,T_ptr,vis_clean, n
         a2=vis_clean[dp_c1b,ch].min()-vis_clean[dp_c0b,ch].min() #vis gap for calibrator
         b2=T_ptr[dp_c1b].min()-T_ptr[dp_c0b].min() # T model gap for calibrator
         print ('n_src_off=2')
-    ga0=a1/b1
-    gb0=a2/b2
+    if len(dp_ca)>0 and a1>0 and b1>0:
+        ga0=a1/b1
+    if len(dp_cb)>0 and a2>0 and b2>0:
+        gb0=a2/b2
     return ga0,gb0
 
 def solve_params_sm(timestamps, vis, ch, nd_ratio, ratio0, Tptr, eta_p0, Tnd, Tel, Tgal, func_gt_param0, func_sm_param0,

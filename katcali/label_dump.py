@@ -88,19 +88,22 @@ def edge_dp_drop(dps,drop_num=1):
     return dps
 
 def cal_dp_c1_split(dp_c1a,dp_c2a,dp_c3a,dp_c1b,dp_c2b,dp_c3b):
-    i1=np.where(dp_c1a<np.min(dp_c2a))[0]
-    dp_c1a1=dp_c1a[i1]
-    i2=np.where(dp_c1a>np.max(dp_c3a))[0]
-    dp_c1a3=dp_c1a[i2]
-    dp_c1a2=dp_c1a[i1[-1]+1:i2[0]]
-    assert(len(dp_c1a)==len(dp_c1a1)+len(dp_c1a2)+len(dp_c1a3))
-    
-    i1=np.where(dp_c1b<np.min(dp_c2b))[0]
-    dp_c1b1=dp_c1b[i1]
-    i2=np.where(dp_c1b>np.max(dp_c3b))[0]
-    dp_c1b3=dp_c1b[i2]
-    dp_c1b2=dp_c1b[i1[-1]+1:i2[0]]
-    assert(len(dp_c1b)==len(dp_c1b1)+len(dp_c1b2)+len(dp_c1b3))
+    dp_c1a1,dp_c1a2,dp_c1a3,dp_c1b1,dp_c1b2,dp_c1b3=[],[],[],[],[],[]
+    if len(dp_c1a)>0:
+        i1=np.where(dp_c1a<np.min(dp_c2a))[0]
+        dp_c1a1=dp_c1a[i1]
+        i2=np.where(dp_c1a>np.max(dp_c3a))[0]
+        dp_c1a3=dp_c1a[i2]
+        dp_c1a2=dp_c1a[i1[-1]+1:i2[0]]
+        assert(len(dp_c1a)==len(dp_c1a1)+len(dp_c1a2)+len(dp_c1a3))
+
+    if len(dp_c1b)>0:
+        i1=np.where(dp_c1b<np.min(dp_c2b))[0]
+        dp_c1b1=dp_c1b[i1]
+        i2=np.where(dp_c1b>np.max(dp_c3b))[0]
+        dp_c1b3=dp_c1b[i2]
+        dp_c1b2=dp_c1b[i1[-1]+1:i2[0]]
+        assert(len(dp_c1b)==len(dp_c1b1)+len(dp_c1b2)+len(dp_c1b3))
     
     
     dp_c1a1,dp_c1a2,dp_c1a3,dp_c1b1,dp_c1b2,dp_c1b3=list(dp_c1a1),list(dp_c1a2),list(dp_c1a3),list(dp_c1b1),list(dp_c1b2),list(dp_c1b3)
@@ -114,6 +117,10 @@ def cal_dp_c1_split(dp_c1a,dp_c2a,dp_c3a,dp_c1b,dp_c2b,dp_c3b):
     return dp_c1a1,dp_c1a2,dp_c1a3,dp_c1b1,dp_c1b2,dp_c1b3
 
 def cal_dp_c(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg, target_start=0, n_src_off=-1):
+    if isinstance(target_start, list):
+        target_start = [item for item in target_start if item != ''] #remove ''
+    dp_ca,dp_cb,dp_c0a, dp_c1a,dp_c2a,dp_c3a,dp_c4a,dp_c0b,dp_c1b,dp_c2b,dp_c3b,dp_c4b,dp_c1a1,dp_c1a2,dp_c1a3,dp_c1b1,dp_c1b2,dp_c1b3=[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]
+    
     sigma_level=10
     n_iter=3
     flags_1ch=flags[:,ch]
@@ -121,24 +128,27 @@ def cal_dp_c(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg, target_start=0, n_
     dp_se=dp_ss[-1]
     data.select(ants=ant,pol=pol,scans='track',targets=target_start)
     dp_c0=data.dumps
+    ang_deg=np.array(ang_deg)
+    ang_deg=np.atleast_2d(ang_deg)
+    ang_deg_min=np.nanmin(ang_deg,axis=0)
     for i in dp_c0:
         if i not in dp_tt or flags_1ch[i]==True:
             dp_c0=list(dp_c0)
             dp_c0.remove(i)
             #print 'rm '+str(i)+' from dp_c0'
-    dp_c0=kf.deg_filter(dp_c0,ang_deg,sigma_level,n_iter)
+    dp_c0=kf.deg_filter(dp_c0,ang_deg_min,sigma_level,n_iter)
     dp_c0=np.array(dp_c0)
     dp_c0a=dp_c0[dp_c0<dp_sb]
     dp_c0b=dp_c0[dp_c0>dp_se]
 
-    data.select(ants=ant,pol=pol,scans='track',targets=target_start+1)
+    data.select(ants=ant,pol=pol,scans='track',targets=target_start+1*np.ones_like(target_start))
     dp_c1=data.dumps
     for i in dp_c1:
         if i not in dp_tt or flags_1ch[i]==True:
             dp_c1=list(dp_c1)
             dp_c1.remove(i)
             #print 'rm '+str(i)+' from dp_c1'
-    dp_c1=kf.deg_filter(dp_c1,ang_deg,sigma_level,n_iter)
+    dp_c1=kf.deg_filter(dp_c1,ang_deg_min,sigma_level,n_iter)
     dp_c1=np.array(dp_c1)
     dp_c1a=dp_c1[dp_c1<dp_sb]
     dp_c1b=dp_c1[dp_c1>dp_se]
@@ -152,38 +162,38 @@ def cal_dp_c(fname,data,ant,pol,flags,ch,dp_tt,dp_ss,ang_deg, target_start=0, n_
     #######################all have above#######################
 
     if fname in ['1551055211','1551037708', '1579725085', '1580260015','1630519596','1631379874','1631387336','1631659886','1631667564'] or n_src_off==4:
-        data.select(ants=ant,pol=pol,scans='track',targets=target_start+2)
+        data.select(ants=ant,pol=pol,scans='track',targets=target_start+2*np.ones_like(target_start))
         dp_c2=data.dumps
         for i in dp_c2:
             if i not in dp_tt or flags_1ch[i]==True:
                 dp_c2=list(dp_c2)
                 dp_c2.remove(i)
                 #print 'rm '+str(i)+' from dp_c2'
-        dp_c2=kf.deg_filter(dp_c2,ang_deg,sigma_level,n_iter)
+        dp_c2=kf.deg_filter(dp_c2,ang_deg_min,sigma_level,n_iter)
         dp_c2=np.array(dp_c2)
         dp_c2a=dp_c2[dp_c2<dp_sb]
         dp_c2b=dp_c2[dp_c2>dp_se]
 
-        data.select(ants=ant,pol=pol,scans='track',targets=target_start+3)
+        data.select(ants=ant,pol=pol,scans='track',targets=target_start+3*np.ones_like(target_start))
         dp_c3=data.dumps
         for i in dp_c3:
             if i not in dp_tt or flags_1ch[i]==True:
                 dp_c3=list(dp_c3)
                 dp_c3.remove(i)
                 #print 'rm '+str(i)+' from dp_c3'
-        dp_c3=kf.deg_filter(dp_c3,ang_deg,sigma_level,n_iter)
+        dp_c3=kf.deg_filter(dp_c3,ang_deg_min,sigma_level,n_iter)
         dp_c3=np.array(dp_c3)
         dp_c3a=dp_c3[dp_c3<dp_sb]
         dp_c3b=dp_c3[dp_c3>dp_se]
 
-        data.select(ants=ant,pol=pol,scans='track',targets=target_start+4)
+        data.select(ants=ant,pol=pol,scans='track',targets=target_start+4*np.ones_like(target_start))
         dp_c4=data.dumps
         for i in dp_c4:
             if i not in dp_tt or flags_1ch[i]==True:
                 dp_c4=list(dp_c4)
                 dp_c4.remove(i)
                 #print 'rm '+str(i)+' from dp_c4'
-        dp_c4=kf.deg_filter(dp_c4,ang_deg,sigma_level,n_iter)
+        dp_c4=kf.deg_filter(dp_c4,ang_deg_min,sigma_level,n_iter)
         dp_c4=np.array(dp_c4)
         dp_c4a=dp_c4[dp_c4<dp_sb]
         dp_c4b=dp_c4[dp_c4>dp_se]
@@ -243,8 +253,12 @@ def cal_dp_label(data,flags,ant,pol,ch_ref,ang_deg):
     dp_ss=[]
     dp_f=[]
     flags_1ch=flags[:,ch_ref]
+    ang_deg=np.array(ang_deg)
+    ang_deg=np.atleast_2d(ang_deg) #prepare for min
+    ang_deg_min=np.nanmin(ang_deg,axis=0)
+    
     for i in dp_t:
-        if flags_1ch[i]==False and ang_deg[i]<=1:
+        if flags_1ch[i]==False and ang_deg_min[i]<=1:
             dp_tt.append(i)
         else:
             dp_f.append(i)

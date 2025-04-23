@@ -23,7 +23,7 @@ def load_data(fname):
     if fname in ['1665679673', '1666205857',  '1675021905', '1675816512', '1677174749', '1678295187', '1678899080', '1679615321', '1681920680',  '1688399183', '1665938490', '1666284501', '1675106912', '1676313206', '1677183387', '1678381591', '1679247986', '1680626188', '1682448988', ' 1689003684', '1666024766', '1666293386', '1675210948', '1676657789', '1677195529', '1678467685', '1679333668', '1680644082', '1683492604', '1689090392', '1666032415', '1666370606', '1675623808', '1677002481', '1677777992', '1678726283', '1679419886', '1680798562', '1684087370',  '1689176790', '1666111882', '1666543907', '1675632179', '1677011008', '1677795989', '1678734987', '1679592842', '1681143685', '1684781618',
 '1666198047', '1666630286', '1675643846', '1677020482', '1678122565', '1678743988', '1679605292', '1681229848', '1685641589']:
         data= katdal.open('/idia/projects/hi_im/MEERKLASS-1/SCI-20220822-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
-    if fname in ['1709659886', '1715108064']:
+    if fname in ['1709659886', '1715108064', '1715012489', '1715098888', '1715032586', '1715208401']:
         data = katdal.open('/idia/projects/hi_im/MEERKLASS-1/SCI-20230907-MS-01/'+fname+'/'+fname+'/'+fname+'_sdp_l0.full.rdb')
     return data
 
@@ -31,16 +31,22 @@ def load_data(fname):
 def check_ants(fname):
     
     bad_ants=[]
+    target_list=[]
     
     #####UHF data#######
 
-    if fname in ['1684087370','1675210948','1675643846','1679615321', '1680644082', '1715108064']:
+    if fname in ['1684087370','1675210948','1675643846','1679615321', '1680644082']:
         target='3C273'
     if fname in ['1675632179', '1679247986', '1679592842']:
         target='PictorA'
     if fname in ['1709659886']:
-        target='HydraA'
-        
+        target_list=['HydraA','PictorA']
+    if fname in ['1715012489', '1715098888']:
+        target_list = ['PictorA', '3C273']
+    if fname in ['1715032586', '1715208401']:
+        target_list = ['3C353']
+    if fname in ['1715108064']:
+        target_list=['', '3C273']
     if fname in ['1684087370']:
         bad_ants=['m050']
     if fname in ['1675632179']:
@@ -53,7 +59,8 @@ def check_ants(fname):
         bad_ants = ['m017', 'm018', 'm046']
     if fname in ['1680644082']:
         bad_ants = ['m017', 'm030', 'm033', 'm034', 'm035']
-    
+    if fname in ['1715012489', '1715098888', '1715032586', '1715208401']:
+        bad_ants = ['m044', 'm045', 'm046', 'm058', 'm061']
     ###########2021  data ############
 
     if fname in ['1634835083', '1634748682', '1634402485', '1633970780', '1633365980', '1632760885', '1632505883', '1632077222', '1632069690', '1631990463', '1631982988', '1631818149', '1631810671', '1631732038', '1631724508', '1631559762', '1631552188', '1631387336', '1631379874', '1630519596']:
@@ -210,7 +217,30 @@ def check_ants(fname):
     if fname=='1579725085':#test only
         bad_ants=[]
         target='PictorA'
-        
+    print ('bad_ants: '+ str(bad_ants))
+
+    if len(target_list) == 0:    
+        print ('calibrator number = 1')
+        flux_model,cc=target_para(target)
+        print ('calibrator: '+str(target)+', ra,dec= '+str(cc.ra)+', '+str(cc.dec))
+    if len(target_list) == 2:
+        print ('calibrator number = 2')
+        flux_model,cc=[],[]
+        for target in target_list:
+            flux_model_i,cc_i=target_para(target)
+            flux_model.append(flux_model_i)
+            cc.append(cc_i)
+            if cc_i != None:
+                print ('calibrator: '+str(target)+', ra,dec= '+str(cc_i.ra)+', '+str(cc_i.dec))
+            else:
+                print ('calibrator: EMPTY')
+        target=target_list
+                
+    return target,cc,bad_ants,flux_model
+
+
+def target_para(target):
+    flux_model,cc= None, None
     ################set calibrator coordinates####################################
     if target=='HydraA':
         flux_model=km.flux_HydraA
@@ -230,11 +260,10 @@ def check_ants(fname):
         cc = SkyCoord(79.9571708*u.deg,  -45.7788278*u.deg, frame='icrs') #Pictor A
     if target=='PKS1934-638':
         flux_model=km.flux_1934_sd
-        cc=SkyCoord(294.854275*u.deg, -63.712674*u.deg, frame='icrs')#PKS 1934-63 (1934-638)
+        cc = SkyCoord(294.854275*u.deg, -63.712674*u.deg, frame='icrs') #PKS 1934-63 (1934-638)
 
-    print ('calibrator: '+str(target)+', ra,dec= '+str(cc.ra)+', '+str(cc.dec))
-    print ('bad_ants: '+ str(bad_ants))
-    return target,cc,bad_ants,flux_model
+    return flux_model,cc
+
 
 def ant_list(data):
     ant_list=[]
@@ -254,6 +283,10 @@ def call_vis(fname,recv):
                  '1678734987', '1679592842', '1681143685', '1684781618', '1666198047', '1666630286', '1675643846', '1677020482', '1678122565',
                  '1678743988', '1679605292', '1681229848', '1685641589', '1709659886','1715108064']:
         data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/MeerKLASS2023/'+str(fname)+'/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
+
+    if fname in ['1715012489', '1715098888', '1715032586', '1715208401']:
+        data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/MeerKLASS2024/'+str(fname)+'/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
+        
     #####L-band####
     if fname in ['1551037708','1551055211', '1553966342','1554156377']:
         data1 = pickle.load(open('/idia/projects/hi_im/raw_vis/SCI-20180330-MS-01/'+str(fname)+'/'+str(fname)+'_'+str(recv)+'_vis_data','rb'))
@@ -317,8 +350,12 @@ def load_ang_deg2(ra,dec,cc):
     print ('# calibrator number: '+str(len(cc)))
     ang_deg=[]
     for i in range(len(cc)):
-        ang_deg_i=cc[i].separation(c_obs)/u.deg
-        ang_deg.append(ang_deg_i)
+        if cc[i] != None:
+            ang_deg_i=cc[i].separation(c_obs)/u.deg
+            ang_deg.append(ang_deg_i)
+        else:
+            print ('* no track here')
+            ang_deg.append([np.NaN]*len(ra))
     return np.array(ang_deg)
 
 def cal_freq(ch):
