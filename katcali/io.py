@@ -39,14 +39,16 @@ def check_ants(fname):
         target='3C273'
     if fname in ['1675632179', '1679247986', '1679592842']:
         target='PictorA'
+    if fname in ['1715032586', '1715208401']:
+        target = '3C353'
+        
     if fname in ['1709659886']:
         target_list=['HydraA','PictorA']
     if fname in ['1715012489', '1715098888']:
         target_list = ['PictorA', '3C273']
-    if fname in ['1715032586', '1715208401']:
-        target_list = ['3C353']
     if fname in ['1715108064']:
         target_list=['', '3C273']
+        
     if fname in ['1684087370']:
         bad_ants=['m050']
     if fname in ['1675632179']:
