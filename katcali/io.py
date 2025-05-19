@@ -4,6 +4,7 @@ from astropy import units as u
 import numpy as np
 import pickle
 import yaml
+from pkg_resources import resource_string
 from . import models as km 
 
 
@@ -32,8 +33,10 @@ def load_data(fname):
 
 
 def check_ants(fname):
-    with open('config.yaml', 'r') as f:
-        config = yaml.safe_load(f)
+    
+    ant_param = resource_string(__name__, 'config.yaml')
+    config = yaml.safe_load(ant_param)
+
         
     bad_ants=[]
     target_list=[]
@@ -47,7 +50,8 @@ def check_ants(fname):
             target_list = entry['target_list']
         bad_ants = entry.get('bad_ants', [])
         
-''' #below have been moved to config.yaml, these codes will be deleted soon if YANL works well   
+    ''' 
+    #below have been moved to config.yaml, these codes will be deleted soon if YANL works well   
     #####UHF data#######
 
     if fname in ['1684087370','1675210948','1675643846','1679615321', '1680644082','1710888742']:
@@ -244,8 +248,9 @@ def check_ants(fname):
     if fname=='1579725085':#test only
         bad_ants=[]
         target='PictorA'
-''' #above have been moved to config.yaml, these codes will be deleted soon if YANL works well
-
+    #above have been moved to config.yaml, these codes will be deleted soon if YANL works well
+    ''' 
+    
     print ('bad_ants: '+ str(bad_ants))
 
     if len(target_list) == 0 and target is not None:    
