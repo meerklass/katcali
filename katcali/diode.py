@@ -1,5 +1,6 @@
 import numpy as np
 from scipy import stats
+import yaml
 
 def label_nd_injection(fname,vis, timestamps, dp_ss, dump_period):
 
@@ -254,6 +255,23 @@ def cal_az_edge_list(az,dp_sb,dp_se):
 def cal_nd_basic_para(fname):
     
     nd_on_time=-999
+    nd_cycle = None
+    nd_set = None
+
+    with open('config.yaml', 'r') as f:
+        config = yaml.safe_load(f)
+        
+    nd_param_list = config.get('nd_param', [])
+    for param in nd_param_list:
+        if str(fname) in param.get('fname', []):
+            nd_on_time = float(param.get('nd_on_time', nd_on_time))
+            nd_cycle = float(param.get('nd_cycle', nd_cycle))
+            break    
+    entry = config.get('entries', {}).get(str(fname), {})
+    if 'nd_set' in entry:
+        nd_set = entry['nd_set']
+        
+''' #below have been moved to config.yaml, these codes will be deleted soon if YANL works well    
     ###UHF#####
     if fname=='1709832691':
         nd_on_time=0.584099237647
@@ -554,7 +572,8 @@ def cal_nd_basic_para(fname):
         nd_cycle=19.4917538692
         nd_set=1640799689.6
     ###from Mel###
-    
+''' #above have been moved to config.yaml, these codes will be deleted soon if YANL works well
+
     if nd_on_time==-999:
         print ('# No record, can ask < astro.jywang@gmail.com >')
         
