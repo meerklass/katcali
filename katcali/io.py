@@ -257,15 +257,15 @@ def check_ants(fname):
         print ('calibrator number = 1')
         flux_model,cc=target_para(target)
         print ('calibrator: '+str(target)+', ra,dec= '+str(cc.ra)+', '+str(cc.dec))
-    if len(target_list) == 2:
+    elif len(target_list) == 2:
         print ('calibrator number = 2')
         flux_model,cc=[],[]
-        for target in target_list:
-            flux_model_i,cc_i=target_para(target)
+        for target_local in target_list:
+            flux_model_i,cc_i=target_para(target_local)
             flux_model.append(flux_model_i)
             cc.append(cc_i)
             if cc_i != None:
-                print ('calibrator: '+str(target)+', ra,dec= '+str(cc_i.ra)+', '+str(cc_i.dec))
+                print ('calibrator: '+str(target_local)+', ra,dec= '+str(cc_i.ra)+', '+str(cc_i.dec))
             else:
                 print ('calibrator: EMPTY')
         target=target_list
